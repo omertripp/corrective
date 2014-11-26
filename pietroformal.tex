@@ -1,0 +1,272 @@
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{l}
+\statement{s ::= m.put(k, v)}\\
+\hspace{15pt} \statement{|\ x=m.get(k)}\\
+\hspace{15pt} \statement{|\ m.remove(k)}\\
+\hspace{15pt} \statement{|\ x=m.putIfAbsent(k, v, v')}\\
+\statement{c ::= x==NULL\ |\ x!=NULL}\\
+\end{tabular}
+\end{center}
+\caption{Statements and conditions}
+\label{fig:language}
+\end{figure}
+
+\section{Language}
+We will formalize our concrete and abstract semantics on the language in Fig. \ref{fig:language}. We distinguish between statements in \statement{s} and Boolean conditions in \statement{c}. Formally, $\statements = \statement{s} \cup \statement{c}$. We assume that all statements are atomic.
+
+We represent transactions through control flow graphs (CFGs). Let $\labels$ the set of program labels. We suppose that $\statement{entry}, \statement{exit} \in \labels$ represents the entry and the exit label, respectively. A CFG is represented by a graph $\cfg = (\labels \times \edges)$ where the set of edges $\edges=(\labels \times \labels \times \statements)$ connects two vertexes in $\labels$ with a label that may be a statement in \statement{s} (to represent a sequential step) or \statement{c} (to represent a conditional jump). Therefore, each node in the CFG may have (i) one out edge with a label in \statement{s}, or (ii) two out edges with labels in \statement{c}.
+
+A program \statement{p} is made by a (finite) set of transactions, and each transaction is represented by a cfg. Therefore, we represent a program made by $n$ transactions by a tuple of $n$ cfgs (where the $i$-th element represents transaction $i$). Formally, $\statement{p} \in \cfg^n$.
+
+\todo{Should we discuss that the number of edges is between $|\labels|$ and $2*|\labels|$. This would be helpful to discuss the complexity of our approach}
+
+\todo{Add running example}
+
+
+\section{Concrete domain and semantics}
+Our concrete domain is a standard finite trace domain. We define by $\trace{\cset{A}}$ the set of all finite traces of elements in $\cset{A}$.
+
+
+Let $\cstatesmemory$ be the set of concrete states that represent both the shared and the internal memory state of the system. We suppose that an atomic small-step semantics $\to : \funzione{\cstatesmemory \times \statements}{\cstatesmemory}$ is provided. Given $n$ transactions, the definition of our concrete trace semantics relies on labeled states $\Sigma = \labels^n \times \cstatesmemory$.
+Based on this semantics, we define the program semantics as follows:
+
+\[
+\begin{array}{l}
+\csemantics{S}{\statement{p}, \sigma_0} = \textit{lfp}_{(\cel{L}_0, \cel{\sigma}_0)}^{\subseteq} \lambda \cset{T} . \cset{T} \cup\\
+\left\{
+\begin{array}{l}
+ \{(\cel{L}_0, \cel{\sigma}_0) \to \cdots \to (\cel{L}_{i-1}, \cel{\sigma}_{i-1}) \to (\cel{L}_i, \cel{\sigma}_i) :\\
+\hspace{10pt} (\cel{L}_0, \cel{\sigma}_0) \to \cdots \to (\cel{L}_{i-1}, \cel{\sigma}_{i-1})  \in \cset{T} \land\\
+\hspace{10pt} \statement{t} \in \dom{\statement{p}} \land \exists \cel{l} \in \labels, \statement{st} \in \statements : (\pi_{\statement{t}}(\cel{L}_{i-1}), \cel{l}, \statement{st}) \in \pi_2(\statement{p}(\statement{t})) \land\\
+\hspace{10pt}\cel{L}_i = \replace{\cel{L}_{i-1}}{\statement{t}}{\cel{l}} \land (\cel{\sigma}_{i-1}, \statement{st}) \to \cel{\sigma}_{i}
+\end{array}
+\right\}\\
+\end{array}
+\]
+where $\cel{L}_0=\statement{entry}^{|\dom{\statement{p}}|}$ and $\replace{\cel{t}}{i}{v}$ replaces the $i$-th component of the tuple $\cel{t}$ with value $v$.
+
+\subsection{Property}
+
+We distinguish between \emph{good} and \emph{bad} executions by looking to the interleaving of the execution of different transactions \todo{Probably we should add something about the state (e.g., to check that two statements interfer on the same key). This is just an abstraction of the trace.}.
+
+
+An action performed by a transaction $i$ on a key $\statement{k}$ is represented by $a_i(\statement{k}) \in \actions$. We distinguish between read and write actions represented by $r$ and $w$, respectively. Statements in \statement{s} by transaction $i$ are interpreted as read and/or write as follows:
+\begin{itemize}
+\item \statement{m.put(k, v)} is represented by $w^i(\statement{k})$,
+\item \statement{x=m.get(k)} is represented by $r^i(\statement{k})$,
+\item \statement{m.remove(k)} is represented by $w^i(\statement{k})$, and
+\item \statement{x=m.putIfAbsent(k, v, v')} is represented by $r^i(\statement{k})$ (if \statement{k} is already in the map) \emph{and} $w^i(\statement{k})$ (otherwise).
+\end{itemize}
+Given a statement $\statement{st}$ and a transaction $k$, we define by $\getaction{\statement{st}}{k}$ the function that returns the corresponding action.
+
+We then define a function $\projectTrace{\statement{p}, \tau}$ that projects a trace of states $\tau$ produced by a program \statement{p} to the sequence of actions it performed\footnote{In the formal definition we ignore execution steps that do not produce actions (i.e., the execution of statements in \statement{c})}:
+
+\[
+\begin{array}{l}
+\projectTrace{\statement{p}, (\cel{L}_0, \cel{\sigma}_0) \to \cdots \to (\cel{L}_n, \cel{\sigma}_n)} = \{
+\cel{a}_1 \to \cdots \to \cel{a}_n :\\
+\hspace{10pt} \forall j \in [1..n] : \extractstep{\statement{p}}{\cel{L}_{j-1}}{\cel{L}_j}=(\statement{t}, k) \land\\
+\hspace{57pt} \getaction{\statement{t}}{k}=\cel{a}_j \}\\
+\end{array}
+\]
+where $\extractstep{\statement{p}}{\cel{L}}{\cel{L}'}$ given two labels representing a step of the execution and the program returns the statement and the transaction that performed the step.
+
+We need to build a function $\isBad{\cel{a}_1 \to \cdots \to \cel{a}_n}$ returns $\true$ if and only if the given sequence of actions represents a serializability violations.\todo{This is not quite right, revise it later}
+
+Finally, given a program $\statement{p}$ and an initial state $\cel{\sigma}_0$, we can partition the set of traces into good and bad traces.
+
+\[
+\begin{array}{l}
+\cset{T}=\csemantics{S}{\statement{p}, \sigma_0}\\
+\badtraces = \{\tau \in \cset{T} : \isBad{\projectTrace{\tau}}\}\\
+\goodtraces = \cset{T} \cap \badtraces\\
+\end{array}
+\]
+
+%We suppose that the oracle is such that if something has happened, than all the traces from there on will be bad. This is formalized as follows:
+%
+%\[
+%\begin{array}{c}
+%\forall \sigma_0 \to \cdots \to \sigma_i \in \badtraces, \nexists \sigma_0 \to \cdots \to \sigma_i \to \sigma_{i+1} \to \cdots \to \sigma_j : \\
+%\sigma_0 \to \cdots \to \sigma_i \to \sigma_{i+1} \to \cdots \to \sigma_j \notin \badtraces 
+%\end{array}
+%\]
+%
+%\todo{We can reformulate this by removing the double negation and with universal quantification on the second trace - not sure what is easier to understand and for the formal proofs}
+
+
+\subsection{Abstract domain and semantics}
+As usual in abstract interpretation, we approximate the concrete domain and semantics with an abstract domain and semantics. The abstract domain forms a Galois connection with the concrete domain, while the abstract semantics approximates the concrete one. \todo{The abstract semantics should be tuned at the level of traces, so we can present the Cartesian product as an abstraction of the original traces}
+
+\section{Warping system}
+
+
+\subsection{Observational Equivalence}
+
+We assume that observations on the state can only be made by state transformers. We denote
+$\sigma \xrightarrow{m/k} \sigma'$ a state transition where some method $m$ has been invoked, and value $k$ returned (we leave the domains of $m$ and $k$ undefined for now).
+
+For two states $\sigma_1$ and $\sigma_2$, observational equivalence is defined as follows:
+
+$$\sigma_1 \sim \sigma_2 \;\;\Leftrightarrow\;\;
+\begin{array}{l}
+  \sigma_1 \xrightarrow{m/k_1} \sigma_1' \text{ implies that }\\
+  \begin{array}{rl}
+      (i)&\exists k_2\ \sigma_2'.\ \sigma_2  \xrightarrow{m/k_2} \sigma_2'\\
+      (ii)&\forall k_2\ \sigma_2' \text{ such that } \sigma_2  \xrightarrow{m/k_2} \sigma_2'.\\
+          & \sigma_2 \xrightarrow{m/k_2} \sigma_2' \;\wedge\; k_1 = k_2  
+          \end{array}
+\end{array}
+$$
+
+\subsection{Trace Warping}
+
+\newcommand\warp{\textsf{warp}}
+Consider some  bad trace $\tau = \sigma_0 \to \cdots \to \sigma_i$. We want to find a good trace $\tau' = \sigma'_0 \to \cdots \to \sigma'_j$ such that $\sigma_i \sim \sigma'_j$. We do this via a \emph{warp} function $f$, which adjusts the state of the bad execution to fall into the good execution. 
+
+For $\tau = \sigma_0 \to \cdots \to \sigma_i \in \badtraces$, 
+and $\tau' = \sigma'_0 \to \cdots \to \sigma'_j$,
+$$
+\warp(\sigma_i,f(\sigma_i))
+\;\;\;\Leftrightarrow\;\;\;
+f(\sigma_i) \sim \sigma_j'
+\;\wedge\;
+\sigma_0 \sim \sigma'_0
+\;\wedge\;
+\tau' \notin \badtraces
+$$
+
+\todo{consider not including $\badtraces$ in the def of warp. maybe easier to permit warping to other bad traces}
+
+
+\subsection{Abstract Trace Warping}
+
+\todo{define hat sim}
+
+\newcommand\awarp{\textsf{awarp}} We now lift to the abstract domain.  Consider some bad trace $\tau = \hat{\sigma}_0 \to \cdots \to \hat{\sigma}_i$. We want to find a good trace $\tau' = \hat{\sigma}'_0 \to \cdots \to \hat{\sigma}'_j$ such that $\hat{\sigma}_i \hat{\sim} \hat{\sigma}'_j$. We do this via an \emph{abstract warp} function $\hat{f}$, which adjusts the state of the bad execution to fall into the good execution.
+
+For $\tau = \hat{\sigma}_0 \to \cdots \to \hat{\sigma}_i \in \badtraces$, 
+and $\tau' = \hat{\sigma}'_0 \to \cdots \to \hat{\sigma}'_j$,
+$$
+\warp(\hat{\sigma}_i,\hat{f}(\hat{\sigma}_i))
+\;\;\;\Leftrightarrow\;\;\;
+\hat{f}(\hat{\sigma}_i) \hat{\sim} \hat{\sigma}_j'
+\;\wedge\;
+\hat{\sigma}_0 \hat{\sim} \hat{\sigma}'_0
+\;\wedge\;
+\tau' \notin \badtraces
+$$
+
+
+
+
+\section{Cartesian product of transactions}
+Given a tuple of $n$ transactions $\cset{T} \in \cfg^n$, we build up the Cartesian product of the cfg of these transactions. Formally, we define the cfg of $\cset{T}$ by $\cel{cfg}_{\cset{T}} = \square_{(\cel{L}_i, \cel{E}_{i}) \in \cset{T}} (\cel{L}_i, \cel{E}_{i})$ where $\square$ denotes the Cartesian product of graphs\todo{Cite something?}. Formally,
+\[
+\begin{array}{l}
+\square_{(\cel{L}_i, \cel{E}_{i}) \in \cset{T}} (\cel{L}_i, \cel{E}_{i}) = (\cel{V}, \cel{E}) :\\
+\hspace{20pt} \cel{V}=\Pi_{(\cel{L}_i, \cel{E}_{i}) \in \cset{T}} \cel{L}_i\\
+\hspace{20pt} \cel{E}=
+\left\{
+\begin{array}{l}
+(\cel{L}, \cel{L}', \statement{st}) : \cel{L}, \cel{L}' \in \cel{V} \land\\
+\hspace{40pt} \exists j \in [1..n] : \forall i \in [1..n] \setminus \{j\}  : \cel{L}_i=\cel{L}'_i \land\\
+\hspace{40pt} \exists (\cel{L}_j, \cel{L}'_j, \statement{st}) \in \cel{E}_j\\
+\end{array}
+\right\}
+\end{array}
+\]
+
+The intuition behind the Cartesian product of cfgs is that (i) each node represents where the execution of each transaction is arrived, and (ii) each edge represents that one transaction performs the execution of an atomic step, while the others do not progress. In this way, we can rely on the Cartesian product of cfgs to compute the interleaving semantics.
+
+\textbf{Put the running example here}
+
+\subsection{Semantics}
+On the Cartesian product of transactions we define the concrete semantics as follows:
+
+\[
+\begin{array}{l}
+\csemantics{S_{CFG}}{\statement{cfg}_\statement{p}, \sigma_0} = \textit{lfp}_{(\cel{L}_0, \cel{\sigma}_0)}^{\subseteq} \lambda \cset{T} . \cset{T} \cup\\
+\hspace{10pt} \left\{
+\begin{array}{l}
+\hspace{10pt} (\cel{L}_0, \cel{\sigma}_0) \to \cdots \to (\cel{L}_{i-1}, \cel{\sigma}_{i-1}) \to (\cel{L}_i, \cel{\sigma}_i) :\\
+\hspace{10pt} (\cel{L}_0, \cel{\sigma}_0) \to \cdots \to (\cel{L}_{i-1}, \cel{\sigma}_{i-1})  \in \cset{T} \land\\
+\hspace{10pt} \exists (\cel{L}_{i-1}, \cel{L}_i, \statement{st}) \in \pi_2(\statement{cfg}_\statement{p}) \land (\cel{\sigma}_{i-1}, \statement{st}) \to \cel{\sigma}_i\\
+\end{array}
+\right\}\\
+\end{array}
+\]
+
+
+
+\begin{lemma}[Soundness of the concrete semantics on the Cartesian product of CFGs]
+$\csemantics{S}{\cel{cfg}_{\cset{T}}, \sigma_0} \subseteq \csemantics{S_{CFG}}{\cel{cfg}_{\cset{T}}, \sigma_0}$
+\end{lemma}
+
+\todo{In theory, they are equal and we can prove it, but maybe this is not interesting, maybe yes - it depends if we need an underapproximation for the good traces}
+
+\subsection{Bad flows}
+Then we statically detect on the CFG of a set of transactions $\cel{cfg}_{\cset{T}}$ the flows that \emph{may} lead to bad executions. Therefore, we build up a data flow analysis that tracks what actions may reach each label in $\cel{cfg}_{\cset{T}}$.
+
+In particular, we are only interested in triples made by these elements since the properties we want to check are on the last three actions \todo{We should enumerate the 4 cases and cite the work introducing them}. Therefore the abstract domain of our data-flow analysis is $(\labels \cup \{\epsilon\})^3$, where $\epsilon$ represents situation in which we have less than three elements. Our data flow analysis is forward and possible. Therefore, our analysis is defined by the following equations:
+
+$$
+\begin{array}{l}
+\cfunction{In}(\cel{l}) = \bigcup_{(\cel{l'}, \cel{l}) \in \cel{e}} \cfunction{Out}(\cel{l'})\\
+\cfunction{Out}(\cel{l}) = \cfunction{Gen}(\cel{l}) \setminus \cfunction{Kill}(\cel{l}) \\
+\cfunction{Kill}(\cel{l}) = \{(\cel{a}_1, \cel{a}_2, \cel{a}_3) : (\cel{a}_1, \cel{a}_2, \cel{a}_3) \in \labels^3\}\\
+\cfunction{Gen}(\cel{l}) = \{(\cel{a}_1, \cel{a}_2, \cel{a}_3) : \exists \cel{a}_4 \in \actions \cup \{\epsilon\}: (\cel{a}_2, \cel{a}_3, \cel{a}_4) \in \cfunction{In}(\cel{l}) \land\\
+\hspace{125pt} \cel{a}_1 \in \getaction{\cfunction{getWeigth}(\cel{I})} \}
+\end{array}
+$$
+
+where $\cel{e}$ represents the edges of the cfg, and $\getaction{\statement{st}}{TODO}$ returns the set of actions ($r$ and/or $w$) the given statement may perform.\todo{Since we have the statements of the edges and not in the nodes, the getLabel function is somewhat broken. I should add the out label and the transaction that performs the statement}
+
+Finally, we tag the edges that could expose bad behaviors. For each edge 
+
+
+In particular, for each edge in $\cel{cfg}_{\cset{T}}$ we consider all the triples of actions generated by this edge. If at least one of these triples represents a conflict, we tag the edge as bad.\todo{Note: we should have one triple per key, but since we are assuming to have only one key statically known we consider this case. This sounds weak}
+Bad edges are aimed at over-approximating bad executions.
+
+\begin{theorem}
+$\forall \tau \in \badtraces \cap \csemantics{S}{\statement{p}, \sigma_0} : \tau \in \csemantics{S_C}{\cel{cfg}_{\cset{T}}, \sigma_0} \cap \badtraces$
+\end{theorem}
+
+\todo{We should define exactly the semantics over the cartesian product of cfgs and show how the trace is built from there}
+
+
+
+\section{TVLA-based analysis}
+
+We instantiated this framework with a TVLA based analysis. We adopted the following representation:
+\begin{itemize}
+\item we represent through a summary node what is inside the map at the beginning of the execution
+\item for all the keys and the values that are parameters of the two transactions, we represent them with concrete nodes
+\item we adopt a binary predicate $r$ to link the map to the summary node
+\item we adopt a binary predicate $k$ to link a parameter key to the map to represent that the key is in the map (note that this predicate is always 0 or 1, never half!)
+\item we adopt a binary predicate $val$ to represent that a key is connected to a value. This $val$ connects the summary node to itself to represent the initial values stored in the map, and it connects the concrete node of a parameter key to a concrete node of a parameter value if the key is insider the map and it is related to the given value
+\end{itemize}
+
+We then represent various entry state in which the predicate $k$ (and $val$ between parameter keys and parameters values) is 1 or 0 to represent all the possible combination when the entry map contains or not a parameter key (and the parameter key is related or not to a parameter value).
+
+Given two abstract states of our analysis, we know that all their concretizations are observationally equivalent.
+
+\begin{theorem}
+$\forall \sigma_1, \sigma_2 \in \gamma({\ael{\sigma}}) : \sigma_1 \sim \sigma_2$
+\end{theorem}
+
+
+\section{Instance of the warping system}
+
+Abstract domain $\astates^{\sharp} = \parts{\pair{\astates}{\{\mathtt{good}, \mathtt{bad}\}}}$
+
+$\mathbb{Q}$ finite set of queries (with parameters)
+
+This set of queries represents the set of observations we can make on a state of the execution (e.g., check if a key is in the map, get the value stored in a given key, ...). This means that we consider that two concrete states are observationally equivalent if they give the same answers to all these queries (Property 1).
+
+First assumption: we have an $eval$ function (that evaluates a query) such that $\forall \statement{q} \in \mathbb{Q}, \ael{\sigma} \in \astates : \afunction{eval}(\statement{q}, \ael{\sigma}) \in \{\true, \false\}$. In particular, this means that we get precise answers to the queries (e.g., the key is / is not in a map), since we can answer only $\true$ or $\false$, and not $\top$. By Property 1 we have then that all the concrete states concretized from an abstract state $\ael{\sigma} \in \astates$ they belong to the same class. In fact, if we get as answer to a query on the abstract state $\true$ (or $\false$), we get $\true$ (or $\false$) on all the possible concretizations of $\ael{\sigma}$. 
+
+Second assumption: we have a function $\Delta : \funzione{\pair{\astates}{\astates}}{\statements^*\cup \{\top\}}$. This function, given two states, returns the set of statements you have to execute to go from the first abstract state to the second one. Formally, $\asemantics{S}{\Delta(\ael{\sigma}, \ael{\sigma}'),\ael{\sigma}}=\ael{\sigma}'$ if $\Delta(\ael{\sigma}, \ael{\sigma}') \neq \top$.
+
+Then we have an entry state made by good abstract states, we take the Cartesian product of the cfgs, and we compute entry and exit state per node in the cfg. We need to explain (1) how we assign good and bad, and (2) how we prove the correlation between entry and exit state preserving the concrete semantics.
