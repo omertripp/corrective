@@ -24,45 +24,10 @@ We also define a notion of \emph{good} configurations
 and in the next section we will define how one can warp from a 
 configuraiton that is not good to one that is.
 
-\paragraph{Language.}
-%
-We assume a set $M$ of method calls (\eg\
+\subsection{Operations and States}
+
+We assume a set $M$ of method calls or operations (\eg\
   \texttt{ht.put('a',5)}).
-Threads execute code $c$ from some programming language that
-includes thread forking, transactions $\tx{c}$,
-method names such as $m$, and a \skipt\ statement.
-Our first trick is to abstract away the programming
-  language with a few functions:
-%
-\begin{description}
-\item[$\step{c}{m}{c'}$:] Within a transaction, code $c$ can be reduced to the pair
-  $(m,c')$.  That is, $m$ is a next reachable method call in the
-  reduction of $c$, with remaining code $c'$.
-
-\item[$\tstep{c}{t}{c'}$:] Outside of a transaction, code $c$ can be reduced to the pair
-  $(t,c')$.  Here $c'$ is the remaining code, and $t$ is either
-  a local state update, or a transaction or a thread fork.
-
-\item[$\nothing{c}$:] This predicate is true provided that there is a
-  reduction of $c$ to $\skipt$ that does not encounter a method call.
-\end{description}
-%
-These functions allow us to obtain a simple semantics, despite an
-expressive input language, by introducing functions to resolve
-nondeterminism between method operation names and at the end of a
-transaction. As an example, one might use the generic language:
-\[ \begin{array}{rcl}
-  c &::=& c_1\plust c_2 \MOR c_1 \semit c_2
-      \MOR (c)^* \MOR \skipt \MOR \tx{c} \MOR \opname
-\end{array} \]
-%
-which consists of nondeterministic choice, sequential
-composition, and nondeterministic looping.
-%
-We assume that code is well-formed in that a single operation name $\opname$ 
-is always contained within a transaction. 
-
-\paragraph{Operations and logs.}
 %
 State is represented in terms of
 logs of operation records. An operation record (or, simply, an ``operation'')
@@ -123,8 +88,7 @@ coinductively, by requiring that all \allowedt\ extensions of the log $\OPL_1$, 
 % \PMPY{} and an atomic machine.
 We use a coinductive definition so that the precongruence can be
 defined up to all infinite suffixes.
-
-\begin{definition}[Shared log precongruence $\opeq$] For all $\OPL_1, \OPL_2$,
+%\begin{definition}[Shared log precongruence $\opeq$] For all $\OPL_1, \OPL_2$,
 $$
 \infer={\OPL_1 \opeq \OPL_2} 
 %   {\deduce{\allowed{\OPL_1}}  {\allowed{\OPL_2}}
@@ -132,13 +96,52 @@ $$
      & \forall \op.\   (\OPL_1 \cdot \op) \opeq (\OPL_2 \cdot \op)}
 $$
 We use a double-line here to indicate greatest fixpoint.
-\end{definition}
-
-\noindent
+%\end{definition}
+%
 Informally, the above definition says that 
 there is no sequence of observations we can make of $\OPL_2$, that we can't also make of $\OPL_1$. 
 This is more general than just considering the set of states reached from executing the first log is included in the second:
 unobservable state differences are also permitted. 
+
+
+\subsection{Language}
+
+
+
+
+Threads execute code $c$ from some programming language that
+includes thread forking, transactions $\tx{c}$,
+method names such as $m$, and a \skipt\ statement. As done
+elsewhere~\cite{pmpy}, we abstract away the programming
+  language with a few semantic functions:
+%
+\begin{description}
+\item[$\step{c}{m}{c'}$:] Within a transaction, code $c$ can be reduced to the pair
+  $(m,c')$.  That is, $m$ is a next reachable method call in the
+  reduction of $c$, with remaining code $c'$.
+
+\item[$\tstep{c}{t}{c'}$:] Outside of a transaction, code $c$ can be reduced to the pair
+  $(t,c')$.  Here $c'$ is the remaining code, and $t$ is either
+  a local state update, or a transaction or a thread fork.
+
+\item[$\nothing{c}$:] This predicate is true provided that there is a
+  reduction of $c$ to $\skipt$ that does not encounter a method call.
+\end{description}
+%
+These functions allow us to obtain a simple semantics, despite an
+expressive input language, by introducing functions to resolve
+nondeterminism between method operation names and at the end of a
+transaction. As an example, one might use the generic language:
+\[ \begin{array}{rcl}
+  c &::=& c_1\plust c_2 \MOR c_1 \semit c_2
+      \MOR (c)^* \MOR \skipt \MOR \tx{c} \MOR \opname
+\end{array} \]
+%
+which consists of nondeterministic choice, sequential
+composition, and nondeterministic looping.
+%
+We assume that code is well-formed in that a single operation name $\opname$ 
+is always contained within a transaction. 
 
 
 
@@ -148,81 +151,83 @@ unobservable state differences are also permitted.
 \newcommand\txnstep[1]{\;\underrightharpdown{\;#1\;}\;}
 \newcommand\txnstept[1]{\underrightharpdown{\;#1\;}}
 
-\subsection{Unconstrained Transition System}
 
-We now defined a generic transition system in which threads may
-interleave their effects however they please. Clearly, this transition
-system is not serializable.
-
+\begin{figure}
 \figbox{\footnotesize
-{\bf Unconstrained Machine Rules} $\xrightarrow{}$
+{\bf Unconstrained Machine Rules} $\xrightarrow{u}$
 $$
-\infer[\text{\sc AFin}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+\infer[\text{\sc UFin}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
   \As_1 \cdot \As_2, G 
 }{
   \nothing{c}
 }
 $$
 $$
-\infer[\text{\sc AFork}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+\infer[\text{\sc UFork}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
   \As_1 \cdot (c_2,\sigma) \cdot (c',\sigma) \cdot \As_2, G 
 }{
   \tstep{c_1}{\fork{c}}{c_2}
 }
 $$
 $$
-\infer[\text{\sc ALocal}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+\infer[\text{\sc ULocal}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
   \As_1 \cdot (c',\sigma') \cdot \As_2, G 
 }{
   \tstep{c}{\local{R}}{c'} & R\ \sigma\ \sigma'
 }
 $$
 $$
-\infer[\text{\sc ATxn}]{ 
-  \As_1 \cdot (c_1,\sigma) \cdot \As_2, G  \xrightarrow{a}
-  \As_1 \cdot (c_2,\sigma') \cdot \As_2, G'
+\infer[\text{\sc UTxn}]{ 
+  \As_1 \cdot (\tx{c_1},\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As_1 \cdot (c_2,\sigma') \cdot \As_2, G\cdot \langle m,\sigma,\sigma' \rangle
 }{
-  \red{\text{fix this rule}} & 
-  \step{c}{m}{c_2} &
-  \tstep{c_1}{\tx{c'}}{c_2} &
-  \OPL_1 \allows \langle m,\sigma,\sigma' \rangle &
-  (c',\sigma),G \BigStep \sigma',G'
+  \step{\tx{c_1}}{m}{c_2} &
+  G \allows \langle m,\sigma,\sigma' \rangle
 }
 $$
 }
+\caption{\label{fig:unconstrained} Unconstrained transition system.}
+\end{figure}
 
+\subsection{Unconstrained Transition System}
 
+We defined a generic transition system $\xrightarrow{u}$ in which threads may
+interleave their effects however they please, shown in Figure~\ref{fig:unconstrained}. Clearly, this transition
+system is not serializable.
 
-
-\subsection{Serializable Transition System}
-
-
-\paragraph{Atomic transition system}.
-We define a simple atomic semantics, given in Figure~\ref{fig:atomic}
-in which transactions are executed instantly, without interruption
-from concurrent threads. The semantics is a relation
-$\xrightarrow{a}$ over pairs consisting of a list of concurrent
+ The semantics is a relation
+$\xrightarrow{u}$ over pairs consisting of a list of concurrent
 threads $\As$ and a shared state $\OPL$. 
 A single thread $(c,\sigma)\in\As$ is a code $c$ and local state $\sigma$. 
-% The relation $\xrightarrow{a}^{*}$ is reflexive,
-% transitive, and permits a thread to complete (rules
-% {\sc ams\_refl}, {\sc ams\_trans}, {\sc ams\_end}, respectively).
 
-We begin with Figure~\ref{fig:atomic}(b).
-%
-The atomic machine can take an {\sc AFin} step when there is a thread
+The unconstrained machine can take a {\sc UFin} step when there is a thread
 $(c,\sigma)$ that can complete, \ie~$\nothing{c}$.
 %
-The {\sc AFork} rule allows a new thread
+The {\sc UFork} rule allows a new thread
 $(c',\sigma)$ to be forked from thread $(c,\sigma)$.
 %
-The {\sc ALocal} rule involves manipulating the thread-local state
+The {\sc ULocal} rule involves manipulating the thread-local state
 $\sigma$ to $\sigma'$.
 %
-Finally, the {\sc ATxn} rule says that if thread executing code $c_1$ can reduce to a 
+Finally, the {\sc UTxn} rule allows a thread executing transaction
+code $\tx{c_1}$ to take a single step to $c_2$, applying the effects
+of $m$ directly to the shared log $G$.
+
+\subsection{Atomic Transition Systems}
+
+We next define a simple atomic semantics $\xrightarrow{a}$,
+given in Figure~\ref{fig:atomic}
+in which transactions are executed instantly, without interruption
+from concurrent threads.
+
+The $\xrightarrow{a}$ rules {\sc AFin, AFork, ALocal} showin in 
+Figure~\ref{fig:atomic}(b) are similar to
+their counterparts in $\xrightarrow{u}$.
+%
+However, the {\sc ATxn} rule says that if thread executing code $c_1$ can reduce to a 
 transaction $\tx{c'}$, then the transaction $c'$ is executed
 atomically by the big step rules $\BigStep$ described next.
 
@@ -308,6 +313,8 @@ $$
 \caption{\label{fig:atomic} Atomic semantics of concurrent threads.}
 \end{figure}
 
+\subsection{Serializable Transition Systems}
+
 
 \begin{definition}[Serializable transition system]
 For all $\Ts,\OPL$, we say that a fragment 
@@ -315,6 +322,8 @@ $\xrightarrow{ser}$ of transition system $\xrightarrow{}$ is
 serializable provided that 
 $\xrightarrow{ser}$ simulates $\xrightarrow{a}$.
 \end{definition}
+
+\red{explain what simulates means}
 
 As previously shown, the Push/Pull transition system is such a
 serializable transition system~\cite{PMPY}.
@@ -335,6 +344,12 @@ some serializable transition system $\xrightarrow{ser}$
 The idea of trace warping is to, at some point of execution, jump to
 an alternate trace that is consistent what what we have observed so
 far. 
+
+\red{quantify observations}
+
+PMPY works because it records old states, so you can jump backwards
+and then roll forwards.
+
 
 Formally, a ``warp'' from a configuration $\Ts,G$ to another
 configuration $\hat{\Ts},\hat{G}$ can be thought of two steps:
