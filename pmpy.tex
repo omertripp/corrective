@@ -345,7 +345,42 @@ The idea of trace warping is to, at some point of execution, jump to
 an alternate trace that is consistent what what we have observed so
 far. 
 
-\red{quantify observations}
+\newcommand\rc[2]{\textsf{rc}(#1,#2)}
+\begin{definition}[Reference configuration]
+For a given transition system with initial configuration $\Ts_0,G_0$,
+we define a \emph{reference configuration}, denoted
+$\rc{\Ts,G}$ to be given by the fixpoint
+$$
+\infer{\rc{\Ts_0}{G}}{}
+\qquad
+\infer{\rc{\Ts'}{G''}}{
+   \rc{\Ts}{G}
+&  \Ts,G \xrightarrow{ser}^{*} \Ts',G'
+&  G'' \opeq G'
+}
+$$
+\end{definition}
+
+\paragraph{Warping correctness.} The goal of warping is simple. For a reference
+configuration $\Ts_0,G_0$, when we have 
+$\Ts_0,G_0 \xrightarrow{u}^{*} \Ts,G$, we wish to
+\[ \begin{array}{rl}
+   \text{Find } \Ts',G'' \text{ such that}&
+      \Ts_0,G_0 \xrightarrow{s} \Ts',G'\\
+  \text{and}&G' \opeq G''
+\end{array} \]
+
+\paragraph{Warping utility.}
+In particular, we would like to find a $\Ts',G''$ that can be 
+\emph{easily computed} from $\Ts,G$.
+
+
+
+\bigskip 
+\bigskip 
+\bigskip 
+
+\red{THIS STUFF MIGHT BE DEAD}
 
 PMPY works because it records old states, so you can jump backwards
 and then roll forwards.
