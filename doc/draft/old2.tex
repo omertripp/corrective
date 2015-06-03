@@ -1,0 +1,92 @@
+\section{OLD Preliminaries}
+
+In this section we lay out some initial definitions. We will work with
+the Push/Pull model of transactions, which is a fairly expressive model.
+As we will see, it provides a nature model for laying
+out a general notion of trace warping.
+
+\paragraph{The Push/Pull Model.} We now summarize the Push/Pull
+model. For a more full description, please see~\cite{pmpy}.
+%
+We work with shared object \emph{operations}, denoted $\theOP$,
+consisting of a method name $m$, thread-local pre/post state $\sigma,
+\sigma'$ (for arguments and return values)
+%, a vector of arguments $\vec{a}$, a vector of return values
+%$\vec{r}$,
+and the operation's unique ID $id$.
+
+The Push/Pull model is based purely on operation \emph{logs}, which
+are lists of operations:
+\[
+  \OPL = [ \numOP{1},  ..., \numOP{n}]
+\]
+The \emph{sequential specification}  is given as a predicate on logs:
+$\allowed{\OPL\cdot \theOP}$ or, alternatively, we may write 
+$\OPL \allows \theOP$.
+
+Threads keep a local log (or ``view'') and there is a single shared
+log. The shared log keeps a flag next two each operation, indicating
+whether the operation belongs to a committed transaction:
+%
+\[\begin{array}{rl}
+  G = [ &(\numOP{1},\gCommitted),  \\
+   &...\\
+                &(\numOP{n},\gUncommitted)]
+\end{array} \]
+
+Each thread is a triple $\CSL$, where $c$ is the code to be executed,
+$\sigma$ is the local state, and $L$ is the local log. The local log has a
+flag next to each entry, indicating whether the operation is local
+($\lUnpushed$), has been {\sc push}ed to the shared view ($\lPushed$) or
+is an operation {\sc pull}ed from the shared log ($\lPulled$) and
+belonging to another thread:
+\[\begin{array}{rl}
+  L = [ &(\numOP{1},\lPulled),  \\
+   &...\\
+                &(\numOP{n},\lUnpushed)]
+\end{array} \]
+%
+The Push/Pull model is parametric over the reduction semantics of the
+code $c$. To accomplish this, we rely on a fixpoint called $\textsf{step}$
+and say that 
+ $(m,\sigma',c') \in \step{\sigma,c}$
+if code $c$ can be reduced from state $\sigma$ 
+\emph{without executing any operation methods} to a next reachable
+method $m$ and the remaining code/state $c'$ and $\sigma'$.
+
+Finally, a configuration in the Push/Pull model is $\Ts,G$ where $G$
+is the shared log and $\Ts = \numCSL{1}\cdot \cdots \cdot \numCSL{n}$
+are the transactions
+
+% \item
+% precongruence relation between logs: $\OPL_1 \opeq \OPL_2 $.\\
+
+\begin{definition}[Precongruence $\opeq$] For all $\OPL_1, \OPL_2$,
+$$
+\infer={\OPL_1 \opeq \OPL_2} 
+   {  \allowed{\OPL_1} \Rightarrow \allowed{\OPL_2}
+     & \forall \op.\   (\OPL_1 \cdot \op) \opeq (\OPL_2 \cdot \op)}
+$$
+Note that we use a double-line here to indicate greatest fixpoint.
+\end{definition}
+
+Intuitively, the above 
+ coinductive fixpoint says that for all seq of ops applied after $\OPL_1$, the results match what would be observed (or is allowed) by $\OPL_2$
+
+% \item
+% obs. equiv
+% $\OPL_1 \obseq \OPL_2 \;\;\equiv\;\; \OPL_1 \opeq \OPL_2 \wedge \OPL_2 \opeq \OPL_2$
+
+% \item steps:
+% $$
+% \infer[\text{\sc fin}]{ \Ts_1 \cdot \CSL\cdot \Ts_2, \OPL \pmpyreduce  \Ts_1 \cdot\Ts_2, \OPL}{\nothing{c}}
+% \hspace{0.1in}
+% \infer[\text{\sc step}]{ \Ts_1 \cdot \CSL\cdot \Ts_2, \OPL \pmpyreduce  \Ts_1 \cdot \CpSpLp\cdot \Ts_2, \OPL'\cdot\theOP}
+% {(c',m) \in \step{c} & \allowed{\OPL\cdot\theOP}}
+% $$
+
+
+%\begin{theorem}[Serializability of Push/Pull~\cite{pmpy}]
+%The Push/Pull model is serializable.
+%\end{theorem}
+

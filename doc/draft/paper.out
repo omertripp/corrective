@@ -1,0 +1,30 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Overview}{}% 2
+\BOOKMARK [1][-]{section.3}{Preliminaries}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Operations and States}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Language}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Unconstrained Transition System}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.4}{Atomic Transition Systems}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.5}{Serializable Transition Systems}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Trace Warping}{}% 9
+\BOOKMARK [1][-]{section.5}{Language}{}% 10
+\BOOKMARK [1][-]{section.6}{Concrete domain and semantics}{}% 11
+\BOOKMARK [2][-]{subsection.6.1}{Property}{section.6}% 12
+\BOOKMARK [2][-]{subsection.6.2}{Abstract domain and semantics}{section.6}% 13
+\BOOKMARK [1][-]{section.7}{Warping system}{}% 14
+\BOOKMARK [2][-]{subsection.7.1}{Observational Equivalence}{section.7}% 15
+\BOOKMARK [2][-]{subsection.7.2}{Trace Warping}{section.7}% 16
+\BOOKMARK [2][-]{subsection.7.3}{Abstract Trace Warping}{section.7}% 17
+\BOOKMARK [1][-]{section.8}{TVLA-based analysis}{}% 18
+\BOOKMARK [1][-]{section.9}{Instance of the warping system}{}% 19
+\BOOKMARK [1][-]{section.10}{Experimental results}{}% 20
+\BOOKMARK [1][-]{section.11}{Related work}{}% 21
+\BOOKMARK [1][-]{section.12}{Conclusion}{}% 22
+\BOOKMARK [1][-]{appendix.A}{First Sketch}{}% 23
+\BOOKMARK [1][-]{appendix.B}{Permuting the execution \205 previous}{}% 24
+\BOOKMARK [1][-]{appendix.C}{New ideas of the meeting on May, 2nd}{}% 25
+\BOOKMARK [2][-]{subsection.C.1}{Observational Equivalence}{appendix.C}% 26
+\BOOKMARK [2][-]{subsection.C.2}{Product of CFGs}{appendix.C}% 27
+\BOOKMARK [1][-]{appendix.D}{Cartesian product of transactions}{}% 28
+\BOOKMARK [2][-]{subsection.D.1}{Semantics}{appendix.D}% 29
+\BOOKMARK [2][-]{subsection.D.2}{Bad flows}{appendix.D}% 30
