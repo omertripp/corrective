@@ -1,0 +1,25 @@
+Entry state:
+[key->initialValue, key:key]
+
+
+Final state 1:
+[key->initialValue, ret1_n:initialValue, ret1_1:initialValue]
+
+
+Final state 2:
+[key->initialValue, ret1_n:initialValue, ret1_1:initialValue]
+
+
+----------------------------------
+Entry state:
+[key->void, key:key]
+
+
+Final state 1:
+[key->#INT#t=1_1_pp=1_0, ret1_n:#INT#t=1_1_pp=1_0, ret1_1:#INT#t=1_1_pp=1_0]
+
+
+Final state 2:
+[key->#INT#t=1_n_pp=1_0, ret1_n:#INT#t=1_n_pp=1_0, ret1_1:#INT#t=1_n_pp=1_0]
+
+
