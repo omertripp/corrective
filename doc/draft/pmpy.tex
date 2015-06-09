@@ -11,7 +11,7 @@
 \newcommand\BigStep{\Downarrow}
 
 
-\section{Preliminaries}
+\section{Technical Background}
 
 In this section we describe a generic language of transactions and
 define an idealized semantics for concurrent transactions called the
@@ -375,6 +375,90 @@ In particular, we would like to find a $\Ts',G''$ that can be
 \emph{easily computed} from $\Ts,G$.
 
 
+
+\section{Static Computation of Warp Destinations}
+
+\paragraph{Abstract state.}
+Let $\hat{\Sigma} = \Ts \times G$, denoted $\hat{\sigma} = (\Ts,G)$.
+
+\newcommand\ts{\bar{t}}
+
+\paragraph{Concrete state.}
+Let $\Sigma = \gamma(\Ts \times G)$ be the concrete states, denoted $\sigma = (\ts,g)$.
+
+\newcommand\Pietrot{{\cal P}ietro}
+
+Discover a $\Pietrot : \hat{\Sigma} \rightarrow \hat{\Sigma}
+\rightarrow \wp({\hat{\Sigma}})$, representing the current abstract
+state, the reference abstract state, and a set of possible destination
+abstract states.
+
+
+\newcommand\llangle{\langle\!\langle}
+\newcommand\rrangle{\rangle\!\rangle}
+
+\section{Dynamic Warping}
+
+\newcommand\Pengt{{\cal P}eng}
+Given $\Pietrot$, the runtime system implements a function
+denoted $\Pengt : \sigma \rightarrow \hat{\sigma} \rightarrow \hat{\sigma} \rightarrow \sigma$. 
+
+
+Runtime tracks the current concrete state $\sigma$,
+current \emph{abstract state} $\hat{\sigma}$ and the last
+\emph{abstract reference state} $\hat{\sigma}_0$. Thus, we denote the runtime
+configuration as
+$$
+    c =  \llangle \sigma,\hat{\sigma},\hat{\sigma}_0 \rrangle 
+\;\;\;\text{ or, expanding }
+    \llangle (\ts,g),(\Ts,G),(\Ts_0,G_0) \rrangle 
+$$
+That is, threads are in state $\ts$, shared state $g$, tracked abstract state
+$(\Ts,G)$ and tracked abstract reference state $(\Ts_0,G_0)$.
+
+There are then the following rules for steps in the runtime system:
+
+$$
+\infer=[\text{\bf Diverge}]{
+   \llangle \sigma,\hat{\sigma},\hat{\sigma}_0 \rrangle 
+  \hookrightarrow^{*}
+   \llangle \sigma',\hat{\sigma}',\hat{\sigma}_0 \rrangle 
+}{ ... }
+$$
+
+
+$$
+\infer=[\text{\bf Warp}]{
+  \llangle \Ts_i,g_i,G_i,G_0 \rrangle
+  \hookrightarrow
+  \llangle \Ts_i,g',G',G_0 \rrangle
+}{
+  & G' \in \Pietrot(\Ts,G_0,G_i)
+  & g' = \Pengt(g,G_i,G')
+}
+$$
+
+$$
+\infer=[\text{\bf Commit}]{
+  \llangle \Ts_i,g_i,G_i,G_0 \rrangle
+  \hookrightarrow
+  \llangle \Ts_i,g',G',G' \rrangle
+}{ ... }
+$$
+
+$$
+\infer=[\text{\bf Step}]{
+  \llangle \Ts,g,G,G_0 \rrangle
+  \hookrightarrow
+  \llangle \Ts',g',G',G_0 \rrangle
+}{
+  g \in \gamma(G)
+& \Ts,G \xrightarrow{P\! P} \Ts',G'
+& g' \in \gamma(G')}
+$$
+
+\vfill
+\pagebreak
 
 \bigskip 
 \bigskip 
