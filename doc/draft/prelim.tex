@@ -1,0 +1,242 @@
+\newcommand\obseq{\stackrel{\sim}{=}}
+\newcommand\CS{\{c,\sigma\}}
+\newcommand\CpSp{\{c',\sigma'\}}
+\newcommand\numCS[1]{\{c_{#1},\sigma_{#1}\}}
+
+%\newcommand\cred[3]{#1 \dashrightarrow (#2,#3)}
+\newcommand\tstep[3]{#1 \lightning (#2,#3)}
+\newcommand\stept{\lightning\!\lightning}
+\renewcommand\step[3]{#1 \stept (#2,#3)}
+
+\newcommand\BigStep{\Downarrow}
+
+\newcommand\myT{T}
+\newcommand\fork[1]{\texttt{fork }#1}
+\newcommand\local[1]{\texttt{local }#1}
+\newcommand\txnstep[1]{\;\underrightharpdown{\;#1\;}\;}
+\newcommand\txnstept[1]{\underrightharpdown{\;#1\;}}
+
+\section{Technical Background}
+
+In this section we describe a generic language of transactions and
+define an idealized semantics for concurrent transactions called the
+atomic semantics, in which there are no interleaved effects on the
+shared state. 
+%
+The model preliminaries generalize those provided previously~\cite{PMPY}.
+%
+We also define a notion of \emph{good} configurations
+and in the next section we will define how one can warp from a 
+configuraiton that is not good to one that is.
+
+\paragraph{Operations and States.}
+We assume a set $M$ of method calls or operations (\eg\
+  \texttt{ht.put('a',5)}).
+%
+State is represented in terms of
+logs of operation records. An operation record (or, simply, an ``operation'')
+$
+    \op = \langle \opname, \lstack_1, \lstack_2, \opid \rangle
+$
+is a tuple consisting of the operation name $m$, 
+a thread-local pre-stack $\lstack_1$ (method arguments),
+a thread-local post-stack $\lstack_2$ (method return values),
+and a unique identifier $\opid$.
+%
+We assume a predicate $\fresh{\opid}$ that holds provided that $\opid$
+is globally unique (details omitted for lack of space).
+%
+In the atomic semantics defined below, the shared state $\OPL :
+\textsf{list } \op$ is an ordered list of operations.
+%
+We use notations such as $\OPL_1\cdot\OPL_2$ and $\OPL\cdot \op$ to
+mean append and appending a singleton, resp.
+
+%\begin{parameter}[From logs to states: $\allowedt{}$] 
+We require a prefix-closed predicate on operation lists $\allowed{\OPL}$
+that indicates whether an operation log $\OPL$ corresponds to a state.
+% The sequential specification
+%   is a predicate on operation lists: $\allowed{\OPL}$. We require that it
+%   be prefix closed.
+%\end{parameter}
+%
+%\noindent
+For convenience we will also write $\OPL \allows \langle m, \lstack_1,
+\lstack_2, \opid\rangle$ which simply means 
+$\allowed{\OPL \cdot \langle m, \lstack_1,\lstack_2, \opid\rangle}$.
+%
+For example, if we have a simple TM
+based on memory read/write operations we expect
+$\;\;\allowed{\OPL\cdot \langle \texttt{a := x}, [x \mapsto 5], [x
+  \mapsto 5, a \mapsto 5], \opid\rangle}$,
+but 
+$\;\;\neg \allowed{\OPL\cdot \langle \texttt{a := x}, [x \mapsto 5], [x
+  \mapsto 5, a \mapsto 3], \opid\rangle}$ or more elaborate
+specifications that involve multiple tasks.
+%
+Ultimately, we expect the $\allowed{}$ predicate to be induced by the
+implementation's operations on the state, $\llbracket op\rrbracket :
+\mathcal{P}(\mathsf{State} \times \mathsf{State})$, and initial
+states $I$. 
+% If we give a denotation to logs as $\llbracket \OPL \cdot op
+% \rrbracket \equiv \llbracket \OPL \rrbracket ; \llbracket op
+% \rrbracket$, and $\llbracket \epsilon \rrbracket \equiv I$ , where $
+% S ; R \equiv \{ s' \mid \exists s \in S. (s,s') \in R \}$. Then we
+% can define $\allowed{\OPL}$ simply by checking if the denotation is
+% non-empty, $(\llbracket \OPL \rrbracket \neq \emptyset)$.
+
+%\paragraph{Operational equivalence.}
+We define a precongruence over operation logs $\OPL_1 \opeq \OPL_2$
+coinductively, by requiring that all \allowedt\ extensions of the log $\OPL_1$, are also \allowedt\ extension to the log $\OPL_2$. 
+% This definition will ultimately be used in the simulation between
+% \PMPY{} and an atomic machine.
+We use a coinductive definition so that the precongruence can be
+defined up to all infinite suffixes.
+%\begin{definition}[Shared log precongruence $\opeq$] For all $\OPL_1, \OPL_2$,
+$$
+\infer={\OPL_1 \opeq \OPL_2} 
+%   {\deduce{\allowed{\OPL_1}}  {\allowed{\OPL_2}}
+   {  \allowed{\OPL_1} \Rightarrow \allowed{\OPL_2}
+     & \forall \op.\   (\OPL_1 \cdot \op) \opeq (\OPL_2 \cdot \op)}
+$$
+We use a double-line here to indicate greatest fixpoint.
+%\end{definition}
+%
+Informally, the above definition says that 
+there is no sequence of observations we can make of $\OPL_2$, that we can't also make of $\OPL_1$. 
+This is more general than just considering the set of states reached from executing the first log is included in the second:
+unobservable state differences are also permitted. 
+
+
+\paragraph{Language.}
+
+Threads execute code $c$ from some programming language that
+includes thread forking, transactions $\tx{c}$,
+method names such as $m$, and a \skipt\ statement. As done
+elsewhere~\cite{pmpy}, we abstract away the programming
+  language with a few semantic functions: \red{update this with pldi
+    camera ready}
+%
+\begin{description}
+\item[$\step{c}{m}{c'}$:] Within a transaction, code $c$ can be reduced to the pair
+  $(m,c')$.  That is, $m$ is a next reachable method call in the
+  reduction of $c$, with remaining code $c'$.
+
+\item[$\tstep{c}{t}{c'}$:] Outside of a transaction, code $c$ can be reduced to the pair
+  $(t,c')$.  Here $c'$ is the remaining code, and $t$ is either
+  a local state update, or a transaction or a thread fork.
+
+\item[$\nothing{c}$:] This predicate is true provided that there is a
+  reduction of $c$ to $\skipt$ that does not encounter a method call.
+\end{description}
+%
+These functions allow us to obtain a simple semantics, despite an
+expressive input language, by introducing functions to resolve
+nondeterminism between method operation names and at the end of a
+transaction.
+%  As an example, one might use the generic language:
+% \[ \begin{array}{rcl}
+%   c &::=& c_1\plust c_2 \MOR c_1 \semit c_2
+%       \MOR (c)^* \MOR \skipt \MOR \tx{c} \MOR \opname
+% \end{array} \]
+% %
+% which consists of nondeterministic choice, sequential
+% composition, and nondeterministic looping.
+%
+We assume that code is well-formed in that a single operation name $\opname$ 
+is always contained within a transaction. 
+
+
+
+
+\begin{figure}
+\figbox{\footnotesize
+(a) {\bf Atomic Machine Big Step Transaction Rules} $\BigStep$
+$$
+\infer[\text{\sc BSFin}]{
+  (c,\sigma),\OPL \BigStep c,\OPL
+}{\nothing{c}}
+\qquad
+\infer[\text{\sc BSStep}]{
+  (c,\sigma),\OPL_1 \BigStep \sigma'',\OPL_2
+}{
+  \deduce{
+    (c_2,\sigma'),
+    \OPL\cdot[\langle m,\sigma,\sigma' \rangle]
+   \BigStep \sigma'',\OPL_2
+ }{
+   \deduce{\OPL_1 \allows \langle m,\sigma,\sigma' \rangle}
+   {\step{c}{m}{c_2}}
+ }
+}
+$$
+(b) {\bf Atomic Machine Rules} $\xrightarrow{a}$
+$$
+\infer[\text{\sc AFin}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+  \As_1 \cdot \As_2, G 
+}{
+  \nothing{c}
+}
+$$
+$$
+\infer[\text{\sc AFork}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+  \As_1 \cdot (c_2,\sigma) \cdot (c',\sigma) \cdot \As_2, G 
+}{
+  \tstep{c_1}{\fork{c}}{c_2}
+}
+$$
+$$
+\infer[\text{\sc ALocal}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
+  \As_1 \cdot (c',\sigma') \cdot \As_2, G 
+}{
+  \tstep{c}{\local{R}}{c'} & R\ \sigma\ \sigma'
+}
+$$
+$$
+\infer[\text{\sc ATxn}]{ 
+  \As_1 \cdot (c_1,\sigma) \cdot \As_2, G  \xrightarrow{a}
+  \As_1 \cdot (c_2,\sigma') \cdot \As_2, G'
+}{
+  \tstep{c_1}{\tx{c'}}{c_2} &
+  (c',\sigma),G \BigStep \sigma',G'
+}
+$$
+}
+\caption{\label{fig:atomic} Atomic semantics of concurrent threads.}
+\end{figure}
+
+
+\paragraph{Atomic Transition Systems.}
+We next define a simple atomic semantics $\xrightarrow{a}$,
+in which transactions are executed instantly, without interruption
+from concurrent threads.
+
+The $\xrightarrow{a}$ rules {\sc AFin, AFork, ALocal} showin in 
+Figure~\ref{fig:atomic}(b) are similar to
+their counterparts in $\xrightarrow{u}$.
+%
+However, the {\sc ATxn} rule says that if thread executing code $c_1$ can reduce to a 
+transaction $\tx{c'}$, then the transaction $c'$ is executed
+atomically by the big step rules $\BigStep$ described next.
+
+Figure~\ref{fig:atomic}(a) illustrates the
+big step semantics $\BigStep$, which uses $\stept$ and $\nothing{}$ 
+(rules {\sc BSStep} and {\sc BSFin}, respectively). These rules
+scan through the nondeterminism in $\tx{c}$ to find a next operation
+name $m$ or a path to $\skipt$ denoting the end of the transaction.
+%
+{\sc BSStep} can be taken provided that the operation $\langle m,\sigma,\sigma'\rangle$ is
+permitted and that $(c_2,\sigma')$ can be
+entirely reduced to $(\sigma'',\OPL_2)$.
+%  Note that there a new operation identifier $\opid_1$
+% is introduced. We require $\opid_1$ to be globally unique
+% (formalization of \textsf{fresh} is omitted for lack of space).
+
+%\red{explain bsstep. we go from $\OPL_1$ to $\OPL_2$ .... bsfin
+%  basically copies the $\OPL$ from left of $\Downarrow$ to the right}
+
+
+
