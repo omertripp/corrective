@@ -54,6 +54,8 @@ Two important challenges that we address in this paper w.r.t. the corrective syn
 
 Beyond the formal details, this paper additionally addresses practical challenges, and in particular the question of how to implement corrective synchronization efficiently, such that it incurs low overhead. To this end, we present a solution based on static analysis to derive the correct poststates in relation to a given prestate. We have implemented a version of the analysis for shared {\sf Map} data structures. {\sf Map}s are used to represent the shared state of many Java programs \cite{XXX}, and so this first step toward a comprehensive static analysis for corrective synchronization is already of practical value.
 
+\red{say that the implementation does something very simple (assumes one transaction), yet illustrates something very powerful that is completely novel}
+
 \paragraph{Contributions} This paper makes the following principal contributions:
 \begin{enumerate}
 	\item \underline{Corrective synchronization:} We present an alternative to both the pessimistic and the optimistic synchronization paradigms, dubbed \emph{corrective synchronization}, whereby serializability is achieved neither via mutual exclusion nor via rollbacks, but through correction of the poststate according to a relational prestate/poststates specification.

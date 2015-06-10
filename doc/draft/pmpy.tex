@@ -429,33 +429,43 @@ $$
 
 $$
 \infer=[\text{\bf Warp}]{
-  \llangle \Ts_i,g_i,G_i,G_0 \rrangle
+  \llangle \sigma,\hat{\sigma},\hat{\sigma}_0 \rrangle
   \hookrightarrow
-  \llangle \Ts_i,g',G',G_0 \rrangle
+  \llangle \sigma',\hat{\sigma}',\hat{\sigma}_0 \rrangle
 }{
-  & G' \in \Pietrot(\Ts,G_0,G_i)
-  & g' = \Pengt(g,G_i,G')
+    \hat{\sigma}' \in \Pietrot(\hat{\sigma}_0,\red{\hat{\sigma}})
+  & \sigma' = \Pengt(\sigma,\hat{\sigma},\hat{\sigma}')
 }
 $$
 
 $$
 \infer=[\text{\bf Commit}]{
-  \llangle \Ts_i,g_i,G_i,G_0 \rrangle
+  \llangle \sigma,\hat{\sigma},\hat{\sigma}_0 \rrangle
   \hookrightarrow
-  \llangle \Ts_i,g',G',G' \rrangle
+  \llangle \sigma',\hat{\sigma}',\hat{\sigma}' \rrangle
 }{ ... }
 $$
 
 $$
 \infer=[\text{\bf Step}]{
-  \llangle \Ts,g,G,G_0 \rrangle
+  \llangle \sigma,\hat{\sigma},\hat{\sigma}_0 \rrangle
   \hookrightarrow
-  \llangle \Ts',g',G',G_0 \rrangle
+  \llangle \sigma',\hat{\sigma}',\hat{\sigma}_0 \rrangle
 }{
+\red{fix}
   g \in \gamma(G)
 & \Ts,G \xrightarrow{P\! P} \Ts',G'
 & g' \in \gamma(G')}
 $$
+
+$\Pietrot$ ensures that $\hat{\sigma}'$ is reachable from $\hat{\sigma}_0$.
+
+$\Pengt$ ensures that $\sigma\in\gamma{\hat{\sigma}$
+and that you awlays warp before you commit (or you always eventually
+warp)
+
+
+
 
 \vfill
 \pagebreak
