@@ -115,54 +115,56 @@ $$
 \bigskip
 \bigskip
 
-\red{\bf ALL THIS MAY BE DEAD}
-
-\begin{definition}[Serializable transition system]
-For all $\Ts,\OPL$, we say that a fragment 
-$\xrightarrow{ser}$ of transition system $\xrightarrow{}$ is
-serializable provided that 
-$\xrightarrow{ser}$ simulates $\xrightarrow{a}$.
-\end{definition}
-
-\red{explain what simulates means}
-
-As previously shown, the Push/Pull transition system is such a
-serializable transition system~\cite{PMPY}.
-
-\begin{definition}[Good configuration]
-A configuration $\Ts,\OPL$ is \emph{good} provided that it is reachable in
-some serializable transition system $\xrightarrow{ser}$
-\end{definition}
 
 
-\newcommand\rc[2]{\textsf{rc}(#1,#2)}
-\begin{definition}[Reference configuration]
-For a given transition system with initial configuration $\Ts_0,G_0$,
-we define a \emph{reference configuration}, denoted
-$\rc{\Ts,G}$ to be given by the fixpoint
-$$
-\infer{\rc{\Ts_0}{G}}{}
-\qquad
-\infer{\rc{\Ts'}{G''}}{
-   \rc{\Ts}{G}
-&  \Ts,G \xrightarrow{ser}^{*} \Ts',G'
-&  G'' \opeq G'
-}
-$$
-\end{definition}
+% \red{\bf ALL THIS MAY BE DEAD}
 
-\paragraph{Warping correctness.} The goal of warping is simple. For a reference
-configuration $\Ts_0,G_0$, when we have 
-$\Ts_0,G_0 \xrightarrow{u}^{*} \Ts,G$, we wish to
-\[ \begin{array}{rl}
-   \text{Find } \Ts',G'' \text{ such that}&
-      \Ts_0,G_0 \xrightarrow{s} \Ts',G'\\
-  \text{and}&G' \opeq G''
-\end{array} \]
+% \begin{definition}[Serializable transition system]
+% For all $\Ts,\OPL$, we say that a fragment 
+% $\xrightarrow{ser}$ of transition system $\xrightarrow{}$ is
+% serializable provided that 
+% $\xrightarrow{ser}$ simulates $\xrightarrow{a}$.
+% \end{definition}
 
-\paragraph{Warping utility.}
-In particular, we would like to find a $\Ts',G''$ that can be 
-\emph{easily computed} from $\Ts,G$.
+% \red{explain what simulates means}
+
+% As previously shown, the Push/Pull transition system is such a
+% serializable transition system~\cite{PMPY}.
+
+% \begin{definition}[Good configuration]
+% A configuration $\Ts,\OPL$ is \emph{good} provided that it is reachable in
+% some serializable transition system $\xrightarrow{ser}$
+% \end{definition}
+
+
+% \newcommand\rc[2]{\textsf{rc}(#1,#2)}
+% \begin{definition}[Reference configuration]
+% For a given transition system with initial configuration $\Ts_0,G_0$,
+% we define a \emph{reference configuration}, denoted
+% $\rc{\Ts,G}$ to be given by the fixpoint
+% $$
+% \infer{\rc{\Ts_0}{G}}{}
+% \qquad
+% \infer{\rc{\Ts'}{G''}}{
+%    \rc{\Ts}{G}
+% &  \Ts,G \xrightarrow{ser}^{*} \Ts',G'
+% &  G'' \opeq G'
+% }
+% $$
+% \end{definition}
+
+% \paragraph{Warping correctness.} The goal of warping is simple. For a reference
+% configuration $\Ts_0,G_0$, when we have 
+% $\Ts_0,G_0 \xrightarrow{u}^{*} \Ts,G$, we wish to
+% \[ \begin{array}{rl}
+%    \text{Find } \Ts',G'' \text{ such that}&
+%       \Ts_0,G_0 \xrightarrow{s} \Ts',G'\\
+%   \text{and}&G' \opeq G''
+% \end{array} \]
+
+% \paragraph{Warping utility.}
+% In particular, we would like to find a $\Ts',G''$ that can be 
+% \emph{easily computed} from $\Ts,G$.
 
 
 
@@ -255,77 +257,6 @@ and that you awlays warp before you commit (or you always eventually
 warp)
 
 
-
-
-\vfill
-\pagebreak
-
-\bigskip 
-\bigskip 
-\bigskip 
-
-\red{THIS STUFF MIGHT BE DEAD}
-
-PMPY works because it records old states, so you can jump backwards
-and then roll forwards.
-
-
-Formally, a ``warp'' from a configuration $\Ts,G$ to another
-configuration $\hat{\Ts},\hat{G}$ can be thought of two steps:
-\begin{enumerate}
-\item Taking some $n$ steps to another warp configuration:
-  $\Ts,G \xrightarrow{}^{*} \Ts',G'$
-\item Swapping the shared log $G'$ with observationally equivalent
-  $\hat{G}$. That is,  $\hat{G} \opeq G'$
-\end{enumerate}
-
-% $$
-% \infer[\text{\sc warp}]{ \Ts, G \xrightarrow{\textsf{warp}} \hat{\Ts}, \hat{G} }
-% {
-%   \begin{array}{lll}    
-%     \text{\underline{Local crit.}} &: \Ts,G \xrightarrow{}^{*} \Ts',G'\\
-%     \text{\underline{Global crit.}} &: G' \opeq \hat{G} & \text{(implies \allowedt)}\\
-%   \end{array}
-% }
-% $$
-
-%    \forall `G.\ `G \text{ prefix of } G.\\
-%    \text{\underline{Local crit.}} &: \forall \{\hat{c},\hat{\sigma},\hat{L}\} \in \hat{\Ts}.\  \lfloor  \hat{G} \rfloor_{\hat{t}} \sim L
-
-
-%    \exists \hat{\OPL} = \numOP{1} \cdots \numOP{n}.\\
-%\allowed{\hat{\OPL}} \\
-
-In practice, there are many warp configurations that can be calculated
-conveniently. For one, uncommitted transactions can rollback (dropping
-their effects) and then some number of (intereleaved) steps can be taken.
-%
-It is often convenient to think of a \emph{reference point}, which is
-a previously reached configuration $\Ts_0,G_0$ from which one might
-compute subsequently reachable warp points $\hat{\Ts},\hat{\OPL}$.
-
-
-%\item jump each thread $\CSL\in \Ts$ to $\CpSpLp\in\hat{\Ts}$ such that:\\
-%    $c' = c$ (could relax this in the future)\\
-    
-\begin{theorem}[Serializability]
-Corollary to the serializability of the Push/Pull model~\cite{pmpy}.
-\end{theorem}
-
-
-\paragraph{Discussion}
-
-This section carves out a large space of possibilities for where one
-might warp to. Some things to consider:
-
-\begin{itemize}
-\item Pessimistic/Optimistic destinations 
-  (our implementation does Pessimistic)
-\item Serial-vs-Serializable destinations
-  (our implementation does Serial).\\
-  For serializabile, the criteria of {\sc push} and {\sc pull} give
-  sufficient conditions in terms of left/right-movers.
-\end{itemize}
 
 
 
