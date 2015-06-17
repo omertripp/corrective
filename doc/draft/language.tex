@@ -1,0 +1,54 @@
+\section{Language}
+\label{sect:language}
+
+\begin{figure}[t]
+	\begin{center}
+		\begin{tabular}{l}
+			\statement{s ::= m.put(k, v)}\\
+			\hspace{15pt} \statement{|\ v=m.get(k)}\\
+			\hspace{15pt} \statement{|\ m.remove(k)}\\
+			\hspace{15pt} \statement{|\ v=m.putIfAbsent(k, v)}\\
+			\hspace{15pt} \statement{|\ v=new\ Value()}\\
+			\hspace{15pt} \statement{|\ v=null}\\
+			\hspace{15pt} \statement{|\ if(b)\ s_1;\ else\ s_2}\\
+			\hspace{15pt} \statement{|\ while(b)\ s_1;}\\
+			\hspace{15pt} \statement{|\ s_1;\ s_2}\\
+			\\
+			\statement{b ::= x==NULL\ |\ m.containsKey(k)\ |\ !b_1}\\
+		\end{tabular}
+	\end{center}
+	\caption{Statements and conditions}
+	\label{fig:language}
+\end{figure}
+
+
+As a proof of concept and preliminary practical study, we instantiate the theoretical framework we formalized in the Section \ref{sect:warping} on the language in Figure \ref{fig:language}, developing a static analysis to compute warping \pietrotodo{targets}, and a dynamic system to warp.
+
+The language is focused on a representative set  of operations of the Java \statement{Map} interface. In Figure \ref{fig:language}, we represent by \statement{m} the map shared among all the transactions, and \statement{k} the shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language support standard \statement{if} and \statement{while} statements, as well as concatenation of statements.
+
+As Boolean conditions, the language supports checking if a variable is \statement{null}, and if the map contains a key.
+
+\subsection{Running Example}
+
+\begin{figure}
+\begin{lstlisting}
+Value removeAttribute(Key k) {
+  Value result = null;
+  if(map.containsKey(k)) {
+    result = m.get(k);
+    m.remove(k);
+  }
+  return result;
+}
+
+boolean removeAttribute(Key k, Value v) {
+  Value oldvalue = m.get(k);
+  m.put(k, v);
+  return oldvalue != null;
+}
+\end{lstlisting}
+\caption{The running example inspired by class \statement{ApplicationContext} of Apache Tomcat}
+\label{lst:runningexamplestaticanalysis}
+\end{figure}
+
+Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. This code is inspired by \pietrotodo{XXX}. The first type of transaction (\statement{transaction1}) removes the value associated with the given key \statement{k}, and returns it. Instead, the second type of transaction relates \statement{k} with a given value \statement{v}, and returns \statement{true} if the key was already in the map. During the formalization of the static analysis and the warping system, we will refer to this running example where each transaction is instantiated multiple times, and all transactions conflict on the same key \statement{k}.

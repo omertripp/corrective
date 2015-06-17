@@ -1,13 +1,129 @@
-
+\newcommand{\set}[1]{\mathsf{#1}}
+\newcommand{\isSummary}{\set{summary}}
+\newcommand{\freshNode}{\set{fresh}}
+\newcommand{\heapnode}{\set{HeapNode}}
+\newcommand{\variable}{\set{Var}}
+\newcommand{\env}{\set{Env}}
+\newcommand{\map}{\set{Map}}
+\newcommand{\state}{\set{\Sigma}}
 
 \section{Static Computation of Warp Destinations}
 
-\paragraph{Abstract state.}
-Let $\hat{\Sigma} = \Ts \times G$, denoted $\hat{\sigma} = (\Ts,G)$.
+\subsection{Abstract Domain}
+\label{sect:abstractate}
+
+Let $\variable$ and $\heapnode$ be the set of variables and abstract heap nodes, respectively. We suppose that a special \statement{null} value is part of $\heapnode$. Both keys and values are abstracted as heap nodes. As usual with heap abstractions, each heap node might represent one or many concrete nodes. Therefore, we suppose that a function $\isSummary : \heapnode \to \{\true, \false\}$ is provided; $\isSummary(h)$ returns $\true$ if and only if $h$ represents many concrete nodes (that is, it is a summary node). We define by $\env : \variable \to \wp(\heapnode)$ the set of (abstract) environments relating each variable to the set of heap nodes it might point to. A map is represented as a function $\map : \heapnode \to \wp(\heapnode)$, connecting each key to the set of possible values it might be related to in the map. The value $\statement{null}$ represents that the key might not be in the map. For instance, $[n_1 \mapsto \{\statement{null}, n_2\}]$ represents that the key $n_1$ might not be in the map, or it is in the map, and it is related to value $n_2$. An abstract state is a pair made by an abstract environment and an abstract map. We augment this set with a special bottom value $\bot$ to will be used to represent that a statement is unreachable. Formally, $\state = (\env \times \map) \cup \{\bot\}$.
+
+The lattice structure is obtained by the point-wise application of set operators to elements in the codomain of abstract environments and functions. Therefore, the abstract lattice is defined as $\langle \state, \dot{\subseteq}, \dot{\cup} \rangle$, where $\dot{\subseteq}$ and$\dot{\cup}$ represents the point-wise application of set operators $\subseteq$ and $\cup$, respectively.
+
+\paragraph{Running example.} 
+Consider the first method in Figure \ref{lst:runningexamplestaticanalysis}. For instance, the abstract state $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{key} is not in the map, while $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to a value. Instead, for the second method, $([\statement{k} \mapsto \{n_1\}, \statement{v} \mapsto n_2], [n_1 \mapsto \{n_2\}])$ represents that \statement{k} is in the map, and it is related to the value pointed by \statement{v}
+
+
+\subsection{Abstract Semantics}
+\label{sect:abstractsemantics}
+
+\begin{figure*}
+\[
+\begin{array}{ll}
+\csemantics{S}{\statement{m.put(k, v)}, (e, m)} = \left\{
+\begin{array}{ll}
+(e, m[n \mapsto e(\statement{v})]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
+(e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})]) & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{put})\\
+\\
+\csemantics{S}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & (\mathtt{get})\\
+\\
+\csemantics{S}{\statement{m.remove(k)}, (e, m)} =  \left\{
+\begin{array}{ll}
+(e, m[n \mapsto \{\statement{null}\}]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
+(e, m[n \mapsto m(n) \cup \{\statement{null}\} : n \in e(\statement{k})]) & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{rmv})\\ 
+\\
+\csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} =  (\pi_1(\csemantics{S}{\statement{v = m.get(k)}, (e, m)}), m') : & \\
+\hspace{70pt} 
+m'=
+\left\{
+\begin{array}{ll}
+(e, m[n \mapsto e(\statement{v})]) & \textrm{ if } e(\statement{k})=\{\statement{n}\} \land m(n) = \{\statement{null}\}\\
+(e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k}) \land \statement{null} \in m(n)]) & \textrm{ otherwise}\\
+\end{array}
+\right. & (\mathtt{pIA})\\
+\\
+\csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
+\\
+\csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{null})\\
+\\
+\csemantics{S}{\statement{if(b)\ s_1;\ else\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e, m)}} \dot{\cup} \csemantics{S}{\statement{s_2}, \csemantics{B}{\statement{! b}, (e, m)}} & \statement{(if)}\\
+\\
+\csemantics{S}{\statement{while(b)\ s_1;}, (e, m)} = \csemantics{B}{\statement{! b}, (e_1, m_1)} : 
+(e_1, m_1) = \mathit{lfp}^{\dot{\subseteq}}_{\bot} \lambda (e', m') . (e, m) \dot{\cup} \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e', m')}}& \statement{(while)}\\
+\\
+\csemantics{S}{\statement{s_1;\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_2}, \csemantics{S}{\statement{s_1}, (e, m)}} & \statement{(cnc)}\\
+\\
+\csemantics{B}{\statement{x==null}, (e, m)} = \left\{
+\begin{array}{ll}
+(e[\statement{x} \mapsto \{\statement{null}\}], m) & \textrm{if } \statement{null} \in e(\statement{x})\\
+\bot & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{null})\\
+\\
+\csemantics{B}{\statement{!x==null}, (e, m)} = \left\{
+\begin{array}{ll}
+(e[\statement{x} \mapsto e(\statement{x}) \setminus \{\statement{null}\}], m) & \textrm{if } \exists n \in \heapnode : n \neq \statement{null} \land n \in e(\statement{x})\\
+\bot & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{!null})\\
+\\
+\csemantics{B}{\statement{m.containsKey(k)}, (e, m)} = \left\{
+\begin{array}{ll}
+\bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
+(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
+(e, m) & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{cntK})\\
+\\
+\csemantics{B}{\statement{! m.containsKey(k)}, (e, m)} = \left\{
+\begin{array}{ll}
+\bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
+(e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land \statement{null} \in m(n)\\
+(e, m) & \textrm{otherwise}\\
+\end{array}
+\right. & (\mathtt{!cntK})\\
+\end{array}
+\]
+\caption{Formal definition of the abstract semantics}
+\label{fig:abstractsemantics}
+\end{figure*}
+Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state. We focus the formalization on abstract states in $\env \times \map$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
+
+\statement{(put)} relates \statement{k} to \statement{v} in the map. In particular, if \statement{k} points to a unique concrete node, it performs a so-called strong update, overwriting previous values related with \statement{k}. Otherwise, it performs a weak update by adding to the previous values the new ones. \statement{(get)} relates the assigned variable \statement{v} to all the heap nodes of values that might be related with \statement{k} in the map. Note that if \statement{k} is not in the map, then the abstract map $m$ relates it to a \statement{null} node, and therefore this value is propagated to \statement{v} then calling \statement{get}, representing the concrete semantics of this statement. Similarly to \statement{(put)}, \statement{(rmv)} removes \statement{k} from the map (by relating it to the singleton $\{\statement{null}\}$) iff \statement{k} points to a unique concrete node. Otherwise, it adds the heap node \statement{null} to the heap nodes related to all the values pointed by \statement{k}. \statement{(pIA)} updates the map like \statement{(put)} but only if the updated key node might have been absent, that is, when $\statement{null} \in m(n)$. \statement{new} creates a new heap node through $\freshNode(t)$ (where $t$ is the identifier of the transaction performing the creation), and assigns it to \statement{v}. The number of nodes is kept bounded by parameterizing the analysis with an upper bound $i$ such that (i) the first $i$ nodes created by a transaction are all concrete nodes, and (ii) all the other nodes are represented by a summary node. Instead, \statement{(null)} relates the given variable to the singleton $\{\statement{null}\}$.
+Rules \statement{(if)}, \statement{(while)}, and \statement{(cnc)} define the standard abstract semantics of \statement{if}, \statement{while}, and concatenation statements.
+The abstract semantics on Boolean conditions produces $\bot$ statements if the given Boolean condition cannot hold on the given abstract semantics. Therefore, \statement{(null)} returns $\bot$ if the given variable \statement{x} cannot be \statement{null}, or a state relating \statement{x} to the singleton $\{\statement{null}\}$ otherwise. Vice-versa, \statement{(!null)} returns $\bot$ if \statement{x} can be only null, or a state relating \statement{x} to all its previous values except \statement{null} otherwise.
+Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is surely not in the map, it refines the possible values of \statement{k} if it is represented by a concrete node, or it simply returns the entry state otherwise. Vice-versa, \statement{(!cntK)} returns $\bot$ if \statement{k} is surely in the map.
+
+\paragraph{Running example.}
+Consider again the first method in Figure \ref{lst:runningexamplestaticanalysis}. When we start from the abstract state  $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{k} is not in the map), we obtain the abstract state $\sigma = ([\statement{k} \mapsto \{n_1\}, \statement{result} \mapsto \{null\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(null)}. During the following computation of rule \statement{(if)}, we consider:
+\begin{enumerate}
+	\item when the Boolean condition \statement{map.containsKey(k)} holds. When applying rule \statement{(cntK)} on $\sigma$ we obtain $\bot$ since the node pointed by \statement{k} is related to the singleton $\{\statement{null}\}$ in the map, representing that the map does not contain the key \statement{k}; and
+	\item when \statement{! map.containsKey(k)} holds. Rule \statement{(!cntK)} applied to $\sigma$ returns $\sigma$ itself, since \statement{k} is in relation only with \statement{null} in the map.
+\end{enumerate}
+\statement{(if)} returns the upper bound of the two resulting states, that is $\bot \dot{\cup} \sigma = \sigma$, and the value pointed by \statement{result} (that is, \statement{null}) is returned.
+Therefore, our analysis computes on this example that, when the key is not in the map in the entry state, the method returns \statement{null} and does not modify the map.
+
+\subsection{Over-approximating Serialized Executions}
+We now formalize how we compute an approximation of serialized executions relying on the abstract semantics defined in Section \ref{sect:abstractsemantics}. Our system receives as input two types of transactions (e.g., the two methods in Figure \ref{lst:runningexamplestaticanalysis}), and returns a mapping from possible abstract entry states, to sets of possible end states.
+
+In particular, given two transactions \statement{t_1} and \statement{t_2}, XXX
+
+\subsection{Extracting Possible Warping States}
 
 \newcommand\ts{\bar{t}}
 
-\paragraph{Concrete state.}
+
+\subsection{Concrete state}
 Let $\Sigma = \gamma(\Ts \times G)$ be the concrete states, denoted $\sigma = (\ts,g)$.
 
 \newcommand\Pietrot{{\cal P}ietro}
@@ -16,6 +132,7 @@ Discover a $\Pietrot : \hat{\Sigma} \rightarrow \hat{\Sigma}
 \rightarrow \wp({\hat{\Sigma}})$, representing the current abstract
 state, the reference abstract state, and a set of possible destination
 abstract states.
+
 
 
 %\newcommand\llangle{\langle\!\langle}

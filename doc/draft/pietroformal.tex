@@ -1,28 +1,4 @@
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{l}
-\statement{s ::= m.put(k, v)}\\
-\hspace{15pt} \statement{|\ x=m.get(k)}\\
-\hspace{15pt} \statement{|\ m.remove(k)}\\
-\hspace{15pt} \statement{|\ x=m.putIfAbsent(k, v, v')}\\
-\statement{c ::= x==NULL\ |\ x!=NULL}\\
-\end{tabular}
-\end{center}
-\caption{Statements and conditions}
-\label{fig:language}
-\end{figure}
-
-\section{Language}
-We will formalize our concrete and abstract semantics on the language in Fig. \ref{fig:language}. We distinguish between statements in \statement{s} and Boolean conditions in \statement{c}. Formally, $\statements = \statement{s} \cup \statement{c}$. We assume that all statements are atomic.
-
-We represent transactions through control flow graphs (CFGs). Let $\labels$ the set of program labels. We suppose that $\statement{entry}, \statement{exit} \in \labels$ represents the entry and the exit label, respectively. A CFG is represented by a graph $\cfg = (\labels \times \edges)$ where the set of edges $\edges=(\labels \times \labels \times \statements)$ connects two vertexes in $\labels$ with a label that may be a statement in \statement{s} (to represent a sequential step) or \statement{c} (to represent a conditional jump). Therefore, each node in the CFG may have (i) one out edge with a label in \statement{s}, or (ii) two out edges with labels in \statement{c}.
-
-A program \statement{p} is made by a (finite) set of transactions, and each transaction is represented by a cfg. Therefore, we represent a program made by $n$ transactions by a tuple of $n$ cfgs (where the $i$-th element represents transaction $i$). Formally, $\statement{p} \in \cfg^n$.
-
-\todo{Should we discuss that the number of edges is between $|\labels|$ and $2*|\labels|$. This would be helpful to discuss the complexity of our approach}
-
-\todo{Add running example}
-
+XXXXXXX TO BE REMOVED!!! XXXXXXX
 
 \section{Concrete domain and semantics}
 Our concrete domain is a standard finite trace domain. We define by $\trace{\cset{A}}$ the set of all finite traces of elements in $\cset{A}$.
