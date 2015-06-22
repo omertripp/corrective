@@ -6,6 +6,9 @@
 \newcommand{\env}{\set{Env}}
 \newcommand{\map}{\set{Map}}
 \newcommand{\state}{\set{\Sigma}}
+\newcommand{\serializedCFGs}{\set{serializedCFGs}}
+\newcommand{\iseqclass}{\set{eqClass}}
+\newcommand{\warpdestination}{\set{warpDest}}
 
 \section{Static Computation of Warp Destinations}
 
@@ -114,11 +117,39 @@ Consider again the first method in Figure \ref{lst:runningexamplestaticanalysis}
 Therefore, our analysis computes on this example that, when the key is not in the map in the entry state, the method returns \statement{null} and does not modify the map.
 
 \subsection{Over-approximating Serialized Executions}
-We now formalize how we compute an approximation of serialized executions relying on the abstract semantics defined in Section \ref{sect:abstractsemantics}. Our system receives as input two types of transactions (e.g., the two methods in Figure \ref{lst:runningexamplestaticanalysis}), and returns a mapping from possible abstract entry states, to sets of possible end states.
+We now formalize how we compute an approximation of serialized executions relying on the abstract semantics defined in Section \ref{sect:abstractsemantics}. Our system receives as input two types of transactions (e.g., the two methods in Figure \ref{lst:runningexamplestaticanalysis}), and returns a mapping from possible abstract entry states, to sets of possible exit states.
 
-In particular, given two transactions \statement{t_1} and \statement{t_2}, XXX
+In particular, given two transactions \statement{t1} and \statement{t2}, we build up a control flow graph that represents possible serialized executions of many instances of the two transactions. In order to build up this serialized control flow graph, the local variables of transactions are rename. For instance, we can build up a serialized CFG where an instance of transaction \statement{t1} (called \statement{t1_1}) is followed by a loop representing a (possible unbounded) sequence of executions of other instances of the same transaction represented by a loop of a \emph{summary} instance of \statement{t1} (called \statement{t1_n}), and this is followed by a similar structure for transaction \statement{t2} (generating transactions \statement{t2_1} and \statement{t2_n}).
+
+When applied to these serialized control flow graphs, the static analysis engine produces exit states that are possible results of serialized executions. Given two transactions, we represent by $\serializedCFGs(\statement{t1}, \statement{t2})=\set{T}$ the function that returns a set of serialized CFGs.
 
 \subsection{Extracting Possible Warping States}
+As we discussed in \pietrotodo{XXX}, we need to compute warping that, given an entry state representing an observational equivalence class, is in an equivalence class that is reachable through a serialized execution. However, an abstract state in $\state$ might represent concrete states that are in different equivalence classes. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot used to define a warping destination.
+
+Therefore, we define a predicate $\iseqclass : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents concrete states all in the same equivalence class. Formally,
+\[
+\begin{array}{c}
+\iseqclass(e, m)\\
+\Updownarrow\\
+\forall \statement{x} \in \dom{e} : |e(\statement{x})|=1 \land e(\statement{x})=\{n_1\} \land \neg \isSummary(n_1)\\
+\forall n \in \dom{m} : |m(n)|=1 \land m(n)=\{n_2\} \land \neg \isSummary(n_2)\\
+\end{array}
+\]
+\pietrotodo{Prove that if $\iseqclass(e,m)$ then all the concretized states from $(e, m)$ are in the same equivalence class}
+
+
+Given two transactions \statement{t1} and \statement{t2}, we build up a set of possible entry states $S$ such that $\forall (e, m) \in S : \iseqclass(e, m)$. We then compute the exit states for all the possible serialized CFGs and entry states, and we filter our only the ones that represents states in the same equivalence class. The results are represented as a function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
+
+
+\[
+\begin{array}{l}
+\warpdestination(\statement{t1}, \statement{t2}, \set{S}) =\{(e', m'):\\
+\hspace{10pt} \exists (e, m) \in \set{S}, \exists \statement{s} \in \serializedCFGs(\statement{t1}, \statement{t2}) :\\
+\hspace{20pt} (e', m') \in \csemantics{S}{\statement{s}, (e, m)} \land \iseqclass(e', m')\}\\
+\end{array}
+\]
+
+\pietrotodo{Not yet explained how we compute the possible entry states}
 
 \newcommand\ts{\bar{t}}
 
