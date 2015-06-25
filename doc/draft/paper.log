@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.14)  24 JUN 2015 16:46
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.14)  25 JUN 2015 15:57
 entering extended mode
  %&-line parsing enabled.
 **paper.tex
@@ -758,7 +758,7 @@ Package epstopdf Info: Source file: <simulation.eps>
 .pdf simulation.eps>
 (epstopdf)             \includegraphics on input line 130.
 Package epstopdf Info: Output file is already uptodate.
- <simulation-eps-converted-to.pdf, id=169, 356.33125pt x 127.47626pt>
+ <simulation-eps-converted-to.pdf, id=173, 356.33125pt x 127.47626pt>
 File: simulation-eps-converted-to.pdf Graphic file (type pdf)
 
 <use simulation-eps-converted-to.pdf> (./prelim.tex
@@ -806,10 +806,49 @@ Underfull \hbox (badness 1845) in paragraph at lines 113--114
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [5])
-(./dynamic.tex) (./experimentalresults.tex) (./relatedwork.tex)
-(./conclusion.tex)
+(./dynamic.tex) (./experimentalresults.tex [6]
+<../../eval/case2-iterations.png, id=280, 581.7735pt x 458.9145pt>
+File: ../../eval/case2-iterations.png Graphic file (type png)
+
+<use ../../eval/case2-iterations.png>
+<../../eval/case2-bop.png, id=281, 576.7146pt x 465.05745pt>
+File: ../../eval/case2-bop.png Graphic file (type png)
+
+<use ../../eval/case2-bop.png>
+<../../eval/case3-iterations.png, id=282, 405.07335pt x 332.08064pt>
+File: ../../eval/case3-iterations.png Graphic file (type png)
+
+<use ../../eval/case3-iterations.png>
+<../../eval/case3-bop.png, id=283, 394.95555pt x 315.45856pt>
+File: ../../eval/case3-bop.png Graphic file (type png)
+
+<use ../../eval/case3-bop.png>
+<../../eval/case4-iterations.png, id=284, 396.7623pt x 341.47575pt>
+File: ../../eval/case4-iterations.png Graphic file (type png)
+
+<use ../../eval/case4-iterations.png>
+<../../eval/case4-bop.png, id=285, 389.5353pt x 321.96284pt>
+File: ../../eval/case4-bop.png Graphic file (type png)
+
+<use ../../eval/case4-bop.png>
+<../../eval/case5-iterations.png, id=286, 394.95555pt x 337.86224pt>
+File: ../../eval/case5-iterations.png Graphic file (type png)
+
+<use ../../eval/case5-iterations.png>
+<../../eval/case5-bop.png, id=287, 392.4261pt x 320.1561pt>
+File: ../../eval/case5-bop.png Graphic file (type png)
+
+<use ../../eval/case5-bop.png>
+
+LaTeX Warning: Float too large for page by 43.89507pt on input line 74.
+
+) (./relatedwork.tex) (./conclusion.tex)
 No file paper.bbl.
-[6] (./old.tex
+(./old.tex [7] [8 <../../eval/case2-iterations.png (PNG copy)> <../../eval/case
+2-bop.png (PNG copy)> <../../eval/case3-iterations.png (PNG copy)> <../../eval/
+case3-bop.png (PNG copy)> <../../eval/case4-iterations.png (PNG copy)> <../../e
+val/case4-bop.png (PNG copy)> <../../eval/case5-iterations.png (PNG copy)> <../
+../eval/case5-bop.png (PNG copy)>]
 Overfull \hbox (38.6866pt too wide) in paragraph at lines 78--79
 []\OT1/ptm/m/n/9 In this way, the en-tire ex-e-cu-tion be-comes $[]$
  []
@@ -819,7 +858,7 @@ Overfull \hbox (46.56252pt too wide) detected at line 107
 []
  []
 
-[7]
+
 Overfull \hbox (68.15314pt too wide) detected at line 116
 \U/MnSymbolC/m/n/9 ¦\OML/cmm/m/it/9 ^^[[] \U/MnSymbolA/m/n/9 ^^@ \U/MnSymbolC/m
 /n/9 ^^E \U/MnSymbolA/m/n/9 ^^@ \OML/cmm/m/it/9 ^^[[] \U/MnSymbolD/m/n/9 > []\U
@@ -840,7 +879,7 @@ Overfull \hbox (14.85426pt too wide) detected at line 151
 
 Underfull \vbox (badness 1418) has occurred while \output is active []
 
-
+ [9]
 Overfull \hbox (6.52844pt too wide) detected at line 194
 []
  []
@@ -851,7 +890,7 @@ Overfull \hbox (3.03508pt too wide) in paragraph at lines 196--197
 s of the cfg, and $[]$
  []
 
-[8]) (./pietroformal.tex
+) (./pietroformal.tex
 Overfull \hbox (32.11247pt too wide) detected at line 22
 []
  []
@@ -862,67 +901,59 @@ Overfull \hbox (6.65392pt too wide) in paragraph at lines 37--38
 OT1/ptm/m/n/9 , we de-fine by $[]$
  []
 
-[9])
+[10])
 
 Package natbib Warning: There were undefined citations.
 
-[10
-
-] (./paper.aux)
+[11] (./paper.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
- 11002 strings out of 493848
- 154703 string characters out of 1152823
+ 11074 strings out of 493848
+ 156403 string characters out of 1152823
  277630 words of memory out of 3000000
- 13883 multiletter control sequences out of 15000+50000
+ 13936 multiletter control sequences out of 15000+50000
  50246 words of font info for 119 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
- 41i,21n,40p,1721b,1310s stack positions out of 5000i,500n,10000p,200000b,50000s
-pdfTeX warning (dest): name{figure.caption.17} has been referenced but does n
-ot exist, replaced by a fixed one
-
-{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/share/te
-xmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolD.enc}{/usr/share/texmf-texlive/fo
-nts/enc/dvips/mnsymbol/MnSymbolE.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/
-mnsymbol/MnSymbolF.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSym
-bolA.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}{/usr
-/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/font
-s/type1/public/mnsymbol/MnSymbol5.pfb></usr/share/texmf-texlive/fonts/type1/pub
-lic/mnsymbol/MnSymbol6.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsymbo
-l/MnSymbol8.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsymbol/MnSymbol9
-.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/s
-hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texmf-t
-exlive/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/fonts
-/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/c
-m/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb><
-/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/te
-xmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/f
-onts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/amsfonts/cm/cmss9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfon
-ts/cm/cmssbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cms
-y9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti7.pfb></usr
-/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/texmf
--texlive/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/fon
-ts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texmf-texlive/fonts/type1/pub
-lic/amsfonts/symbols/msbm10.pfb></usr/share/texmf-texlive/fonts/type1/public/am
-sfonts/symbols/msbm7.pfb></usr/share/texmf-texlive/fonts/type1/hoekwater/stmary
-rd/stmary9.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr
-/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texliv
-e/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/ti
-mes/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (10 pages, 451991 bytes).
+ 41i,21n,45p,1721b,1310s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/share/
+texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolD.enc}{/usr/share/texmf-texlive/
+fonts/enc/dvips/mnsymbol/MnSymbolE.enc}{/usr/share/texmf-texlive/fonts/enc/dvip
+s/mnsymbol/MnSymbolF.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnS
+ymbolA.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}{/u
+sr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/fo
+nts/type1/public/mnsymbol/MnSymbol5.pfb></usr/share/texmf-texlive/fonts/type1/p
+ublic/mnsymbol/MnSymbol6.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsym
+bol/MnSymbol8.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsymbol/MnSymbo
+l9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr
+/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texmf
+-texlive/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/fon
+ts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
+/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb
+></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/
+texmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive
+/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texmf-texlive/fonts/type1
+/public/amsfonts/cm/cmss9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
+onts/cm/cmssbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/c
+msy9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti7.pfb></u
+sr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texmf-texlive/fonts/type1/p
+ublic/amsfonts/symbols/msbm10.pfb></usr/share/texmf-texlive/fonts/type1/public/
+amsfonts/symbols/msbm7.pfb></usr/share/texmf-texlive/fonts/type1/hoekwater/stma
+ryrd/stmary9.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></u
+sr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texl
+ive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/
+times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (11 pages, 631954 bytes).
 PDF statistics:
- 453 PDF objects out of 1000 (max. 8388607)
- 113 named destinations out of 1000 (max. 500000)
- 278 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 484 PDF objects out of 1000 (max. 8388607)
+ 122 named destinations out of 1000 (max. 500000)
+ 326 words of extra memory for PDF output out of 10000 (max. 10000000)
 
