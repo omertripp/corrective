@@ -1,8 +1,38 @@
+\newcommand\op{o\!p}
+\newcommand\PMPY{Push/Pull}
+\newcommand\PMPYfoot{\footnote{\scriptsize %
+  \url{http://en.wikipedia.org/wiki/List\_of\_Doctor\_Dolittle\_characters\#The\_Pushmi-pullyu}}}
+\newcommand\Ops{\text{\it O\!p\!s}}
+%\newcommand\crit[2]{\underline{\text{#1 \emph{Crit.} (\emph{#2})}}}
+%\newcommand\crit[2]{\text{\emph{\bf Crit}\ #1 (\emph{#2}){\bf .}}}
+\newcommand\crit[2]{#1 criterion (\emph{#2})}
+\newcommand\critAPPi{\crit{\APPLY{}}{i}}
+\newcommand\critAPPii{\crit{\APPLY{}}{ii}}
+\newcommand\critAPPiii{\crit{\APPLY{}}{iii}}
+\newcommand\critPUSHi{\crit{\PUSH{}}{i}}
+\newcommand\critPUSHii{\crit{\PUSH{}}{ii}}
+\newcommand\critPUSHiii{\crit{\PUSH{}}{iii}}
+\newcommand\critUNPUSHi{\crit{\UNPUSH{}}{i}}
+\newcommand\critUNPUSHii{\crit{\UNPUSH{}}{ii}}
+\newcommand\critPULLi{\crit{\PULL{}}{i}}
+\newcommand\critPULLii{\crit{\PULL{}}{ii}}
+\newcommand\critPULLiii{\crit{\PULL{}}{iii}}
+\newcommand\critUNPULLi{\crit{\UNPULL{}}{i}}
+\newcommand\critCMTi{\crit{\CMT{}}{i}}
+\newcommand\critCMTii{\crit{\CMT{}}{ii}}
+\newcommand\critCMTiii{\crit{\CMT{}}{iii}}
+\newcommand\critCMTiv{\crit{\CMT{}}{iv}}
+\newcommand\tx[1]{\texttt{tx}\ #1}
+\newcommand\skipt{\texttt{skip}}
+\newcommand\plust{\;\texttt{+}\;}
+\newcommand\semit{\;\texttt{;}\;}
+
+
 \newcommand\TRUE{\textsf{true}}
 \newcommand\FALSE{\textsf{false}}
 
-\newcommand\APP{{\sc app}}
-\newcommand\UNAPP{{\sc unapp}}
+\newcommand\APPLY{{\sc apply}}
+\newcommand\UNAPP{{\sc unapply}}
 \newcommand\PUSH{{\sc push}}
 \newcommand\UNPUSH{{\sc unpush}}
 \newcommand\PULL{{\sc pull}}
@@ -20,12 +50,150 @@
 \newcommand\x{\texttt{x}}
 \newcommand\y{\texttt{y}}
 
-%\newcommand\pmpyreduce{\leadsto}
-\newcommand\pmpyreduce{\xrightarrow{\;\;\;}}
-\newcommand\pmpyrt{\xrightarrow{\textsf{rt}}}
-\newcommand\pmpyfwd{\xrightarrow{\textsf{fwd}}}
-\newcommand\pmpyback{\xrightarrow{\textsf{back}}}
-\newcommand\pmpystruct{\xrightarrow{\textsf{struct}}}
+\newcommand\pmpyreduce{\rightsquigarrow}
+
+\newcommand*{\mystrut}{\rule[-0.05\baselineskip]{0pt}{1.15\baselineskip}}
+%\newcommand\Tboxed[1]{\fbox{\mystrut #1}}
+\newcommand\Tboxed[1]{#1}
+
+%\newcommand\pmpyreduce{\xrightarrow{\;\;\;}}
+%\newcommand\pmpyrt{\xrightarrow{\textsf{rt}}}
+%\newcommand\pmpyfwd{\xrightarrow{\textsf{fwd}}}
+%\newcommand\pmpyback{\xrightarrow{\textsf{back}}}
+%\newcommand\pmpystruct{\xrightarrow{\textsf{struct}}}
+
+
+%!TEX root=paper.tex
+
+\newcommand\opname{m}
+%\newcommand\step[1]{\textsf{step}(#1)}
+\newcommand\nothingtext{fin}
+\newcommand\nothing[1]{\textsf{\nothingtext}(#1)}
+\newcommand\committ{\textsf{cmt}}
+\newcommand\lstack{\sigma}
+\newcommand\opid{\mathit{id}}
+\newcommand\fresh[1]{\textsf{fresh}(#1)}
+\newcommand\OPL{\ell} 
+\newcommand\unpushed[1]{\lfloor #1 \rfloor_{\lUnpushed}}
+\newcommand\pushed[1]{\lfloor #1 \rfloor_{\lPushed}}
+\newcommand\mine[1]{\lfloor #1 \rfloor^{\lUnpushed}_{\lPushed}}
+\newcommand\pulled[1]{\lfloor #1 \rfloor_{\lPulled}}
+\newcommand\gcommitted[1]{\lfloor #1 \rfloor_{\gCommitted}}
+\newcommand\guncommitted[1]{\lfloor #1 \rfloor_{\gUncommitted}}
+
+%\input{../../coq/simple/pushpull}
+\input{ott}
+
+\newcommand\SimRel{\;\sim\;}
+\newcommand\theOP{\langle m, \sigma, \sigma', \opid \rangle}
+\newcommand\numOP[1]{\langle m_#1, \sigma_#1, \sigma'_#1, \opid_#1\rangle}
+\newcommand\cmtpres{\textsf{cmtpres}}
+\newcommand\prewind{\;\circlearrowleft_\textsf{self}\;}
+\newcommand\Gpost{G_\textsf{post}}
+\newcommand\CSL{\{c, \sigma, L\}}
+\newcommand\CSLp{\{c, \sigma, L'\}}
+\newcommand\CpSpLp{\{c', \sigma', L'\}}
+\newcommand\csL[1]{\{c, \sigma, #1\}}
+\newcommand\cslC[1]{\{#1, \sigma, L\}}
+\newcommand\cslCS[2]{\{#1, #2, L\}}
+\newcommand\cslCSL[3]{\{#1, #2, #3\}}
+\newcommand\cslpre{\{`c, `\sigma, `L\}}
+\newcommand\cslhat{\{\hat{c}, \hat{\sigma}, \hat{L}\}}
+
+%\newcommand\Gdrop{G_\textsf{drop}}
+\newcommand\Gdrop{`G}
+\newcommand\Godrop{`{}`G}
+\newcommand\Grewindt[1]{\circlearrowleft_{\!\!\!#1}}
+\newcommand\Grewind[3]{#1 \; \Grewindt{#2} #3}
+\newcommand\GrewindGLGdrop{\Grewind{G}{L}{\Gdrop}}
+\newcommand\GrewindGLGodrop{\Grewind{G}{L}{\Godrop}}
+
+\newcommand\Gothers{\Gpost\setminus \pushed{L_1\cdot\hat{L}_2}}
+\newcommand\Gmine{\Gpost\cap \pushed{L_1\cdot\hat{L}_2}}
+\newcommand\GothersP{\Gpost'\setminus \pushed{L_1\cdot\hat{L}_2}}
+\newcommand\GmineP{\Gpost'\cap \pushed{L_1\cdot\hat{L}_2}}
+
+%\newcommand\invA{\textsf{inv}_a}
+\newcommand\invLG{I_{LG}}
+\newcommand\invA{I_\textsf{slideR}}
+
+\newcommand\invSlidePushed{I_\textsf{slidePushed}}
+\newcommand\invB{I_\textsf{reorderPUSH}}
+\newcommand\invChronPush{I_\textsf{chronPush}}
+\newcommand\early[3]{\textsf{early }#1\textsf{ than }#2\textsf{ in }#3}
+
+\newcommand\invC{I_\textsf{localOrder}}
+
+\newcommand\invNA{I_\textsf{RightOfPulled}}
+\newcommand\invNB{I_\textsf{movePulledLeft}}
+
+\newcommand\origtx{\textsf{otx}}
+
+% %%%% params: c s L G
+% \newcommand\invar[4]{\begin{array}{ll}%
+%     \forall \cslpre.\ \cslCSL{#1}{#2}{#3} \prewind \cslpre \;\Rightarrow&(1)\\%
+%     \forall \Gpost.\ \committ(#4,`L,\Gpost) \;\Rightarrow&(2)\\%
+%     \forall \sigma',\OPL_a.\ (`c, `\sigma), \gcommitted{\Gpost}\cdot\unpushed{`L} \;\Downarrow\; \sigma', \OPL_a \;\Rightarrow&(3)\\%
+%     \;\;\exists \OPL_b.\;\;\;%
+%        \origtx(\cslpre), \gcommitted{#4} \Downarrow  \sigma', \OPL_b%
+%        \;\;\;\wedge\;\;\;  \OPL_a \opeq \OPL_b\hspace{0.1in}&(4)%
+%   \end{array}}
+% \newcommand\invarCSLG{\invar{c}{\sigma}{L}{G}}
+
+\newcommand\invLocalReorder{I_\textsf{localReorder}}
+
+%%%% params: c s L G
+\newcommand\invar[4]{\begin{array}{ll}%
+    \forall \Godrop.\ \Grewind{#4}{L}{\Godrop}. \;\Rightarrow&(0)\\%
+    \forall \cslpre.\ \cslCSL{#1}{#2}{#3},\Godrop \prewind \cslpre,\Gdrop \;\Rightarrow&(1)\\%
+    \forall \Gpost.\ \committ(\Gdrop,`L,\Gpost) \;\Rightarrow&(2)\\%
+    \forall \sigma',\OPL_a.\ (`c, `\sigma), \Gpost\cdot\unpushed{`L} \;\Downarrow\; \sigma', \OPL_a \;\Rightarrow&(3)\\%
+    \;\;\exists \OPL_b.\;\;\;%
+       \origtx(\cslpre), #4\setminus L \Downarrow  \sigma', \OPL_b%
+       \;\;\;\wedge\;\;\;  \OPL_a \opeq \OPL_b\hspace{0.1in}&(4)%
+  \end{array}}
+\newcommand\invarCSLG{\invar{c}{\sigma}{L}{G}}
+
+\newcommand\invSubset{I_\subseteq}
+\newcommand\csl{\{c,\sigma,L\}}
+
+%\newcommand\cred[3]{#1 \dashrightarrow (#2,#3)}
+\newcommand\tstep[3]{#1 \lightning (#2,#3)}
+\newcommand\stept{\lightning_{\mkern-7mu \texttt{tx}}} %\!\lightning}
+\newcommand\step[3]{#1 \stept (#2,#3)}
+
+\newcommand\BigStep{\Downarrow}
+\newcommand\localR{\texttt{local}_R}
+
+\newcommand\MOR{\ \mid\ }
+
+\newcommand\allowedt{\textsf{allowed}}
+\newcommand\allowed[1]{\allowedt\ #1}
+\newcommand\allows{\textsf{ allows }}
+
+\newcommand\opeq{\preccurlyeq} %\asymp}
+
+\newcommand\As{\mathbf{A}}
+\newcommand\Ts{\mathbf{T}}
+\newcommand\myT{T}
+
+
+
+\newcommand\fork[1]{\texttt{fork }#1}
+\newcommand\local[1]{\texttt{local }#1\red{FIXlocal}}
+\newcommand\txnstep[1]{\;\underrightharpdown{#1}\;}
+\newcommand\Dir{\txnstep{dir}}
+\newcommand\Fwd{\txnstep{\textsf{fwd}}}
+\newcommand\Bwd{\txnstep{\textsf{bwd}}}
+\newcommand\txnstept[1]{\underrightharpdown{#1}}
+\newcommand\Dirt{\txnstept{dir}}
+\newcommand\Fwdt{\txnstept{\textsf{fwd}}}
+\newcommand\Bwdt{\txnstept{\textsf{bwd}}}
+\newcommand\pmpystruct{\red{pmpystruct}}
+\newcommand\pmpyrt{\red{pmpyrt}}
+
+
+
 
 %%% Local Variables: 
 %%% mode: plain-tex

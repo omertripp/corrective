@@ -1,0 +1,82 @@
+\begin{figure*}
+\figboxB{\footnotesize
+\Tboxed{(a) \PMPY{} {\bf Machine Rules} $\pmpyreduce$}
+$$
+\infer[\text{\FIN{}}]{
+  \Ts_1\cdot\csl\cdot\Ts_2,G \pmpyreduce
+  \Ts_1\cdot \Ts_2,G
+}{\nothing{c}}
+\hspace{0.1in}
+\infer[\text{\FORK{}}]{
+  \Ts_1\cdot\cslC{c}\cdot\Ts_2,G \pmpyreduce
+  \Ts_1\cdot\cslC{c_1}\cdot\cslC{c_2}\cdot\Ts_2,G
+}{\tstep{c}{\fork{c_1}}{c_2}}
+$$
+$$
+\infer[\text{\LOCAL{}}]{
+  \Ts_1\cdot\cslCS{c_1}{\sigma_1}\cdot\Ts_2,G \pmpyreduce
+  \Ts_1\cdot\cslCS{c_2}{\sigma_2}\cdot\Ts_2,G 
+}{\tstep{c_1}{\localR}{c_2} & R\ \sigma_1\ \sigma_2}
+$$
+$$
+\infer[\text{\BEGIN{}}]{
+  \Ts_1\cdot\cslC{c_1}\cdot\Ts_2,G \pmpyreduce
+  \Ts_1\cdot\cslC{(\tx{c},c_2)}\cdot\Ts_2,G
+}{\tstep{c_1}{\tx{c}}{c_2}}
+\hspace{0.1in}
+\infer[\text{\CMT{}}]{
+   \Ts_1\cdot\cslC{(\tx{c},c_1)}\cdot\Ts_2,G \pmpyreduce
+   \Ts_1\cdot\cslC{c_1}\cdot\Ts_2,G'
+}{
+  \nothing{c}  & L \subseteq G & \committ(G,L,G')
+}
+$$
+\begin{center}
+\begin{tabular}{rl}
+\begin{minipage}{3.5in}
+$$
+\infer[\text{\STEP{}}]{
+   \Ts_1\cdot\cslC{(\tx{c},c_1)}\cdot\Ts_2,G \pmpyreduce
+   \Ts_1\cdot\cslCSL{(\tx{c'},c_1)}{\sigma'}{L'}\cdot\Ts_2,G'
+}{
+  \CSL, G
+  \Dir
+  \CpSpLp, G'
+}
+$$
+\end{minipage}
+&
+\begin{minipage}{3.1in}
+%The {\sc PPTxEnd} rule involves predicate \textsf{cmt}, defined as follows:
+where $\textsf{cmt}(G_1,L_1,G_2) \equiv$\\
+$\;G_2 \;=\; \textsf{map } \left(\lambda\ (\op,g).\ 
+     \begin{cases}
+       (\op,\gCommitted) & \text{if } \op \in \pushed{L_1} \\
+       (\op,g) & \text{ otherwise}
+       \end{cases}
+       \right) G_1
+$
+\end{minipage}
+\end{tabular}
+\end{center}
+\medskip
+\noindent
+\Tboxed{(b) \PMPY{} {\bf Step Rules} $\Dir$}
+\ottusedrule{\ottdruleapp{}}
+\ottusedrule{\ottdruleunapp{}}
+\bigskip
+\ottusedrule{\ottdrulepush{}}
+\ottusedrule{\ottdruleunpush{}}
+\bigskip
+\ottusedrule{\ottdrulepull{}}
+\ottusedrule{\ottdruleunpull{}}
+}
+\caption{\label{fig:ott}
+(a) The machine reductions of \PMPY{}. 
+(b) The \PMPY{} rules.
+  Notations $\setminus,\notin,\cdot,\subseteq$ are all lifted to
+  lists where equality is given by $\opid$s. 
+We will refer to the premise criteria of each rule as, for example, ``\critPUSHii.'' 
+Criteria that are written in \gray{gray font} are not strictly
+necessary. See inline discussion.}
+\end{figure*}

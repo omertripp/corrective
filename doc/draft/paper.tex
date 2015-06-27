@@ -18,12 +18,14 @@
 \usepackage{proof}
 \usepackage{hyperref}
 %\usepackage[normalem]{ulem}
+\usepackage{harpoon}
+
 
 
 \usepackage{supertabular}
 
 \input{defs}
-\input{defs-pmpy}
+%\input{defs-pmpy}
 
 % program listings
 \usepackage{listings}
@@ -83,6 +85,7 @@
 \newcommand\comment[1]{{\color{blue} #1}}
 \newcommand\ignore[1]{}
 \newcommand\disabled[1]{{\color{light-gray} #1}}
+\newcommand\gray[1]{{\color{light-gray} #1}}
 \newcommand\eg{{\it e.g.}}
 \newcommand\ie{{\it i.e.}}
 \newcommand\cf{{\it cf.}}
@@ -131,6 +134,8 @@
 
 \input{prelim}
 
+\input{pushpull}
+
 \input{warp}
 
 
@@ -162,6 +167,10 @@
 
 \newpage
 \appendix
+\input{atomic}
+
+\section{Complete \PMPY{} rules}
+\input{bigfig}
 
 \input{old}
 

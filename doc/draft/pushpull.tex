@@ -1,0 +1,81 @@
+\newcommand\STEP{{\sc step}}
+\newcommand\BEGIN{{\sc begin}}
+\newcommand\LOCAL{{\sc local}}
+\newcommand\FIN{{\sc fin}}
+\newcommand\FORK{{\sc fork}}
+
+\subsection{The \PUSH{}/\PULL{} model}
+
+We briefly summarize the \PUSH{}/\PULL{} model~\cite{KP:PLDI15}. This model consists of
+seven rules which we will use for both intuitive descriptions of the
+Warping protocol, and in the formal proof of serializability.
+The \PMPY{} model is a log-based transition relation
+$\Ts,G \pmpyreduce \Ts', G'$ that reduces
+a list of threads $\Ts : \textsf{list } (c\times \lstack
+\times L)$ and a global log $G$ to $\Ts',G'$.
+%
+There is a per-thread local log $L$ and a global log $G$.
+
+
+The rules characterize how a given transaction moves forward/backward
+locally, how it may share its effects into the shared view (\PUSH),
+and bring the effects of other transactions into its local view
+(\PULL). The rules are:
+\begin{itemize}
+\item \APPLY: A thread reduces its (nondeterminisitc) code down to a
+  next-reachable operation $\op$ (with continuation code). This
+  operation $\op$ is applied to the local log but is not yet shared
+  into the global log. It is yet ``unpushed.''
+
+\item \UNAPP: This rule undoes the most recent \APPLY, restoring the
+  previous code and local state, and discarding the most recent
+  operation from the local log.
+
+\item \PUSH: A transaction shares its effects with the global view by
+  copying an $\op$ from its local log and appending it to the global
+  log. Locally, $\op$ is considered ``pushed'' and, in the global log,
+  it is marked as ``uncommitted.''
+%
+  This rule can only be taken if all uncommitted operations in the
+  shared log can commute with (move to the right of) $\op$.
+%
+  Moreover, it is possible to \PUSH{} operations to the shared log in
+  a different order than they appear in the local log (provided that
+  each pushed $\op$ commutes with its earlier unpushed neighbors in the local log).
+
+\item \UNPUSH: An operation $\op$ that has been \PUSH{}ed to the
+  shared log can be \UNPUSH{}ed by swapping the flag from ``pushed''
+  to ``unpushed'' and removing the corresponding global log entry for
+  $\op$. $\op$ can only be \UNPUSH{}ed if it commutes with the
+  subsequently pushed operations in the log.
+
+\item \PULL:
+%
+  Transactions can learn about the published effects of other
+  transactions by \PULL{}ing operations from the global log into their
+  local logs. Provided it has not alreadty been pulled, an operation
+  $\op$ can be copied from the global log, appended to the local log,
+  and marked as ``pulled.'' A transaction does not need to \PULL{} in
+  shared-log-chronological order.
+
+\item \UNPULL: (description omitted for lack of space)
+
+\item \CMT: \red{todo}
+%  and local state manipulations (\LOCAL
+\end{itemize}
+%The full descriptions of these rules are given in Appendix~\ref{apx:bigfig}.
+Note that each of the above rules (except for \CMT) have an opposite rule.
+%
+Other rules include transaction initiation (\BEGIN),
+thread completion (\FIN) and forking (\FORK).
+As shown previously~\cite{KP:PLDI15}, each rule comes with a few
+criteria which, all told, ensure serializability and---when
+appropriately restricted---opacity.
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

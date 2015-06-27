@@ -3,18 +3,12 @@
 \newcommand\CpSp{\{c',\sigma'\}}
 \newcommand\numCS[1]{\{c_{#1},\sigma_{#1}\}}
 
-%\newcommand\cred[3]{#1 \dashrightarrow (#2,#3)}
-\newcommand\tstep[3]{#1 \lightning (#2,#3)}
-\newcommand\stept{\lightning\!\lightning}
-\renewcommand\step[3]{#1 \stept (#2,#3)}
 
-\newcommand\BigStep{\Downarrow}
-
-\newcommand\myT{T}
-\newcommand\fork[1]{\texttt{fork }#1}
-\newcommand\local[1]{\texttt{local }#1}
-\newcommand\txnstep[1]{\;\underrightharpdown{\;#1\;}\;}
-\newcommand\txnstept[1]{\underrightharpdown{\;#1\;}}
+\begin{figure*}
+\centering
+\includegraphics[width=5in]{stages.eps}
+\caption{\red{caption.}}
+\end{figure*}
 
 \section{Technical Background}
 
@@ -147,96 +141,15 @@ We assume that code is well-formed in that a single operation name $\opname$
 is always contained within a transaction. 
 
 
-
-
-\begin{figure}
-\figbox{\footnotesize
-(a) {\bf Atomic Machine Big Step Transaction Rules} $\BigStep$
-$$
-\infer[\text{\sc BSFin}]{
-  (c,\sigma),\OPL \BigStep c,\OPL
-}{\nothing{c}}
-\qquad
-\infer[\text{\sc BSStep}]{
-  (c,\sigma),\OPL_1 \BigStep \sigma'',\OPL_2
-}{
-  \deduce{
-    (c_2,\sigma'),
-    \OPL\cdot[\langle m,\sigma,\sigma' \rangle]
-   \BigStep \sigma'',\OPL_2
- }{
-   \deduce{\OPL_1 \allows \langle m,\sigma,\sigma' \rangle}
-   {\step{c}{m}{c_2}}
- }
-}
-$$
-(b) {\bf Atomic Machine Rules} $\xrightarrow{a}$
-$$
-\infer[\text{\sc AFin}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
-  \As_1 \cdot \As_2, G 
-}{
-  \nothing{c}
-}
-$$
-$$
-\infer[\text{\sc AFork}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
-  \As_1 \cdot (c_2,\sigma) \cdot (c',\sigma) \cdot \As_2, G 
-}{
-  \tstep{c_1}{\fork{c}}{c_2}
-}
-$$
-$$
-\infer[\text{\sc ALocal}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{a}
-  \As_1 \cdot (c',\sigma') \cdot \As_2, G 
-}{
-  \tstep{c}{\local{R}}{c'} & R\ \sigma\ \sigma'
-}
-$$
-$$
-\infer[\text{\sc ATxn}]{ 
-  \As_1 \cdot (c_1,\sigma) \cdot \As_2, G  \xrightarrow{a}
-  \As_1 \cdot (c_2,\sigma') \cdot \As_2, G'
-}{
-  \tstep{c_1}{\tx{c'}}{c_2} &
-  (c',\sigma),G \BigStep \sigma',G'
-}
-$$
-}
-\caption{\label{fig:atomic} Atomic semantics of concurrent threads.}
-\end{figure}
-
-
-\paragraph{Atomic Transition Systems.}
-We next define a simple atomic semantics $\xrightarrow{a}$,
+The atomic semantics $\xrightarrow{a}$,
 in which transactions are executed instantly, without interruption
-from concurrent threads.
-
-The $\xrightarrow{a}$ rules {\sc AFin, AFork, ALocal} showin in 
-Figure~\ref{fig:atomic}(b) are similar to
-their counterparts in $\xrightarrow{u}$.
-%
-However, the {\sc ATxn} rule says that if thread executing code $c_1$ can reduce to a 
-transaction $\tx{c'}$, then the transaction $c'$ is executed
-atomically by the big step rules $\BigStep$ described next.
-
-Figure~\ref{fig:atomic}(a) illustrates the
-big step semantics $\BigStep$, which uses $\stept$ and $\nothing{}$ 
-(rules {\sc BSStep} and {\sc BSFin}, respectively). These rules
-scan through the nondeterminism in $\tx{c}$ to find a next operation
-name $m$ or a path to $\skipt$ denoting the end of the transaction.
-%
-{\sc BSStep} can be taken provided that the operation $\langle m,\sigma,\sigma'\rangle$ is
-permitted and that $(c_2,\sigma')$ can be
-entirely reduced to $(\sigma'',\OPL_2)$.
-%  Note that there a new operation identifier $\opid_1$
-% is introduced. We require $\opid_1$ to be globally unique
-% (formalization of \textsf{fresh} is omitted for lack of space).
-
-%\red{explain bsstep. we go from $\OPL_1$ to $\OPL_2$ .... bsfin
-%  basically copies the $\OPL$ from left of $\Downarrow$ to the right}
+from concurrent threads is given in Appendix~\ref{apx:atomic}.
+Threads in the atomic semantics are represented as a pair
+$(c,\sigma)$ of the code $c$ and a small amount of local
+information $\sigma$ used to model arguments and return values.
 
 
-
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:
