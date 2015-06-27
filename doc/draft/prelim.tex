@@ -2,7 +2,8 @@
 \newcommand\CS{\{c,\sigma\}}
 \newcommand\CpSp{\{c',\sigma'\}}
 \newcommand\numCS[1]{\{c_{#1},\sigma_{#1}\}}
-
+\newcommand\whilebc[2]{\texttt{while}\ #1\ \texttt{do}\ #2}
+\newcommand\whileBC{\whilebc{b}{c}}
 
 % \begin{figure*}
 % \centering
@@ -45,6 +46,13 @@ $$
 \infer{ \nothing{\skipt} }{}
 $$
 \red{do looping fin rule.}
+$$
+\infer{  \step{\whileBC}{m}{c'} }
+      {  \step{c \semit \whileBC}{m}{c'} & \lstack \vDash b }
+\qquad
+\infer{  \nothing{\whileBC} }
+      {  \lstack \nvDash b }
+$$
 }
 \caption{Reduction semantics 
 $\step{c}{m}{c'}$ and $\nothing{c}$
