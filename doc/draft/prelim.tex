@@ -4,24 +4,71 @@
 \newcommand\numCS[1]{\{c_{#1},\sigma_{#1}\}}
 
 
-\begin{figure*}
-\centering
-\includegraphics[width=5in]{stages.eps}
-\caption{\red{caption.}}
-\end{figure*}
+% \begin{figure*}
+% \centering
+% \includegraphics[width=5in]{stages.eps}
+% \caption{\red{caption.}}
+% \end{figure*}
+\begin{figure}
+\figbox{
+$$
+\infer{  \step{c_1 \semit c_2}{m}{c' \semit c_2} }
+      {  \step{c_1}{m}{c'} }
+\hspace{0.07in}
+\infer{  \step{c_1 \semit c_2}{m}{c} }
+      {  \nothing{c_1} & \step{c_2}{m}{c} }
+\hspace{0.07in}
+\infer{  \step{(c)^*}{m}{c'} }
+      {  \step{c \semit (c)^*}{m}{c'} }
+$$
+$$
+\infer{  \step{c_1 \plust c_2}{m}{c} }
+      {  \step{c_1}{m}{c} }
+\qquad
+\infer{  \step{c_1 \plust c_2}{m}{c} }
+      {  \step{c_2}{m}{c} }
+\qquad
+\infer{  \step{m}{m}{\skipt} }{}
+$$
+
+$$
+\infer{  \nothing{c_1 \semit c_2} }
+      {  \nothing{c_1} 
+      &  \nothing{c_2} }
+\qquad
+\infer{  \nothing{c_1 \plust c_2} }
+      {  \nothing{c_1} }
+\qquad
+\infer{  \nothing{c_1 \plust c_2} }
+      {  \nothing{c_2} }
+\qquad
+\infer{ \nothing{\skipt} }{}
+$$
+\red{do looping fin rule.}
+}
+\caption{Reduction semantics 
+$\step{c}{m}{c'}$ and $\nothing{c}$
+for the example language.}
+\end{figure}
 
 \section{Technical Background}
 
-In this section we describe a generic language of transactions and
-define an idealized semantics for concurrent transactions called the
-atomic semantics, in which there are no interleaved effects on the
-shared state. 
+In this section we provide the technical background for our work,
+including preliminary definitions and a brief summary of the \PMPY{}
+model of tarnsactions~\cite{KP:PLDI15}.
+
+\subsection{Preliminaries and atomic semantics}
+
+% We first describe a generic language of transactions and
+% define an idealized semantics for concurrent transactions called the
+% atomic semantics, in which there are no interleaved effects on the
+% shared state. 
 %
-The model preliminaries generalize those provided previously~\cite{PMPY}.
+%The model preliminaries generalize those provided previously~\cite{PMPY}.
 %
-We also define a notion of \emph{good} configurations
-and in the next section we will define how one can warp from a 
-configuraiton that is not good to one that is.
+%We also define a notion of \emph{good} configurations
+%and in the next section we will define how one can warp from a 
+%configuraiton that is not good to one that is.
 
 \paragraph{Operations and States.}
 We assume a set $M$ of method calls or operations (\eg\
@@ -104,12 +151,18 @@ unobservable state differences are also permitted.
 
 \paragraph{Language.}
 
-Threads execute code $c$ from some programming language that
-includes thread forking, transactions $\tx{c}$,
-method names such as $m$, and a \skipt\ statement. As done
-elsewhere~\cite{pmpy}, we abstract away the programming
-  language with a few semantic functions: \red{update this with pldi
-    camera ready}
+For the sake of presentation, let us
+say that the code is given by the following language 
+\[ \begin{array}{rcl}
+  c &::=& c_1\plust c_2 \MOR c_1 \semit c_2
+      \MOR (c)^* \MOR \skipt \MOR \tx{c} \MOR \opname
+\end{array} \]
+This grammar additionally consists of nondeterministic choice, sequential
+composition, and nondeterministic looping.
+%,  \skipt, a transaction $\tx{c}$, and operations denoted $\opname$.
+As done elsewhere~\cite{KP:PLDI15}, we abstract away the programming
+language with a few semantic functions: \red{update this with pldi
+  camera ready}
 %
 \begin{description}
 \item[$\step{c}{m}{c'}$:] Within a transaction, code $c$ can be reduced to the pair
@@ -139,6 +192,22 @@ transaction.
 %
 We assume that code is well-formed in that a single operation name $\opname$ 
 is always contained within a transaction. 
+
+
+The rules for $\step{c}{m}{c'}$ and $\nothing{c}$ are given in
+Figure~\ref{fig:stepfin}.
+\red{explain}
+For example, if 
+$
+c \;=\; \tx{(\skipt \semit (c_1 \plust (m \plust n)) \semit c_2)}
+$,
+then one path through $c$ reaches method $n$ with a continuation of $c_2$. Hence,
+$ \step{c}{n}{c_2}$.
+
+
+% Threads execute code $c$ from some programming language that
+% includes thread forking, transactions $\tx{c}$,
+% method names such as $m$, and a \skipt\ statement.
 
 
 The atomic semantics $\xrightarrow{a}$,

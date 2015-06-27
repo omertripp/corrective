@@ -1,0 +1,142 @@
+
+\paragraph{Unconstrained transition system.}
+
+We begin with a generic transition system $\xrightarrow{u}$ in which threads may
+interleave their effects however they please:
+%{\bf Unconstrained Machine Rules} $\xrightarrow{u}$
+$$
+\infer[\text{\sc UFin}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As_1 \cdot \As_2, G 
+}{
+  \nothing{c}
+}
+$$
+$$
+\infer[\text{\sc UFork}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As_1 \cdot (c_2,\sigma) \cdot (c',\sigma) \cdot \As_2, G 
+}{
+  \tstep{c_1}{\fork{c}}{c_2}
+}
+$$
+$$
+\infer[\text{\sc ULocal}]{ 
+  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As_1 \cdot (c',\sigma') \cdot \As_2, G 
+}{
+  \tstep{c}{\local{R}}{c'} & R\ \sigma\ \sigma'
+}
+$$
+$$
+\infer[\text{\sc UTxn}]{ 
+  \As_1 \cdot (\tx{c_1},\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As_1 \cdot (\tx{c_2},\sigma') \cdot \As_2, G\cdot \langle m,\sigma,\sigma' \rangle
+}{
+  \step{c_1}{m}{c_2} &
+  G \allows \langle m,\sigma,\sigma' \rangle
+}
+$$
+The semantics is a relation
+$\xrightarrow{u}$ over pairs consisting of a list of concurrent
+threads $\As$ and a shared state $\OPL$. 
+A single thread $(c,\sigma)\in\As$ is a code $c$ and local state $\sigma$. 
+
+The unconstrained machine can take a {\sc UFin} step when there is a thread
+$(c,\sigma)$ that can complete, \ie~$\nothing{c}$.
+%
+The {\sc UFork} rule allows a new thread
+$(c',\sigma)$ to be forked from thread $(c,\sigma)$.
+%
+The {\sc ULocal} rule involves manipulating the thread-local state
+$\sigma$ to $\sigma'$.
+%
+Finally, the {\sc UTxn} rule allows a thread executing transaction
+code $\tx{c_1}$ to take a single step to $c_2$, applying the effects
+of $m$ directly to the shared log $G$.
+
+%\subsection{Serializable Transition Systems}
+
+\paragraph{Corrective Warping and Committing.}
+A simple version of warping (which we have implemented in
+Section~\ref{sec:impl}) builds on an unconstrained transition system
+$\xrightarrow{u}$ by adding a special {\sc WarpCmt} rule. This rule
+attempts to perform a warp---
+replacing the current state with state that would have been reached in
+an atomic interleaving and then committing---or else, aborts. This is
+already more expressive than all existing notions of transactions
+which, in the face of an inconsistent state perform a (potentially
+partial) abort.
+
+\red{add the fact that each thread remembers the $\Ts,G$ where they began}
+
+$$
+\infer[\text{\sc WarpCmt}]{ 
+  \As_1 \cdot ((\tx{c_1},\red{c_2}),\sigma) \cdot \As_2, G  \xrightarrow{u}
+  \As'_1 \cdot (c'_2,\sigma') \cdot \As'_2, G'
+}{
+  \nothing{c_1} &
+   \text{\red{Warp}}(  \As_1 \cdot (c_2,\sigma) \cdot \As_2, G,
+  \As'_1 \cdot (c'_2,\sigma') \cdot \As'_2, G')
+}
+$$
+
+
+\red{how to jump to an atomic state? you haven't committed yet.}
+
+\red{reference state issue.}
+
+\red{conditions on warping - consistency.}
+
+
+
+
+% \red{\bf ALL THIS MAY BE DEAD}
+
+% \begin{definition}[Serializable transition system]
+% For all $\Ts,\OPL$, we say that a fragment 
+% $\xrightarrow{ser}$ of transition system $\xrightarrow{}$ is
+% serializable provided that 
+% $\xrightarrow{ser}$ simulates $\xrightarrow{a}$.
+% \end{definition}
+
+% \red{explain what simulates means}
+
+% As previously shown, the Push/Pull transition system is such a
+% serializable transition system~\cite{PMPY}.
+
+% \begin{definition}[Good configuration]
+% A configuration $\Ts,\OPL$ is \emph{good} provided that it is reachable in
+% some serializable transition system $\xrightarrow{ser}$
+% \end{definition}
+
+
+% \newcommand\rc[2]{\textsf{rc}(#1,#2)}
+% \begin{definition}[Reference configuration]
+% For a given transition system with initial configuration $\Ts_0,G_0$,
+% we define a \emph{reference configuration}, denoted
+% $\rc{\Ts,G}$ to be given by the fixpoint
+% $$
+% \infer{\rc{\Ts_0}{G}}{}
+% \qquad
+% \infer{\rc{\Ts'}{G''}}{
+%    \rc{\Ts}{G}
+% &  \Ts,G \xrightarrow{ser}^{*} \Ts',G'
+% &  G'' \opeq G'
+% }
+% $$
+% \end{definition}
+
+% \paragraph{Warping correctness.} The goal of warping is simple. For a reference
+% configuration $\Ts_0,G_0$, when we have 
+% $\Ts_0,G_0 \xrightarrow{u}^{*} \Ts,G$, we wish to
+% \[ \begin{array}{rl}
+%    \text{Find } \Ts',G'' \text{ such that}&
+%       \Ts_0,G_0 \xrightarrow{s} \Ts',G'\\
+%   \text{and}&G' \opeq G''
+% \end{array} \]
+
+% \paragraph{Warping utility.}
+% In particular, we would like to find a $\Ts',G''$ that can be 
+% \emph{easily computed} from $\Ts,G$.
+

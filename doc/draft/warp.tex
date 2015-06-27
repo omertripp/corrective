@@ -1,3 +1,5 @@
+
+
 \section{Warping}
 \label{sect:warping}
 
@@ -7,160 +9,91 @@ starting again from the beginning, it may be possible to
 \emph{correct} the shared/local state directly by directly
 modifying the state. Thus, the program continues as if it had not
 gone down the bad path to the inconsistent state.
-
-We now formalize a simple version where, from an inconsistent state,
-the system warps to a state that was reachable in a serial
-interleaving. We later show this can be easily generalized to allow
-warping to more subtle states (such as those described by the
-Push/Pull model~\cite{}). These \emph{super}-serial (yet still
-serializable) allow for more possible destinations, making it more
-likely that a destination will be available when an inconsistent state
-is reached.
+In this way we exploit a large design space, predicted by the \PMPY{}
+model, but yet unexplored.
 
 
-\paragraph{Unconstrained transition system.}
 
-We begin with a generic transition system $\xrightarrow{u}$ in which threads may
-interleave their effects however they please:
-%{\bf Unconstrained Machine Rules} $\xrightarrow{u}$
-$$
-\infer[\text{\sc UFin}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
-  \As_1 \cdot \As_2, G 
-}{
-  \nothing{c}
-}
-$$
-$$
-\infer[\text{\sc UFork}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
-  \As_1 \cdot (c_2,\sigma) \cdot (c',\sigma) \cdot \As_2, G 
-}{
-  \tstep{c_1}{\fork{c}}{c_2}
-}
-$$
-$$
-\infer[\text{\sc ULocal}]{ 
-  \As_1 \cdot (c,\sigma) \cdot \As_2, G  \xrightarrow{u}
-  \As_1 \cdot (c',\sigma') \cdot \As_2, G 
-}{
-  \tstep{c}{\local{R}}{c'} & R\ \sigma\ \sigma'
-}
-$$
-$$
-\infer[\text{\sc UTxn}]{ 
-  \As_1 \cdot (\tx{c_1},\sigma) \cdot \As_2, G  \xrightarrow{u}
-  \As_1 \cdot (\tx{c_2},\sigma') \cdot \As_2, G\cdot \langle m,\sigma,\sigma' \rangle
-}{
-  \step{c_1}{m}{c_2} &
-  G \allows \langle m,\sigma,\sigma' \rangle
-}
-$$
-The semantics is a relation
-$\xrightarrow{u}$ over pairs consisting of a list of concurrent
-threads $\As$ and a shared state $\OPL$. 
-A single thread $(c,\sigma)\in\As$ is a code $c$ and local state $\sigma$. 
 
-The unconstrained machine can take a {\sc UFin} step when there is a thread
-$(c,\sigma)$ that can complete, \ie~$\nothing{c}$.
+
+A thread
+$(c\times \lstack \times L)$ consists of code $c$, some local stack
+$\lstack$, and a local log $L$. When executing a transaction, the
+code is of the form $\tx{c}$.
+
+A given code $c$ induces a tree, with the root node labeled $c$. For
+each $m$ and $c'$ such that $\step{c}{m}{c'}$, we create a child node
+labled $c'$ and label the arc as $m$. For example,
+\begin{center}
+\includegraphics[width=2.8in]{stages0.eps}
+\end{center}
+If, for a node labeled $c$, $\nothing{c}$ holds, then that note shall
+be a leaf.
+
+The main idea of corrective synchronization is that transactions, in
+instances of conflict, change their behavior to another possible
+\red{more...}
+
+Let us say, for example, that the example transaction has already
+executed the following path:
+\begin{itemize*}
+\item From $(c_1,\lstack,[])$, $\step{c_1}{m}{c_2}$ holds, so \APPLY{}$(m)$.
+\item From $(c_2,\lstack',[m])$, $\step{c_2}{n}{c_4}$ holds, so \APPLY{}$(n)$.
+\item Ending at $(c_4,\lstack'',[m,n])$
+\end{itemize*}
+For now, let us assume for simplicity that the transaction has not
+\PUSH{}ed any of these methods.
+
+At this stage, let us say that another transaction has committed, and
+the newly committed operations conflict with both $p$ and $r$. At this
+point the current transaction is doomed and, in standard transactional
+memory implementations, has no choice by to abort and roll back to the
+original code $c_1$. 
+
+We observe that, in some cases, it may be more efficient to avoid the
+process of aborting and restarting and instead, \emph{correcting}
+behavior by transitioning directly to an alternate location on the
+transaction tree, where the outlook is better. Consider this diagram:
+\begin{center}
+\includegraphics[width=2.8in]{stages1.eps}
+\end{center}
+Here the transaction has 
+
+correction of $[n^{-1};m^{-1};t;u]$
+
+\paragraph{Adding pessimistic behavior.}
 %
-The {\sc UFork} rule allows a new thread
-$(c',\sigma)$ to be forked from thread $(c,\sigma)$.
+The description thus far has been purely optimistic: a transaction
+does not share its effects until it commits. A transaction may
+\PUSH{} some of its effects to the shared log. However, this
+constrains the transaction's warp destinations. 
 %
-The {\sc ULocal} rule involves manipulating the thread-local state
-$\sigma$ to $\sigma'$.
+If, in the running example, operation $m$ has been \PUSH{}ed, then it
+is not possible for the transaction to warp to any node in the right
+subtree of $c_1$. The transaction may, however, warp to node $c_4$,
+applying a correction of $[n^{-1};q]$.
 %
-Finally, the {\sc UTxn} rule allows a thread executing transaction
-code $\tx{c_1}$ to take a single step to $c_2$, applying the effects
-of $m$ directly to the shared log $G$.
+It is only possible for the transaction to warp to the right subtree
+of $c_1$ if it first rolls backward, \UNPUSH{}ing $m$. This may
+require global coordination if another transaction has already \PULL{}ed $m$.
 
-%\subsection{Serializable Transition Systems}
+\begin{theorem} The transition system is serializable.
+\begin{proof}Via simulation with the \PMPY{} model~\cite{KP:PLDI15}.
+\end{proof}
+\end{theorem}
 
-\paragraph{Corrective Warping and Committing.}
-A simple version of warping (which we have implemented in
-Section~\ref{sec:impl}) builds on an unconstrained transition system
-$\xrightarrow{u}$ by adding a special {\sc WarpCmt} rule. This rule
-attempts to perform a warp---
-replacing the current state with state that would have been reached in
-an atomic interleaving and then committing---or else, aborts. This is
-already more expressive than all existing notions of transactions
-which, in the face of an inconsistent state perform a (potentially
-partial) abort.
+Being able to perform these warp operations depends crucially on a
+few factors that we will explore in the rest of this paper:
+\begin{itemize*}
+\item Detecting when conflict is inevitable.
+\item Detecting which warp destinations are possible and conflict-free.
+\item How to correct: modifing the current local state, stack and
+  program counter so that it
+  is compatible with that alternate destination
+\end{itemize*}
+We address these issues with a combination of static and dynamic analysis.
 
-\red{add the fact that each thread remembers the $\Ts,G$ where they began}
-
-$$
-\infer[\text{\sc WarpCmt}]{ 
-  \As_1 \cdot ((\tx{c_1},\red{c_2}),\sigma) \cdot \As_2, G  \xrightarrow{u}
-  \As'_1 \cdot (c'_2,\sigma') \cdot \As'_2, G'
-}{
-  \nothing{c_1} &
-   \text{\red{Warp}}(  \As_1 \cdot (c_2,\sigma) \cdot \As_2, G,
-  \As'_1 \cdot (c'_2,\sigma') \cdot \As'_2, G')
-}
-$$
-
-
-\red{how to jump to an atomic state? you haven't committed yet.}
-
-\red{reference state issue.}
-
-\red{conditions on warping - consistency.}
-
-
-
-
-% \red{\bf ALL THIS MAY BE DEAD}
-
-% \begin{definition}[Serializable transition system]
-% For all $\Ts,\OPL$, we say that a fragment 
-% $\xrightarrow{ser}$ of transition system $\xrightarrow{}$ is
-% serializable provided that 
-% $\xrightarrow{ser}$ simulates $\xrightarrow{a}$.
-% \end{definition}
-
-% \red{explain what simulates means}
-
-% As previously shown, the Push/Pull transition system is such a
-% serializable transition system~\cite{PMPY}.
-
-% \begin{definition}[Good configuration]
-% A configuration $\Ts,\OPL$ is \emph{good} provided that it is reachable in
-% some serializable transition system $\xrightarrow{ser}$
-% \end{definition}
-
-
-% \newcommand\rc[2]{\textsf{rc}(#1,#2)}
-% \begin{definition}[Reference configuration]
-% For a given transition system with initial configuration $\Ts_0,G_0$,
-% we define a \emph{reference configuration}, denoted
-% $\rc{\Ts,G}$ to be given by the fixpoint
-% $$
-% \infer{\rc{\Ts_0}{G}}{}
-% \qquad
-% \infer{\rc{\Ts'}{G''}}{
-%    \rc{\Ts}{G}
-% &  \Ts,G \xrightarrow{ser}^{*} \Ts',G'
-% &  G'' \opeq G'
-% }
-% $$
-% \end{definition}
-
-% \paragraph{Warping correctness.} The goal of warping is simple. For a reference
-% configuration $\Ts_0,G_0$, when we have 
-% $\Ts_0,G_0 \xrightarrow{u}^{*} \Ts,G$, we wish to
-% \[ \begin{array}{rl}
-%    \text{Find } \Ts',G'' \text{ such that}&
-%       \Ts_0,G_0 \xrightarrow{s} \Ts',G'\\
-%   \text{and}&G' \opeq G''
-% \end{array} \]
-
-% \paragraph{Warping utility.}
-% In particular, we would like to find a $\Ts',G''$ that can be 
-% \emph{easily computed} from $\Ts,G$.
-
-
-
+\red{what about side effects?}
 
 %%% Local Variables: 
 %%% mode: latex

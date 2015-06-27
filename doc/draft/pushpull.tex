@@ -9,18 +9,17 @@
 We briefly summarize the \PUSH{}/\PULL{} model~\cite{KP:PLDI15}. This model consists of
 seven rules which we will use for both intuitive descriptions of the
 Warping protocol, and in the formal proof of serializability.
-The \PMPY{} model is a log-based transition relation
+The \PMPY{} model involves rule that characterize how a given transaction moves forward/backward
+locally, how it may share its effects into the shared view (\PUSH),
+and bring the effects of other transactions into its local view
+(\PULL). 
+The  model is a log-based transition relation
 $\Ts,G \pmpyreduce \Ts', G'$ that reduces
 a list of threads $\Ts : \textsf{list } (c\times \lstack
 \times L)$ and a global log $G$ to $\Ts',G'$.
 %
 There is a per-thread local log $L$ and a global log $G$.
-
-
-The rules characterize how a given transaction moves forward/backward
-locally, how it may share its effects into the shared view (\PUSH),
-and bring the effects of other transactions into its local view
-(\PULL). The rules are:
+The rules are:
 \begin{itemize}
 \item \APPLY: A thread reduces its (nondeterminisitc) code down to a
   next-reachable operation $\op$ (with continuation code). This
