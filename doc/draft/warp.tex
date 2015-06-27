@@ -12,43 +12,47 @@ gone down the bad path to the inconsistent state.
 In this way we exploit a large design space, predicted by the \PMPY{}
 model, but yet unexplored.
 
-
-
-
-
-A thread
-$(c\times \lstack \times L)$ consists of code $c$, some local stack
-$\lstack$, and a local log $L$. When executing a transaction, the
-code is of the form $\tx{c}$.
-
+A thread $(c\times \lstack \times L)$ consists of code $c$, some local
+stack $\lstack$ (for arguments and return values), and a local log
+$L$. When executing a transaction, the code is of the form $\tx{c}$.
+%
 A given code $c$ induces a tree, with the root node labeled $c$. For
 each $m$ and $c'$ such that $\step{c}{m}{c'}$, we create a child node
-labled $c'$ and label the arc as $m$. For example,
+labled $c'$ and label the arc as $m$. If, for a node labeled $c$,
+$\nothing{c}$ holds, then that note shall be a leaf.  We will
+illustrate warping with the following example tree:
 \begin{center}
 \includegraphics[width=2.8in]{stages0.eps}
 \end{center}
-If, for a node labeled $c$, $\nothing{c}$ holds, then that note shall
-be a leaf.
 
+\paragraph{Warping.}
 The main idea of corrective synchronization is that transactions, in
 instances of conflict, change their behavior to another possible
 \red{more...}
 
 Let us say, for example, that the example transaction has already
 executed the following path:
-\begin{itemize*}
-\item From $(c_1,\lstack,[])$, $\step{c_1}{m}{c_2}$ holds, so \APPLY{}$(m)$.
-\item From $(c_2,\lstack',[m])$, $\step{c_2}{n}{c_4}$ holds, so \APPLY{}$(n)$.
-\item Ending at $(c_4,\lstack'',[m,n])$
-\end{itemize*}
+\[\begin{array}{cl}
+ (c_1,\lstack,[])\\
+  \downarrow & \text{\APPLY}: \step{c_1}{m}{c_2} \text{ and } L'=L\cdot[m]\\
+ (c_2,\lstack',[m])\\
+  \downarrow & \text{\APPLY}: \step{c_2}{n}{c_4} \text{ and } L'=L\cdot[n]\\
+ (c_4,\lstack'',[m,n])\\
+\end{array}\]
+% \begin{itemize*}
+% \item From $(c_1,\lstack,[])$, $\step{c_1}{m}{c_2}$ holds, so \APPLY{}$(m)$.
+% \item From $(c_2,\lstack',[m])$, $\step{c_2}{n}{c_4}$ holds, so \APPLY{}$(n)$.
+% \item Ending at $(c_4,\lstack'',[m,n])$
+% \end{itemize*}
 For now, let us assume for simplicity that the transaction has not
 \PUSH{}ed any of these methods.
 
-At this stage, let us say that another transaction has committed, and
-the newly committed operations conflict with both $p$ and $r$. At this
-point the current transaction is doomed and, in standard transactional
-memory implementations, has no choice by to abort and roll back to the
-original code $c_1$. 
+At this stage, let us say that another transaction has committed. This
+event may introduce conflict, either with one of the methods already
+performed ($m$ or $n$) or with some/all of the methods in the subtree
+of $c_4$: $p$ and $r$. When conflict is inevitable, standard
+transactional memory implementations have no choice but to abort the
+transaction and roll back to the original code $c_1$.
 
 We observe that, in some cases, it may be more efficient to avoid the
 process of aborting and restarting and instead, \emph{correcting}
@@ -59,7 +63,11 @@ transaction tree, where the outlook is better. Consider this diagram:
 \end{center}
 Here the transaction has 
 
-correction of $[n^{-1};m^{-1};t;u]$
+\paragraph{Correction.}
+
+code\\
+local state\\
+log correction of $[n^{-1};m^{-1};t;u]$
 
 \paragraph{Adding pessimistic behavior.}
 %
