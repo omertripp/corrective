@@ -1,4 +1,4 @@
-\documentclass{sigplanconf}
+\documentclass[preprint,nocopyrightspace]{sigplanconf}
 
 \usepackage{caption}
 \DeclareCaptionType{copyrightbox}
@@ -124,7 +124,15 @@
 %\authorinfo{omitted for double-blind reviewing}{}{}
 \maketitle
 
-
+\begin{abstract}
+	Concurrency control is a challenging problem. While some thread interleavings are admissible, there are certain interleaving scenarios that lead to inadmissible program states. Broadly speaking, there are two main paradigms for avoiding such situations: \emph{pessimistic synchronization} reduces parallelism to ensure absence of interference between threads, while \emph{optimistic synchronization} detects when illegal interleavings have occurred and rolls execution (of one or more threads) back to an admissible point.
+	
+	We propose a novel synchronization paradigm. In our approach, dubbed \emph{corrective synchronization}, the correctness of multithreaded execution is enforced neither by reducing parallelism nor by rolling back illegal thread interleavings, but by correcting the inadmissible state after the fact. The system automatically compensates, if necessary, for the effects of inadmissible interleavings by modifying the program state as a transaction completes while accounting for the behavior of concurrent transactions. We have proven that corrective synchronization is serializable.
+	
+	In practice, corrective synchronization poses two new challenges, which we take a first step in addressing in this paper: First, for the question of how to identify the admissible states, we apply static analysis to a variant of the program that is serializable by construction. Second, for detection and correction of inadmissible states, we have developed a runtime system that performs both of these steps efficiently assuming the shared state is encoded as one or more associative mappings.
+	
+	Finally, we present an implementation of our approach for Java. In our experimental evaluation, we compare corrective synchronization with two mainstream techniques: a lock-based approach boosted with abstract {\sf Map} semantics as well as a standard software transactional memory (STM). Our experimental evaluation on several real-world benchmarks indicates x2 speedup improvement compared to these techniques. Further, our technique incurs negligible overhead as compared to the original execution.
+\end{abstract}
 
 \input{introduction}
 
