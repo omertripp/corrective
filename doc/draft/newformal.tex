@@ -29,14 +29,8 @@ $\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrb
 $\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to \langle t, {\tt warp}, (sh, tl, g, l)\rangle}
 {\textrm{if there is a conflict}}$\\
 \\
-$\infer{\langle t, {\tt warp}, (sh, tl, g, l)\rangle \to (sh', tl', g', l')}
-{\textrm{if the warping system produces } (sh', tl', g', l')}$\\
-\\
-$\infer{\langle t, {\tt warp}, (sh, tl, g, l)\rangle \to \langle t, {\tt abort}, (sh, tl, g, l)\rangle}
-{\textrm{if the system is unable to warp}}$\\
-\\
-$\infer{\langle t, {\tt abort}, (sh, tl, g, l)\rangle \to (sh, tl \setminus [tl \mapsto tl(t)], g, l \setminus [l \mapsto l(t)])}
-{}$\\
+$\infer{\langle t, {\tt warp}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto s], g, l[t \mapsto i])}
+{\textrm{if the warping system produces state } s \textrm{ and  log } i}$\\
 \\
 $\infer{\langle t, {\tt end}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrbracket(sh), tl \setminus [t \mapsto tl(t)], g.l(t), l\setminus [t \mapsto l(t)])}
 {}$\\
