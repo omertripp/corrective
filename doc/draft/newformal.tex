@@ -48,8 +48,20 @@ The events are defined as follows:
 \\
 {\sf end}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T \setminus \{ t \}, \mu \setminus [t \mapsto \mu(t)], \sigma, L)}{t \in T, \mu(t) = ({\sf skip}, \_, \epsilon)}$ \\
 \\
-{\sf warp}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L'_t)}{
-\exists (c'_t,\sigma'_t,L'_t).\ {\sf ref}\ t = (T_0,\mu_0,\sigma_0,L_0) \leadsto (T,\mu[t \mapsto (c'_t,\sigma'_t,L'_t)],\sigma,L)}$ \\
+{\sf warp}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L'_t)], \sigma, L)}{
+\begin{array}{c}
+\exists (c'_t,\sigma'_t,L'_t).\\
+{\sf ref}\ t = (T_0,\mu_0,\sigma_0,L_0) \leadsto (T,\mu [t \mapsto (c'_t, \sigma'_t, L'_t) ], \sigma, L)\\
+\end{array}
+}
+$ \\
+%\\
+%{\sf warp}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
+%	\exists (T_0,\mu_0,\sigma_0,L_0).
+%	{\sf ref}\ t = (T_0,\mu_0,\sigma_0,L_0) \leadsto (T,\mu', \sigma_n, L)
+%	}
+%$
+%\\
 \\
 \end{tabular}
 \\
