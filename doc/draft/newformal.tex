@@ -1,5 +1,5 @@
 \section{Transaction Semantics}
-
+\label{sec:concretesemantics}
 \subsection{Notation}
 
 In our description of the transition system, we utilize the following semantic domains:
@@ -94,33 +94,33 @@ $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 	\end{proof}
 \end{theorem}
 
-\subsection{Other Stuff}
-
-Events might be {\tt start}, {\tt read}, {\tt write}, {\tt warp}, {\tt commit}, {\tt abort}, and {\tt end}. Figure \ref{fi:semantics} formalizes the concrete semantics, where $a.b$ denotes the concatenation of sequence $a$ and sequence $b$, and $p_t$ represents the sequence of actions transaction $t$ performs.
-
-\begin{figure*}
-\begin{center}
-\begin{tabular}{c}
-\\
-$\infer{\langle t, {\tt start}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto (p_t, sh)], g, l[t \mapsto \epsilon])}{}$\\
-\\
-$\infer{\langle t, {\tt read}, (sh, tl, g, l)\rangle \to (sh, tl, g, l[t \mapsto l(t).{\tt read}])}{}$\\
-\\
-$\infer{\langle t, {\tt write}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto \llbracket {\tt write}\rrbracket](tl(t)), g, l[t \mapsto l(t).{\tt write}])}{}$\\
-\\
-$\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrbracket(sh), tl, g.l(t), l\setminus [t \mapsto l(t)])}
-{\textrm{if there is no conflict}}$\\
-\\
-$\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to \langle t, {\tt warp}, (sh, tl, g, l)\rangle}
-{\textrm{if there is a conflict}}$\\
-\\
-$\infer{\langle t, {\tt warp}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto s], g, l[t \mapsto i])}
-{\textrm{if the warping system produces state } s \textrm{ and  log } i}$\\
-\\
-$\infer{\langle t, {\tt end}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrbracket(sh), tl \setminus [t \mapsto tl(t)], g.l(t), l\setminus [t \mapsto l(t)])}
-{}$\\
-\end{tabular}
-\caption{Concrete semantics}
-\label{fi:semantics}
-\end{center}
-\end{figure*}
+%\subsection{Other Stuff}
+%
+%Events might be {\tt start}, {\tt read}, {\tt write}, {\tt warp}, {\tt commit}, {\tt abort}, and {\tt end}. Figure \ref{fi:semantics} formalizes the concrete semantics, where $a.b$ denotes the concatenation of sequence $a$ and sequence $b$, and $p_t$ represents the sequence of actions transaction $t$ performs.
+%
+%\begin{figure*}
+%\begin{center}
+%\begin{tabular}{c}
+%\\
+%$\infer{\langle t, {\tt start}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto (p_t, sh)], g, l[t \mapsto \epsilon])}{}$\\
+%\\
+%$\infer{\langle t, {\tt read}, (sh, tl, g, l)\rangle \to (sh, tl, g, l[t \mapsto l(t).{\tt read}])}{}$\\
+%\\
+%$\infer{\langle t, {\tt write}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto \llbracket {\tt write}\rrbracket](tl(t)), g, l[t \mapsto l(t).{\tt write}])}{}$\\
+%\\
+%$\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrbracket(sh), tl, g.l(t), l\setminus [t \mapsto l(t)])}
+%{\textrm{if there is no conflict}}$\\
+%\\
+%$\infer{\langle t, {\tt commit}, (sh, tl, g, l)\rangle \to \langle t, {\tt warp}, (sh, tl, g, l)\rangle}
+%{\textrm{if there is a conflict}}$\\
+%\\
+%$\infer{\langle t, {\tt warp}, (sh, tl, g, l)\rangle \to (sh, tl[t \mapsto s], g, l[t \mapsto i])}
+%{\textrm{if the warping system produces state } s \textrm{ and  log } i}$\\
+%\\
+%$\infer{\langle t, {\tt end}, (sh, tl, g, l)\rangle \to (\llbracket l(t) \rrbracket(sh), tl \setminus [t \mapsto tl(t)], g.l(t), l\setminus [t \mapsto l(t)])}
+%{}$\\
+%\end{tabular}
+%\caption{Concrete semantics}
+%\label{fi:semantics}
+%\end{center}
+%\end{figure*}

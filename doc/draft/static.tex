@@ -10,7 +10,12 @@
 \newcommand{\iseqclass}{\set{eqClass}}
 \newcommand{\warpdestination}{\set{warpDest}}
 
+\section{Instance}
+
+We instantiated the theoretical framework introduced in Section \ref{sec:concretesemantics} to a specific system. In particular, our system is made by $n$ transactions ($T=\{t_1, ..., t_n\}$) and we assume that they all start their execution together at the beginning, and they commit and finish their execution together at the end. Therefore, we assume that each transaction performs only one commit.
+
 \section{Static Computation of Warp Destinations}
+
 
 \subsection{Abstract Transaction Semantics}
 \ael{T} is the set of abstract transaction identifiers. An abstract transaction identifier can represent one or many concrete transactions in T. $\gamma_\ael{T} : \ael{T} \to T$ maps abstract transaction identifiers 
@@ -61,30 +66,30 @@ m'=
 \\
 \csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
 \\
-\csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{null})\\
+\csemantics{S}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{null})\\
 \\
-\csemantics{S}{\statement{if(b)\ s_1;\ else\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e, m)}} \dot{\cup} \csemantics{S}{\statement{s_2}, \csemantics{B}{\statement{! b}, (e, m)}} & \statement{(if)}\\
-\\
-\csemantics{S}{\statement{while(b)\ s_1;}, (e, m)} = \csemantics{B}{\statement{! b}, (e_1, m_1)} : 
-(e_1, m_1) = \mathit{lfp}^{\dot{\subseteq}}_{\bot} \lambda (e', m') . (e, m) \dot{\cup} \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e', m')}}& \statement{(while)}\\
-\\
-\csemantics{S}{\statement{s_1;\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_2}, \csemantics{S}{\statement{s_1}, (e, m)}} & \statement{(cnc)}\\
-\\
-\csemantics{B}{\statement{x==null}, (e, m)} = \left\{
+%\csemantics{S}{\statement{if(b)\ s_1;\ else\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e, m)}} \dot{\cup} \csemantics{S}{\statement{s_2}, \csemantics{B}{\statement{! b}, (e, m)}} & \statement{(if)}\\
+%\\
+%\csemantics{S}{\statement{while(b)\ s_1;}, (e, m)} = \csemantics{B}{\statement{! b}, (e_1, m_1)} : 
+%(e_1, m_1) = \mathit{lfp}^{\dot{\subseteq}}_{\bot} \lambda (e', m') . (e, m) \dot{\cup} \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e', m')}}& \statement{(while)}\\
+%\\
+%\csemantics{S}{\statement{s_1;\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_2}, \csemantics{S}{\statement{s_1}, (e, m)}} & \statement{(cnc)}\\
+%\\
+\csemantics{S}{\statement{assert(x==null)}, (e, m)} = \left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto \{\statement{null}\}], m) & \textrm{if } \statement{null} \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{null})\\
 \\
-\csemantics{B}{\statement{!x==null}, (e, m)} = \left\{
+\csemantics{S}{\statement{assert(x!=null)}, (e, m)} = \left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto e(\statement{x}) \setminus \{\statement{null}\}], m) & \textrm{if } \exists n \in \heapnode : n \neq \statement{null} \land n \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{!null})\\
 \\
-\csemantics{B}{\statement{m.containsKey(k)}, (e, m)} = \left\{
+\csemantics{S}{\statement{assert(m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
 (e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
@@ -92,7 +97,7 @@ m'=
 \end{array}
 \right. & (\mathtt{cntK})\\
 \\
-\csemantics{B}{\statement{! m.containsKey(k)}, (e, m)} = \left\{
+\csemantics{S}{\statement{assert(!m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
 (e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land \statement{null} \in m(n)\\
