@@ -1,7 +1,7 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.14)  25 JUN 2015 15:57
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=latex 2014.3.19)  9 JUL 2015 15:43
 entering extended mode
  %&-line parsing enabled.
-**paper.tex
+**paper.tex -interaction=errorstopmode
 (./paper.tex
 LaTeX2e <2009/09/24>
 Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
@@ -187,11 +187,10 @@ Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 (/etc/texmf/tex/latex/config/graphics.cfg
 File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
 )
-Package graphics Info: Driver file: pdftex.def on input line 91.
+Package graphics Info: Driver file: dvips.def on input line 91.
 
-(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
-File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
-\Gread@gobject=\count107
+(/usr/share/texmf-texlive/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
 ))
 \Gin@req@height=\dimen119
 \Gin@req@width=\dimen120
@@ -239,16 +238,9 @@ Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 )
 
-Package epstopdf Warning: Shell escape feature is not enabled.
+Package epstopdf Warning: Other drivers than `pdftex.def' are not supported.
 
-Package grfext Info: Graphics extension search list:
-(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
-G,.JBIG2,.JB2,.eps]
-(grfext)             \AppendGraphicsExtensions on input line 433.
-(/usr/share/texmf-texlive/tex/latex/latexconfig/epstopdf-sys.cfg
-File: epstopdf-sys.cfg 2009/10/26 v1.1 Configuration of epstopdf for TeX Live
-)))
-(/usr/share/texmf-texlive/tex/latex/mnsymbol/MnSymbol.sty
+)) (/usr/share/texmf-texlive/tex/latex/mnsymbol/MnSymbol.sty
 Package: MnSymbol 2007/01/21 v1.4 support for the MnSymbol font
 
 (/usr/share/texmf-texlive/tex/latex/base/textcomp.sty
@@ -409,7 +401,7 @@ Package: epsfig 1999/02/16 v1.7a (e)psfig emulation (SPQR)
 (/usr/share/texmf-texlive/tex/latex/wrapfig/wrapfig.sty
 \wrapoverhang=\dimen123
 \WF@size=\dimen124
-\c@WF@wrappedlines=\count108
+\c@WF@wrappedlines=\count107
 \WF@box=\box29
 \WF@everypar=\toks30
 Package: wrapfig 2003/01/31  v 3.6
@@ -420,12 +412,15 @@ Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 (/etc/texmf/tex/latex/config/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: pdftex.def on input line 130.
-) (./program.sty
+Package color Info: Driver file: dvips.def on input line 130.
+
+(/usr/share/texmf-texlive/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+)) (./program.sty
 Package: program 1998/07/30 1.0 Source program environment for LaTeX
-\c@programline=\count109
-\c@programlineskip=\count110
-\c@programid=\count111
+\c@programline=\count108
+\c@programlineskip=\count109
+\c@programid=\count110
 )
 (/usr/share/texmf-texlive/tex/latex/multirow/multirow.sty
 \bigstrutjot=\dimen125
@@ -436,7 +431,7 @@ Package: rotating 2009/03/28 v2.16a rotated objects in LaTeX
 (/usr/share/texmf-texlive/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
-\c@r@tfl@t=\count112
+\c@r@tfl@t=\count111
 \rotFPtop=\skip61
 \rotFPbot=\skip62
 \rot@float@box=\box30
@@ -444,17 +439,17 @@ Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
 (/usr/share/texmf-texlive/tex/latex/subfig/subfig.sty
 Package: subfig 2005/06/28 ver: 1.3 subfig package
-\c@KVtest=\count113
+\c@KVtest=\count112
 \sf@farskip=\skip63
 \sf@captopadj=\dimen126
 \sf@capskip=\skip64
 \sf@nearskip=\skip65
-\c@subfigure=\count114
-\c@subfigure@save=\count115
-\c@lofdepth=\count116
-\c@subtable=\count117
-\c@subtable@save=\count118
-\c@lotdepth=\count119
+\c@subfigure=\count113
+\c@subfigure@save=\count114
+\c@lofdepth=\count115
+\c@subtable=\count116
+\c@subtable@save=\count117
+\c@lotdepth=\count118
 \sf@top=\skip66
 \sf@bottom=\skip67
 ) (./proof.sty
@@ -487,7 +482,7 @@ Package: hyperref 2009/10/09 v6.79a Hypertext links for LaTeX
 
 (/usr/share/texmf-texlive/tex/generic/oberdiek/ifpdf.sty
 Package: ifpdf 2009/04/10 v2.0 Provides the ifpdf switch (HO)
-Package ifpdf Info: pdfTeX in pdf mode detected.
+Package ifpdf Info: pdfTeX in pdf mode not detected.
 )
 (/usr/share/texmf-texlive/tex/generic/oberdiek/ifvtex.sty
 Package: ifvtex 2008/11/04 v1.4 Switches for detecting VTeX and its modes (HO)
@@ -504,8 +499,8 @@ O)
 Package: xcolor-patch 2009/10/02 xcolor patch
 ))
 \@linkdim=\dimen146
-\Hy@linkcounter=\count120
-\Hy@pagecounter=\count121
+\Hy@linkcounter=\count119
+\Hy@pagecounter=\count120
 
 (/usr/share/texmf-texlive/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2009/10/09 v6.79a Hyperref: PDFDocEncoding definition (HO)
@@ -536,7 +531,7 @@ Package: intcalc 2007/09/27 v1.1 Expandable integer calculations (HO)
 (/usr/share/texmf-texlive/tex/generic/oberdiek/bigintcalc.sty
 Package: bigintcalc 2007/11/11 v1.1 Expandable big integer calculations (HO)
 ))
-\Fld@menulength=\count122
+\Fld@menulength=\count121
 \Field@Width=\dimen147
 \Fld@charsize=\dimen148
 \Field@toks=\toks32
@@ -551,18 +546,25 @@ Package hyperref Info: PDF/A mode OFF on input line 4407.
 (/usr/share/texmf-texlive/tex/generic/oberdiek/atbegshi.sty
 Package: atbegshi 2008/07/31 v1.9 At begin shipout hook (HO)
 )
-\Hy@abspage=\count123
-\c@Item=\count124
-\c@Hfootnote=\count125
+\Hy@abspage=\count122
+\c@Item=\count123
+\c@Hfootnote=\count124
 )
-*hyperref using default driver hpdftex*
-(/usr/share/texmf-texlive/tex/latex/hyperref/hpdftex.def
-File: hpdftex.def 2009/10/09 v6.79a Hyperref driver for pdfTeX
-\Fld@listcount=\count126
-)
+*hyperref using default driver hdvips*
+(/usr/share/texmf-texlive/tex/latex/hyperref/hdvips.def
+File: hdvips.def 2009/10/09 v6.79a Hyperref driver for dvips
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/pdfmark.def
+File: pdfmark.def 2009/10/09 v6.79a Hyperref definitions for pdfmark specials
+\pdf@docset=\toks33
+\pdf@box=\box35
+\pdf@toks=\toks34
+\pdf@defaulttoks=\toks35
+\Fld@listcount=\count125
+))
 (/usr/share/texmf-texlive/tex/latex/supertabular/supertabular.sty
 Package: supertabular 2004/02/20 v4.1e the supertabular environment
-\c@tracingst=\count127
+\c@tracingst=\count126
 \ST@wd=\dimen149
 \ST@rightskip=\skip68
 \ST@leftskip=\skip69
@@ -577,27 +579,27 @@ Package: supertabular 2004/02/20 v4.1e the supertabular environment
 \ST@prevht=\dimen157
 \ST@toadd=\dimen158
 \ST@dimen=\dimen159
-\ST@pbox=\box35
+\ST@pbox=\box36
 ) (./defs.tex) (./defs-pmpy.tex) (/usr/share/texmf-texlive/tex/latex/listings/l
 istings.sty
-\lst@mode=\count128
-\lst@gtempboxa=\box36
-\lst@token=\toks33
-\lst@length=\count129
+\lst@mode=\count127
+\lst@gtempboxa=\box37
+\lst@token=\toks36
+\lst@length=\count128
 \lst@currlwidth=\dimen160
-\lst@column=\count130
-\lst@pos=\count131
+\lst@column=\count129
+\lst@pos=\count130
 \lst@lostspace=\dimen161
 \lst@width=\dimen162
-\lst@newlines=\count132
-\lst@lineno=\count133
+\lst@newlines=\count131
+\lst@lineno=\count132
 \lst@maxwidth=\dimen163
 
 (/usr/share/texmf-texlive/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
-\c@lstnumber=\count134
-\lst@skipnumbers=\count135
-\lst@framebox=\box37
+\c@lstnumber=\count133
+\lst@skipnumbers=\count134
+\lst@framebox=\box38
 )
 (/usr/share/texmf-texlive/tex/latex/listings/listings.cfg
 File: listings.cfg 2007/02/22 1.4 listings configuration
@@ -607,10 +609,10 @@ Package: listings 2007/02/22 1.4 (Carsten Heinz)
 (/usr/share/texmf-texlive/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
-\c@theorem=\count136
-\c@definition=\count137
-\c@parameter=\count138
-\c@property=\count139
+\c@theorem=\count135
+\c@definition=\count136
+\c@parameter=\count137
+\c@property=\count138
  (./pietromacro.tex)
 (./paper.aux)
 \openout1 = `paper.aux'.
@@ -651,28 +653,15 @@ Package caption Info: rotating package is loaded.
 Package caption Info: supertabular package is loaded.
 Package caption Info: wrapfig package is loaded.
 Package caption Info: End \AtBeginDocument code.
-
-(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
-[Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count140
-\scratchdimen=\dimen164
-\scratchbox=\box38
-\nofMPsegments=\count141
-\nofMParguments=\count142
-\everyMPshowfont=\toks34
-\MPscratchCnt=\count143
-\MPscratchDim=\dimen165
-\MPnumerator=\count144
-\everyMPtoPDFconversion=\toks35
-)
 Package hyperref Info: Link coloring OFF on input line 107.
- (/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
 Package: nameref 2007/05/29 v2.31 Cross-referencing by name of section
 
 (/usr/share/texmf-texlive/tex/latex/oberdiek/refcount.sty
 Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
 )
-\c@section@level=\count145
+\c@section@level=\count139
 )
 LaTeX Info: Redefining \ref on input line 107.
 LaTeX Info: Redefining \pageref on input line 107.
@@ -682,7 +671,7 @@ LaTeX Info: Redefining \pageref on input line 107.
 \openout3 = `paper.out'.
 
 \AtBeginShipoutBox=\box39
-\c@lstlisting=\count146
+\c@lstlisting=\count140
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <18> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 123.
 LaTeX Font Info:    Try loading font information for TS1+ptm on input line 123.
@@ -740,7 +729,7 @@ Package natbib Warning: Citation `XXX' on page 1 undefined on input line 53.
 
 Underfull \vbox (badness 2717) has occurred while \output is active []
 
- [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+ [1
 
 
 ]
@@ -748,20 +737,8 @@ Underfull \vbox (badness 2717) has occurred while \output is active []
 Package natbib Warning: Citation `XXX' on page 2 undefined on input line 55.
 
 )
-Package epstopdf Info: Source file: <simulation.eps>
-(epstopdf)                    date: 2015-06-24 14:26:03
-(epstopdf)                    size: 82573 bytes
-(epstopdf)             Output file: <simulation-eps-converted-to.pdf>
-(epstopdf)                    date: 2015-06-24 14:26:03
-(epstopdf)                    size: 24242 bytes
-(epstopdf)             Command: <epstopdf --outfile=simulation-eps-converted-to
-.pdf simulation.eps>
-(epstopdf)             \includegraphics on input line 130.
-Package epstopdf Info: Output file is already uptodate.
- <simulation-eps-converted-to.pdf, id=173, 356.33125pt x 127.47626pt>
-File: simulation-eps-converted-to.pdf Graphic file (type pdf)
-
-<use simulation-eps-converted-to.pdf> (./prelim.tex
+File: simulation.eps Graphic file (type eps)
+ <simulation.eps> (./prelim.tex
 
 Package natbib Warning: Citation `PMPY' on page 2 undefined on input line 26.
 
@@ -779,7 +756,7 @@ Overfull \hbox (1.4415pt too wide) detected at line 207
 [] []
  []
 
-[2 <./simulation-eps-converted-to.pdf>]) (./warp.tex
+[2]) (./warp.tex
 Overfull \hbox (17.15013pt too wide) detected at line 58
 []
  []
@@ -807,153 +784,35 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [5])
 (./dynamic.tex) (./experimentalresults.tex [6]
-<../../eval/case2-iterations.png, id=280, 581.7735pt x 458.9145pt>
-File: ../../eval/case2-iterations.png Graphic file (type png)
 
-<use ../../eval/case2-iterations.png>
-<../../eval/case2-bop.png, id=281, 576.7146pt x 465.05745pt>
-File: ../../eval/case2-bop.png Graphic file (type png)
+! LaTeX Error: Cannot determine size of graphic in ../../eval/case2-varyIter.pd
+f (no BoundingBox).
 
-<use ../../eval/case2-bop.png>
-<../../eval/case3-iterations.png, id=282, 405.07335pt x 332.08064pt>
-File: ../../eval/case3-iterations.png Graphic file (type png)
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+\GenericError  ...                                
+                                                  \endgroup 
+\Gread@eps ...raphic in #1 (no BoundingBox)}\@ehc 
+                                                  \gdef \@gtempa {0 0 72 72 ...
 
-<use ../../eval/case3-iterations.png>
-<../../eval/case3-bop.png, id=283, 394.95555pt x 315.45856pt>
-File: ../../eval/case3-bop.png Graphic file (type png)
-
-<use ../../eval/case3-bop.png>
-<../../eval/case4-iterations.png, id=284, 396.7623pt x 341.47575pt>
-File: ../../eval/case4-iterations.png Graphic file (type png)
-
-<use ../../eval/case4-iterations.png>
-<../../eval/case4-bop.png, id=285, 389.5353pt x 321.96284pt>
-File: ../../eval/case4-bop.png Graphic file (type png)
-
-<use ../../eval/case4-bop.png>
-<../../eval/case5-iterations.png, id=286, 394.95555pt x 337.86224pt>
-File: ../../eval/case5-iterations.png Graphic file (type png)
-
-<use ../../eval/case5-iterations.png>
-<../../eval/case5-bop.png, id=287, 392.4261pt x 320.1561pt>
-File: ../../eval/case5-bop.png Graphic file (type png)
-
-<use ../../eval/case5-bop.png>
-
-LaTeX Warning: Float too large for page by 43.89507pt on input line 74.
-
-) (./relatedwork.tex) (./conclusion.tex)
-No file paper.bbl.
-(./old.tex [7] [8 <../../eval/case2-iterations.png (PNG copy)> <../../eval/case
-2-bop.png (PNG copy)> <../../eval/case3-iterations.png (PNG copy)> <../../eval/
-case3-bop.png (PNG copy)> <../../eval/case4-iterations.png (PNG copy)> <../../e
-val/case4-bop.png (PNG copy)> <../../eval/case5-iterations.png (PNG copy)> <../
-../eval/case5-bop.png (PNG copy)>]
-Overfull \hbox (38.6866pt too wide) in paragraph at lines 78--79
-[]\OT1/ptm/m/n/9 In this way, the en-tire ex-e-cu-tion be-comes $[]$
- []
-
-
-Overfull \hbox (46.56252pt too wide) detected at line 107
-[]
- []
-
-
-Overfull \hbox (68.15314pt too wide) detected at line 116
-\U/MnSymbolC/m/n/9 ¶\OML/cmm/m/it/9 ^^[[] \U/MnSymbolA/m/n/9 ^^@ \U/MnSymbolC/m
-/n/9 ^^E \U/MnSymbolA/m/n/9 ^^@ \OML/cmm/m/it/9 ^^[[] \U/MnSymbolD/m/n/9 > []\U
-/stmry/m/n/9 J\OT1/cmtt/m/n/9 p\OML/cmm/m/it/9 ; ^^[[]\U/stmry/m/n/9 K\OML/cmm/
-m/it/9 ; \U/MnSymbolC/m/n/9 ß\OML/cmm/m/it/9 ^^[[] \U/MnSymbolA/m/n/9 ^^@ \U/Mn
-SymbolC/m/n/9 ^^E \U/MnSymbolA/m/n/9 ^^@ \OML/cmm/m/it/9 ^^[[] \U/MnSymbolD/m/n
-/9 > \U/msb/m/n/9 S\U/stmry/m/n/9 J\OT1/cmtt/m/n/9 p\OML/cmm/m/it/9 ; ^^[[]\U/s
-tmry/m/n/9 K \U/MnSymbolC/m/n/9 ^^B []\OMX/MnSymbolE/m/n/9 à\OML/cmm/m/it/9 ^^[
-[]\OMX/MnSymbolE/m/n/9 ç \U/MnSymbolD/m/n/9 ^^@ []\OMX/MnSymbolE/m/n/9 à\OML/cm
-m/m/it/9 ^^[[]\OMX/MnSymbolE/m/n/9 ç
- []
-
-
-Overfull \hbox (14.85426pt too wide) detected at line 151
-[]
- []
-
-
-Underfull \vbox (badness 1418) has occurred while \output is active []
-
- [9]
-Overfull \hbox (6.52844pt too wide) detected at line 194
-[]
- []
-
-
-Overfull \hbox (3.03508pt too wide) in paragraph at lines 196--197
-[]\OT1/ptm/m/n/9 where $\OT1/cmss/m/n/9 e$ \OT1/ptm/m/n/9 rep-re-sents the edge
-s of the cfg, and $[]$
- []
-
-) (./pietroformal.tex
-Overfull \hbox (32.11247pt too wide) detected at line 22
-[]
- []
-
-
-Overfull \hbox (6.65392pt too wide) in paragraph at lines 37--38
-\OT1/ptm/m/n/9 Given a state-ment $[]$ and a trans-ac-tion $\OML/cmm/m/it/9 k$\
-OT1/ptm/m/n/9 , we de-fine by $[]$
- []
-
-[10])
-
-Package natbib Warning: There were undefined citations.
-
-[11] (./paper.aux)
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: There were undefined references.
-
- ) 
+\Gin@setfile ...se #1\fi \endcsname {\Gin@base #2}
+                                                  \else \Gin@nosize {#3}\fi ...
+<argument> ...le \Gin@rule@* {\Gin@base \Gin@ext }
+                                                  \fi 
+\@firstoftwo #1#2->#1
+                     
+...
+l.48 ...textwidth]{../../eval/case2-varyIter.pdf}}
+                                                   
 Here is how much of TeX's memory you used:
- 11074 strings out of 493848
- 156403 string characters out of 1152823
- 277630 words of memory out of 3000000
- 13936 multiletter control sequences out of 15000+50000
- 50246 words of font info for 119 fonts, out of 3000000 for 9000
+ 10583 strings out of 493849
+ 149785 string characters out of 1152846
+ 261036 words of memory out of 3000000
+ 13607 multiletter control sequences out of 15000+50000
+ 33831 words of font info for 103 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
- 41i,21n,45p,1721b,1310s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/share/
-texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolD.enc}{/usr/share/texmf-texlive/
-fonts/enc/dvips/mnsymbol/MnSymbolE.enc}{/usr/share/texmf-texlive/fonts/enc/dvip
-s/mnsymbol/MnSymbolF.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnS
-ymbolA.enc}{/usr/share/texmf-texlive/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}{/u
-sr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/fo
-nts/type1/public/mnsymbol/MnSymbol5.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/mnsymbol/MnSymbol6.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsym
-bol/MnSymbol8.pfb></usr/share/texmf-texlive/fonts/type1/public/mnsymbol/MnSymbo
-l9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr
-/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texmf
--texlive/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/fon
-ts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/pub
-lic/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
-/cm/cmmi9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb
-></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/
-texmf-texlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive
-/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texmf-texlive/fonts/type1
-/public/amsfonts/cm/cmss9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
-onts/cm/cmssbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/c
-msy9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti7.pfb></u
-sr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/tex
-mf-texlive/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/f
-onts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/amsfonts/symbols/msbm10.pfb></usr/share/texmf-texlive/fonts/type1/public/
-amsfonts/symbols/msbm7.pfb></usr/share/texmf-texlive/fonts/type1/hoekwater/stma
-ryrd/stmary9.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></u
-sr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texl
-ive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/
-times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 631954 bytes).
-PDF statistics:
- 484 PDF objects out of 1000 (max. 8388607)
- 122 named destinations out of 1000 (max. 500000)
- 326 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41i,21n,40p,1748b,1297s stack positions out of 5000i,500n,10000p,200000b,50000s
 
+Output written on paper.dvi (6 pages, 77908 bytes).
