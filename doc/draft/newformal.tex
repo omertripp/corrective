@@ -85,13 +85,14 @@ Note that the {\sf warp} rule only applies changes to the local configuration co
 	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf warp}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
 \end{definition}
 
+Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
+$[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
+
 \begin{theorem}[Progress] Assume that (i) a ${\sf warp}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) warping instances are progress safe. Then progress is guaranteed.
 	\begin{proof}
 	Given system state $s$, if there exists a transaction $t$ that is able to either commit or complete then the proof is done. Otherwise, there is a transaction $t$ that reaches a commit point at some state $s'$ and fails. At this point, ${\sf warp}\ t$ is the only enabled transition for $t$, and by assumption (ii), the warping instance is progress safe. At this point, there are two possibilities. Either $t$ proceeds without other threads modifying the shared state, such that a commit or completion point is reached by $t$ (without warping prior to reaching such a point according to assumption (i)), in which case progress has been achieved, or one or more threads interfere with $t$ by committing their effects, in which case too progress has been achieved.
 	\end{proof}
 \end{theorem}
-
-An important observation (or relaxation) is that the local states of other threads are irrelevant to the success of a commit or end transition. Hence, the only cause of a failed commit is if other threads have committed.
 
 \subsection{Other Stuff}
 
