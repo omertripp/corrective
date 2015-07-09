@@ -51,16 +51,9 @@ The events are defined as follows:
 {\sf warp}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
 	t \in T, 
 	{\sf ref}\ t \leadsto (T,\mu', \sigma, L)}$\\
-%{\sf warp}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L'_t)], \sigma, L)}{
-%t \in T, 
-%{\sf ref}\ t \leadsto (T,\mu [t \mapsto (c'_t, \sigma'_t, L'_t) ], \sigma, L)}$\\
-%\\
-%{\sf warp}\ $(t)$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
-%	\exists (T_0,\mu_0,\sigma_0,L_0).
-%	{\sf ref}\ t = (T_0,\mu_0,\sigma_0,L_0) \leadsto (T,\mu', \sigma_n, L)
-%	}
-%$
-%\\
+\\
+{\sf local}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L_t)], \sigma, L)}
+{t \in T, (c_t,\sigma_t) \rightarrow (c'_t,\sigma'_t)}$\\
 \\
 \end{tabular}
 \\
@@ -88,11 +81,27 @@ Note that the {\sf warp} rule only applies changes to the local configuration co
 Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
 $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 
-\begin{theorem}[Progress] Assume that (i) a ${\sf warp}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) warping instances are progress safe. Then progress is guaranteed.
+\begin{theorem}[Progress]\label{Th:progress} Assume that (i) a ${\sf warp}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) warping instances are progress safe. Then progress is guaranteed.
 	\begin{proof}
 	Given system state $s$, if there exists a transaction $t$ that is able to either commit or complete then the proof is done. Otherwise, there is a transaction $t$ that reaches a commit point at some state $s'$ and fails. At this point, ${\sf warp}\ t$ is the only enabled transition for $t$, and by assumption (ii), the warping instance is progress safe. At this point, there are two possibilities. Either $t$ proceeds without other threads modifying the shared state, such that a commit or completion point is reached by $t$ (without warping prior to reaching such a point according to assumption (i)), in which case progress has been achieved, or one or more threads interfere with $t$ by committing their effects, in which case too progress has been achieved.
 	\end{proof}
 \end{theorem}
+
+\begin{definition}[Complete warping] 
+	We say that the system is complete w.r.t. warping if for any state $s$, if a ${\sf warp}\ t$ transition is executed in $s$, then the selected warping target satisfies progress safety.
+\end{definition}
+
+\begin{lemma}[Termination]
+	Assume that the system performs warping only on failed commits, and is complete w.r.t. warping. Further assume that throughout any run of the system, only boundedly many transactions are created (via a {\sf bgn}), and these transactions do not have infinite executions. Then termination is guaranteed.
+	\begin{proof}
+		The first two assumptions guarantee progress, as established above in 
+		Theorem \ref{Th:progress}. Since transactions are finite, each transactions may perform finitely many {\sf cmt} transitions before terminating via an {\sf end} transition. This implies that after finitely many transitions, some transaction $t$ will terminate. This argument applies to the resulting system until no transactions are left.
+	\end{proof}
+\end{lemma}
+
+\begin{example}[Loop parallelization]\label{Ex:loops}
+	Assume the common case of loop parallelization, where loop iterations are executed in parallel as transactions. There are normally finitely many transactions, all starting at the same time, and all are expected to terminate within a finite number of steps.
+\end{example}
 
 %\subsection{Other Stuff}
 %
