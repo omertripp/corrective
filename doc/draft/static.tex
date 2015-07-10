@@ -68,10 +68,12 @@ Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. T
 
 
 \subsection{Static Computation of Warp Destinations}
+Given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:concretesemantics} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) and producing the same shared log. Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $s_0$. In addition, since all the transaction commit together at the end, we have complete control over the shared log XXX.
 
+Therefore, we propose a static analysis that, given 
 
 \subsubsection{Abstract Transaction Semantics}
-\ael{T} is the set of abstract transaction identifiers. An abstract transaction identifier can represent one or many concrete transactions in T. $\gamma_\ael{T} : \ael{T} \to T$ maps abstract transaction identifiers 
+$\ael{T}$ is the set of abstract transaction identifiers. An abstract transaction identifier can represent one or many concrete transactions in T. $\gamma_\ael{T} : \ael{T} \to T$ maps abstract transaction identifiers 
 
 
 \subsubsection{Abstract Domain}
