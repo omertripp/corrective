@@ -1,5 +1,52 @@
-\section{Experimental results}
-\subsection{Implementation}
+\section{Implementation and Evaluation}\label{Se:experiments}
+
+In this section, we first describe our prototype implementation of the overall system (both the static analysis and the runtime synchronization algorithm), and then describe its experimental evaluation over a set of five real-world subjects. 
+
+\subsection{Prototype System}
+
+We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{Se:instance}, which covers all the operations listed in Figure \ref{fig:language}. \pietrotodo{Move paragraph on $T_1,T_2,T_n$ over here.} 
+
+As explained earlier, the interface with the runtime system is a relational warping specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
+\begin{center}
+$[ {\sf k} \mapsto \bot , {\sf v} \mapsto v ] \leadsto \{ [ {\sf k} \mapsto v , {\sf v} \mapsto v ] \}$
+\end{center}
+denotes that in the poststate, the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
+%
+The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
+
+As noted earlier, in our current prototype all transactions are assumed to start simultaneously. Each concrete transaction $t$ is mapped to its abstract counterpart $\overline{t}$, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
+
+During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Warping occurs only on failed commits (as discussed in Section \ref{Se:guarantees}), in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the warping specification. 
+
+The specification is cast by the runtime system into a hierarchical representation, which conveys constraints between past and (potential) future warping decisions to ensure overall consistency toward converging on a correct poststate. This means in particular that as execution progresses, transactions have decreasingly many possible warping targets.
+
+\subsection{Methodology and Experimental Setup}
+
+We conducted our experiments on an X86\_64 ThinkPad W530 workstation with eight 2.30GHz Intel Core i7-3610QM processors, 16GB of RAM and 6M caches. The workstation runs version
+12.04 of the Ubuntu Linux distribution, and has the Sun 64-Bit 1.7 Java virtual machine (JVM) installed.
+
+In our experiments, we measured two aspects of parallel execution:
+\begin{itemize}
+	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as \pengtodo{how is the workload measured?}.
+	\item \underline{Concurrency level:} For a fixed workload size, set at \pengtodo{what is workload size?}, the number of threads is varied along the range of 1 to 16 threads.  
+\end{itemize}
+For statistical soundness, we report the average performance results across 10 independent repetitions of each experiments.
+
+We compare our technique against two competing solutions:
+\begin{itemize}
+	\item version 1.3 of the Deuce STM (the latest version),\footnote{
+		\url{https://github.com/DeuceSTM/DeuceSTM}
+	} which implements a concrete-level pessimistic variant of STM; and
+	\item a lock-based solution synchronization algorithm boosted with {\sf Map} semantics \cite{EricBoosting}.
+\end{itemize}
+
+\subsection{Subjects}
+
+
+
+\subsection{Performance Results} 
+
+\subsection{Discussion}
 
 {\bf Execution Summary\ } The static analysis phase computes a set of execution summaries, each representing a legal execution, which are used as the input of the dynamic analysis phase.
 Each execution summary describes (i) the return value of each transaction instance and (ii) the final map state
