@@ -11,6 +11,7 @@
 \newcommand{\warpdestination}{\set{warpDest}}
 
 \section{Application to Composed Map Operations}
+\label{se:instance}
 As a proof of concept and study of practical feasibility, we instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language comprising some basic operations on concurrent shared maps, and a restricted transaction system. In particular, we assume that (i) there are $n$ transactions ($T=\{t_1, ..., t_n\}$), (ii) all the transactions start together at the beginning of the execution, (iii) each transaction commit only once, and (iv) and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} warping at the end of the execution. While these restrictions might be relaxed, this scenario is particularly interesting in practice XXXX
 
 
@@ -44,36 +45,39 @@ We focus our formalization on the fragment of language in Figure \ref{fig:langua
 \subsubsection{Running Example}
 
 \begin{figure}
-	\begin{lstlisting}
-	Value removeAttribute(Key k) {
-	Value result = null;
-	if(map.containsKey(k)) {
-	result = m.get(k);
-	m.remove(k);
-	}
-	return result;
-	}
+\begin{lstlisting}
+Value removeAttribute(Key k) {
+  Value result = null;
+  if(map.containsKey(k)) {
+    result = m.get(k);
+    m.remove(k);
+  }
+  return result;
+}
 	
-	boolean removeAttribute(Key k, Value v) {
-	Value oldvalue = m.get(k);
-	m.put(k, v);
-	return oldvalue != null;
-	}
-	\end{lstlisting}
-	\caption{The running example inspired by class \statement{ApplicationContext} of Apache Tomcat}
-	\label{lst:runningexamplestaticanalysis}
+boolean removeAttribute(Key k, Value v) {
+  Value oldvalue = m.get(k);
+  m.put(k, v);
+  return oldvalue != null;
+}
+\end{lstlisting}
+\caption{The running example inspired by class \statement{ApplicationContext} of Apache Tomcat}
+\label{lst:runningexamplestaticanalysis}
 \end{figure}
+
+XXX Somewhere else? XXX
 
 Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. This code is inspired by \pietrotodo{XXX}. The first type of transaction (\statement{transaction1}) removes the value associated with the given key \statement{k}, and returns it. Instead, the second type of transaction relates \statement{k} with a given value \statement{v}, and returns \statement{true} if the key was already in the map. During the formalization of the static analysis and the warping system, we will refer to this running example where each transaction is instantiated multiple times, and all transactions conflict on the same key \statement{k}.
 
 
 \subsection{Static Computation of Warp Destinations}
-Given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:concretesemantics} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) and producing the same shared log. Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $s_0$. In addition, since all the transaction commit together at the end, we have complete control over the shared log XXX.
+Given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) producing the same shared log. Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $s_0$. In addition, since all the transaction commit together at the end, we have complete control over the shared log XXX.
 
-Therefore, we propose a static analysis that, given 
+\subsubsection{Serialized Control Flow Graph}
+\label{Se:concabs}
+Before defining the abstract domain and semantics focused on composed map operations, we introduce a generic abstract transaction semantics, that, given $k$ types of transactions, computes the possible warping states starting from an entry state that represents a specific concrete situation. The possible warping states might be the result of the computation of several instances of the $k$ types of transactions. XXX
 
-\subsubsection{Abstract Transaction Semantics}
-$\ael{T}$ is the set of abstract transaction identifiers. An abstract transaction identifier can represent one or many concrete transactions in T. $\gamma_\ael{T} : \ael{T} \to T$ maps abstract transaction identifiers 
+Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each transaction type $i$, we create three static transaction identifiers $t^i_1$, $t^i_2$, and $t^i_n$. $t^i_1$ and $t^i_2$ represent precisely two concrete instances of $c^i$, while $t^i_n$ is a \emph{summary} abstract instance representing many concrete instances of $c^i$. We then build up a control flow graph representing a serialized execution of all these abstract transactions. In particular, each transaction type $c^i$ leads to a control flow graph $tc^i$ that executes (i) first $t^i_1$, (ii) then $t^i_n$ inside a non-deterministic loop (to overapproximate many instances of $c^i$)), and (iii) finally $t^i_2$. While the choice of having the two concrete transaction instances before and after the summary instance is arbitrary and other solutions are possible, we found this solution particularly effective in practice as we will show in Section \ref{Se:experiments}. The overall serialized program $tc$ is then build by concatenating the serialized CFGs of all transactions.
 
 
 \subsubsection{Abstract Domain}
@@ -147,7 +151,7 @@ m'=
 \csemantics{S}{\statement{assert(m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
-(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
+(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neq \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{cntK})\\
@@ -155,7 +159,7 @@ m'=
 \csemantics{S}{\statement{assert(!m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
-(e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \not \isSummary(n) \land \statement{null} \in m(n)\\
+(e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neq \isSummary(n) \land \statement{null} \in m(n)\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{!cntK})\\
@@ -167,7 +171,6 @@ m'=
 Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state. We focus the formalization on abstract states in $\env \times \map$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
 
 \statement{(put)} relates \statement{k} to \statement{v} in the map. In particular, if \statement{k} points to a unique concrete node, it performs a so-called strong update, overwriting previous values related with \statement{k}. Otherwise, it performs a weak update by adding to the previous values the new ones. \statement{(get)} relates the assigned variable \statement{v} to all the heap nodes of values that might be related with \statement{k} in the map. Note that if \statement{k} is not in the map, then the abstract map $m$ relates it to a \statement{null} node, and therefore this value is propagated to \statement{v} then calling \statement{get}, representing the concrete semantics of this statement. Similarly to \statement{(put)}, \statement{(rmv)} removes \statement{k} from the map (by relating it to the singleton $\{\statement{null}\}$) iff \statement{k} points to a unique concrete node. Otherwise, it adds the heap node \statement{null} to the heap nodes related to all the values pointed by \statement{k}. \statement{(pIA)} updates the map like \statement{(put)} but only if the updated key node might have been absent, that is, when $\statement{null} \in m(n)$. \statement{new} creates a new heap node through $\freshNode(t)$ (where $t$ is the identifier of the transaction performing the creation), and assigns it to \statement{v}. The number of nodes is kept bounded by parameterizing the analysis with an upper bound $i$ such that (i) the first $i$ nodes created by a transaction are all concrete nodes, and (ii) all the other nodes are represented by a summary node. Instead, \statement{(null)} relates the given variable to the singleton $\{\statement{null}\}$.
-Rules \statement{(if)}, \statement{(while)}, and \statement{(cnc)} define the standard abstract semantics of \statement{if}, \statement{while}, and concatenation statements.
 The abstract semantics on Boolean conditions produces $\bot$ statements if the given Boolean condition cannot hold on the given abstract semantics. Therefore, \statement{(null)} returns $\bot$ if the given variable \statement{x} cannot be \statement{null}, or a state relating \statement{x} to the singleton $\{\statement{null}\}$ otherwise. Vice-versa, \statement{(!null)} returns $\bot$ if \statement{x} can be only null, or a state relating \statement{x} to all its previous values except \statement{null} otherwise.
 Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is surely not in the map, it refines the possible values of \statement{k} if it is represented by a concrete node, or it simply returns the entry state otherwise. Vice-versa, \statement{(!cntK)} returns $\bot$ if \statement{k} is surely in the map.
 
@@ -180,15 +183,10 @@ Consider again the first method in Figure \ref{lst:runningexamplestaticanalysis}
 \statement{(if)} returns the upper bound of the two resulting states, that is $\bot \dot{\cup} \sigma = \sigma$, and the value pointed by \statement{result} (that is, \statement{null}) is returned.
 Therefore, our analysis computes on this example that, when the key is not in the map in the entry state, the method returns \statement{null} and does not modify the map.
 
-\subsubsection{Over-approximating Serialized Executions}
-We now formalize how we compute an approximation of serialized executions relying on the abstract semantics defined in Section \ref{sect:abstractsemantics}. Our system receives as input two types of transactions (e.g., the two methods in Figure \ref{lst:runningexamplestaticanalysis}), and returns a mapping from possible abstract entry states, to sets of possible exit states.
-
-In particular, given two transactions \statement{t1} and \statement{t2}, we build up a control flow graph that represents possible serialized executions of many instances of the two transactions. In order to build up this serialized control flow graph, the local variables of transactions are rename. For instance, we can build up a serialized CFG where an instance of transaction \statement{t1} (called \statement{t1_1}) is followed by a loop representing a (possible unbounded) sequence of executions of other instances of the same transaction represented by a loop of a \emph{summary} instance of \statement{t1} (called \statement{t1_n}), and this is followed by a similar structure for transaction \statement{t2} (generating transactions \statement{t2_1} and \statement{t2_n}).
-
-When applied to these serialized control flow graphs, the static analysis engine produces exit states that are possible results of serialized executions. Given two transactions, we represent by $\serializedCFGs(\statement{t1}, \statement{t2})=\set{T}$ the function that returns a set of serialized CFGs.
-
 \subsubsection{Extracting Possible Warping States}
-As we discussed in \pietrotodo{XXX}, we need to compute warping that, given an entry state representing an observational equivalence class, is in an equivalence class that is reachable through a serialized execution. However, an abstract state in $\state$ might represent concrete states that are in different equivalence classes. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot used to define a warping destination.
+\pietrotodo{I jump directly into equivalence classes, need to reason about this before!!!}
+
+We need now to compute possible warping targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute warping that, given an entry state representing an observational equivalence class, is in an equivalence class that is reachable through a serialized execution. However, an abstract state in $\state$ might represent concrete states that are in different equivalence classes. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot used to define a warping destination.
 
 Therefore, we define a predicate $\iseqclass : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents concrete states all in the same equivalence class. Formally,
 \[

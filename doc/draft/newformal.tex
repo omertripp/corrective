@@ -27,6 +27,7 @@ We additionally define two helper functions:
 The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. The shared log $L$ consists of pairs $\left\langle t,o \right\rangle$, where $t$ is a transaction identifier and $w(c) \neq \bot$.
 
 \subsection{Transition System}
+\label{sec:transitionsystem}
 
 We define four transactional events, as follows:
 \begin{itemize}
@@ -53,11 +54,12 @@ The events are defined as follows:
 	{\sf ref}\ t \leadsto (T,\mu', \sigma, L)}$\\
 \\
 {\sf local}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L_t)], \sigma, L)}
-{t \in T, (c_t,\sigma_t) \rightarrow (c'_t,\sigma'_t)}$\\
+{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
 \\
 \end{tabular}
 \\
 Note that the {\sf warp} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations.
+In the {\sf local} rule, $\to_l$ represents the transition relation for local operations.
 
 \subsection{Formal Guarantees}
 
