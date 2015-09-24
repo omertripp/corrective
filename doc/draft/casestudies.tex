@@ -1,0 +1,250 @@
+\section{Case Studies}
+
+
+\subsection{Case 2}
+Applications: Apache Tomcat
+
+Class: ApplicationContext
+
+
+\subsubsection{Transaction 1}
+\begin{lstlisting}
+Attribute removeAttribute(String name){
+	Attribute val = null;
+	found = attr.containsKey(name) ;
+	if (found) {
+		val = attr.get(name);
+		attr.remove(name);
+		}
+	return val;
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+ret=null;
+if(map.containsKey(key)) {
+	ret=map.get(key);
+	map.remove(key);
+}
+return ret;
+\end{lstlisting}
+
+\subsubsection{Transaction 2}
+\begin{lstlisting}
+boolean removeAttribute(String name, Attribute value){
+	boolean replaced = false;
+	oldValue = attributes.get(name);
+	if (oldValue != null)
+		replaced = true;
+	attributes.put(name, value);
+	return replaced;
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+ret=map.containsKey(key);
+map.put(key, value);
+return ret;
+\end{lstlisting}
+
+\subsection{Case 3}
+Applications: dyuproject
+
+Class: StandardConvertorCache
+
+\subsubsection{Transaction 1}
+\begin{lstlisting}
+public Convertor getConvertor(Class<?> clazz, boolean create, boolean addClass) {
+	Convertor convertor = (Convertor)_convertors.get(clazz.getName());
+	if(convertor==null && create) {
+		convertor = newConvertor(clazz, addClass);
+		_convertors.putIfAbsent(clazz.getName(), convertor);
+	}
+	return convertor;
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+value=map.get(key);
+if(value==null && b) {
+	value=new Value();
+	map.putIfAbsent(key, value);
+}
+retrun value;
+\end{lstlisting}
+
+\subsubsection{Transaction 2}
+\begin{lstlisting}
+protected Convertor getConvertor(String className) {
+	Convertor convertor = (Convertor)_convertors.get(className);
+	if(convertor==null) {
+		Class<?> clazz = StandardJSON.loadClass(className);;
+		convertor = clazz==null ? UNRESOLVED_CONVERTOR : newConvertor(clazz);
+		_convertors.putIfAbsent(className, convertor);
+	}
+	return convertor;
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+value=map.get(key);
+if(value==null) {
+	value=new Value();
+	map.putIfAbsent(key, value);
+}
+return value;
+\end{lstlisting}
+
+\subsection{Case 4}
+Applications: Flexive
+
+Class: FxValueRendererFactory
+
+\subsubsection{Transaction 1}
+\begin{lstlisting}
+public static FxValueRenderer getInstance(FxLanguage language) {
+	if (language == null) {
+	// default renderer always exists
+	return renderers.get(DEFAULT);
+	}
+	if (!renderers.containsKey(language)) {
+		renderers.putIfAbsent(language, new FxValueRendererImpl(language));
+	}
+	return renderers.get(language);
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+if(!map.containsKey(key)) {
+	loc_w=new Value();
+	map.putIfAbsent(key, loc_w);
+}
+return map.get(key)"
+\end{lstlisting}
+
+\subsubsection{Transaction 2}
+\begin{lstlisting}
+void addRenderer(FxLanguage language, Class<T> valueType, FxValueFormatter<DT, T> formatter) {
+	renderers.putIfAbsent(language, new FxValueRendererImpl(language));
+	renderers.get(language).put(valueType, formatter);
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+loc_w=new Value();
+map.putIfAbsent(key, loc_w);
+loc_w=map.get(key);
+\end{lstlisting}
+
+\subsection{Case 5}
+Applications: Gridkit
+
+Class: ReflectionPofSerializer
+
+\subsubsection{Transaction 1}
+\begin{lstlisting}
+protected Object internalDeserialize(PofReader in) throws IOException {
+	Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
+	ObjectFormat format = formats.get(type);
+	if (format == null) {
+		try {
+			format = new ObjectFormat(type);
+		} catch (Exception e) {
+			throw new IOException("Failed to create reflection format for " + type.getName(), e);
+		}
+	formats.put(type, format);
+	}
+	Object result = resolve(format.deserialize(in));
+	return result;
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+if(map.containsKey(key)) {
+	value=new Value();
+	map.put(key, value);
+	ret=null;
+} else
+	ret=map.get(key);
+return ret;
+\end{lstlisting}
+
+\subsubsection{Transaction 2}
+\begin{lstlisting}
+protected void internalSerialize(PofWriter out, Object origValue) throws IOException {
+	Object value = replace(origValue);
+	Class<?> type = value.getClass();
+	ObjectFormat format = formats.get(type);
+	if (format == null) {
+		try {
+			format = new ObjectFormat(type);
+		} catch (Exception e) {
+			throw new IOException("Failed to create reflection format for " + type.getName(), e);
+			}
+		formats.put(type, format);
+	}
+	format.serialize(out, value);
+}
+\end{lstlisting}
+
+
+**********************
+
+Our code
+
+**********************
+
+\begin{lstlisting}
+if(map.containsKey(key))
+	value=new Value();
+map.put(key, value);
+\end{lstlisting}

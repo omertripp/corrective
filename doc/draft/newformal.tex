@@ -7,7 +7,7 @@ In our description of the transition system, we utilize the following semantic d
 \\
 \begin{tabular}{rcll}
 	\\
-	$T \subset {\cal T}$ & $:=$ & transaction IDs \\
+	$t \in T \subset {\cal T}$ & $:=$ & transaction IDs \\
 	$c \in {\cal C}$ & $:=$ & command \\
 	$\sigma \in \Sigma$ & $:=$ & shared state \\
 	${\sigma_t}$ & $:=$ & local state of $t$ \\
@@ -30,12 +30,15 @@ The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. T
 \subsection{Transition System}
 \label{sec:transitionsystem}
 
-We define four transactional events, as follows:
+XXX We need to plug there the running example XXX
+
+We define five transactional events, as follows:
 \begin{itemize}
 \item The {\sf bgn} event marks the beginning of a transaction.
 \item The {\sf cmt} event fires when a transaction publishes its outstanding log of operations that affect the shared state to the shared state and log.
 \item The {\sf end} event marks the termination of a transaction.
 \item The {\sf warp} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
+\item The {\sf local} event executes a local action.
 \end{itemize}
 We define the semantics of these events in the following. For rules where a transaction $t$ is defined in the prestate, its corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$. We utilize helper function ${\sf serpref} \colon\ {\cal L} \rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively) determine whether a given shared log is the prefix of some serializable execution log. Finally, we define helper function
 ${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the (global) system state immediately preceding $t$'s start.
@@ -80,6 +83,8 @@ In the {\sf local} rule, $\to_l$ represents the transition relation for local op
 	$(\sigma_t,c_t,L_t) {\longrightarrow} (\sigma'_t,c'_t,L'_t)$, such that 
 	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf warp}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
 \end{definition}
+
+XXX Need to explain these definitions XXX
 
 Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
 $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
