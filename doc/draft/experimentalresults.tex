@@ -27,8 +27,8 @@ We conducted our experiments on an X86\_64 ThinkPad W530 workstation with eight 
 
 In our experiments, we measured two aspects of parallel execution:
 \begin{itemize}
-	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as \pengtodo{how is the workload measured?}.
-	\item \underline{Concurrency level:} For a fixed workload size, set at \pengtodo{what is workload size?}, the number of threads is varied along the range of 1 to 32 threads.  
+	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as the number of transactions executed by a given thread, where a single transaction consists of the invocation of a particular method. All inputs share the same key(s).
+	\item \underline{Concurrency level:} For a fixed workload size, set at 10 (\pengtodo{please confirm}), the number of threads is varied along the range of 1 to 32 threads.  
 \end{itemize}
 For statistical soundness, we report the average performance results across 10 independent repetitions of each experiment.
 
@@ -44,116 +44,167 @@ We compare our technique against two competing solutions:
 
 Our benchmark suite consists of four subjects, all of which are taken from popular open-source code bases and have been used in past studies on concurrency \cite{OhadShacham,...}, as follows:
 \begin{itemize}
-	\item \underline{Apache Tomcat:} This is a web-application container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is ...
-	\item \underline{dyuproject:} This is a library for ... We experiment with {\sf StandardConvertorCache}, which ...
-	\item \underline{Flexive:} The purpose of this library is to ... We have included {\sf FxValueRendererFactory} from it, which ...
-	\item \underline{Gridkit:} This library provides .... In it, {\sf ReflectionPofSerializer} is a concurrent data structure for ...
+	\item \underline{Apache Tomcat:} A web-application container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is a concrete representation of a web application's execution environment.
+	\item \underline{dyuproject:} A framework for development of Java web applications. We experiment with {\sf StandardConvertorCache}, which handles conversion of objects to/from JSON format.
+	\item \underline{Flexive:} A next-generation content repository for the development of web applications, in particular in an enterprise setting. We have included {\sf FxValueRendererFactory} from it, which is responsible to render transparently certain objects in a language.
+	\item \underline{Gridkit:} A library containing utilities and functionality related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
 \end{itemize}
-Though the above subjects were all designed as concurrent data structures, they contain bugs that mandate additional synchronization \cite{OhadShacham}.
 
-We have extracted two transactional methods out of each of the benchmarks. For example, XXX. In our experiments, each thread runs a XXX combination of the two transactions.
+We have extracted two concurrent methods out of each of benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{OhadShacham}. 
 
-cases 3,4,5: after first successful transaction, remaining transactions will be read only (conditional update), so no conflict. stm does pretty good.
+As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in XXX. We do not include their code in the paper for lack of space.
 
-case 2: there's blind updates (no checking before), so stm is problematic. lots of conflicts.
+\begin{figure}
+	\begin{lstlisting}
+protected Object internalDeserialize(PofReader in) 
+   throws IOException {
+ Class type = in.getPofContext().getClass(in.getUserTypeId());
+ ObjectFormat format = formats.get(type);
+ if (format == null) {
+  try {
+   format = new ObjectFormat(type);
+  } catch (Exception e) {
+   throw new IOException(... + type.getName(), e); }
+  formats.put(type, format); }
+  Object result = resolve(format.deserialize(in));
+  return result; }
+	\end{lstlisting}
+
+	\begin{lstlisting}
+protected void internalSerialize(PofWriter out,Object origVal) 
+   throws IOException {
+ Object value = replace(origVal);
+ Class type = value.getClass();
+ ObjectFormat format = formats.get(type);
+ if (format == null) {
+  try {
+   format = new ObjectFormat(type);
+  } catch (Exception e) {
+   throw new IOException(... + type.getName(), e); }
+  formats.put(type, format); }
+ format.serialize(out, value); }
+	\end{lstlisting}
+	\caption{\label{Fi:gridkitPair}Two concurrent methods from Gridkit, with concurrency bugs, included as benchmarks}
+\end{figure}
 
 \subsection{Performance Results} 
 
 We depict the performance results in Figures \ref{XXX}-\ref{XXX}. 
-For each benchmark, we present two graphs: The left-hand-side graphs correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The expected trend for these graphs is monotonic increase in running time. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable. Here, too, we expect an increase in running time due to interference between threads.
+For each benchmark, we present two column diagrams, corresponding to STM and warping (left/red and right/green, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
-We omit the trend line for lock-based synchronization from the graphs, but present the respective data in tabular form (in Table \ref{XXX}), since in all four cases the lock-based solution follows a linear trend of degradation (as a function of both workload size and the number of threads). Excluding its trend line from the graph enables a more meaningful scale to compare between STM and warping.
+The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
-The results are consistent with our expectations. Across all benchmarks, both the (a) and the (b) graphs largely follow the expected trend. Further, in all cases the warping approach achieves the least running time. The most significant gap is w.r.t. benchmark XXX, where for the largest workload our approach is x5 more performant than STM (the (a) graph), and for 32 threads the improvement compared to STM is x6 (the (b) graph).
-
-We summarize the comparison between STM, warping and  lock-based synchronization in Table \ref{XXX}. We indicate both absolute running times and relative improvement.
-
-In Figure~\ref{fig:case2Iter}, the X axis is the number of transactions in each thread, Y axis is the running time (unit: milliseconds). We fix the number of threads as 8. Although the number of transactions changes, the ratio between the $lock/stm$ time and the $warp$ time remains around 5, i.e., the $warp$ version runs as  5X times as the $lock/stm$ versions. We interpret the results in the following ways. First, the $lock$ version essentially serialize all the transaction instances because they involve the same key. The $stm$ version also exhibits the  parallelism embarrassingly in this case: Many transaction instances unconditionally update the location of the key in the map, which conflict with the transaction instances that read the location and force them to rollback. The $stm$ and $lock$ versions have similar performance because they  both serialize the transaction instances. Second, the speedup of our approach over $lock/stm$ is fixed when the thread number is fixed, indicating that the speedup is subject to the number of threads. 
-
-
-
-In Figure~\ref{fig:case2Th}, the X axis is the number of threads, Y axis is the running time. We fix the number of transactions each thread runs as 100. The ratio between the $lock/stm$ time and the $warp$ increases when the number of threads increases. For example, the $lock/stm$ version takes around 2X time as the $warp$ with 2 threads, around 3X time with 4 threads, around 5X with 8 threads, and remain 5X with more than 8 threads. This observation confirms our previous conclusion that the speedup is subject to the the number of threads. In this case, we get the best the speedup with 8 threads, where 8 is also the number of the cores, indicating that we make full exploitation of the cores with 8 threads. The figure shows that our approach has the dramatically better thread scalability than existing approaches. Another interesting observation is, when there is a single thread, the stm version takes 164 ms, while both our version and the lock version takes 112 ms. The stm takes longer time because the Deuce implementation instruments the classes on  the fly when they are loaded, which consumes extra time. 
-
-
-Figure~\ref{fig:case3Iter}, Figure~\ref{fig:case4Iter} and Figure~\ref{fig:case4Iter} show the performance when the workload increases and follow the same setting as the test 2 shown in Figure~\ref{fig:case2Iter}. Similar to Figure~\ref{fig:case2Th}, Figure~\ref{fig:case3Th}, Figure~\ref{fig:case4Iter} and Figure~\ref{fig:case4Iter} show the performance when the number of threads increases. From the figures, we see the trend of the lock version and our version resemble case 2, but the stm version behaves quite differently. An interesting observation is, the time difference between the stm version and ours is almost a constant. This suggests that the stm version achieves the same parallelism degree as ours, while incurring some extra  overhead of class instrumentation. We inspected the code and confirmed this conclusion. In these cases, many transaction instances first check and then update conditionally. After the first instances update, the following instances will fail the checking and are degenerated to read-only transactions. The read-only transactions allow the maximal parallelism like ours. 
+The aggregate performance results, averaging across all workloads and concurrency levels, are as follows:
+\begin{center}
+\begin{tabular}{l|c|c|c|c}
+					& \multicolumn{2}{c|}{STM} & \multicolumn{2}{c}{warping} \\
+					\cline{2-5} 
+					& workload & conc. & workload & conc. \\
+\hline
+Tomcat	  	 &	1.5\%		&	3\% & 29\%		& 30\% \\			   
+dyuproject	 & 	18\%		& 	24\%	    & 30\% &	30\%	\\
+Flexive 		&	17\%	  &		14\%			& 29\% & 30\%	\\ 
+Gridkit 		&	20\% 	&		16\%		& 32\% & 30\%	\\
+\hline\hline	
+{\bf average} & {\bf 14\%} 	&   {\bf 14\%}    & {\bf 30\%}   & {\bf 30\%} \\
+\end{tabular}
+\end{center}
+As the numbers indicate, the gap between warping and STM is significant with warping providing over x2 more performance improvement relative to locks than STM.
 
 \subsection{Discussion}
 
-{\bf Execution Summary\ } The static analysis phase computes a set of execution summaries, each representing a legal execution, which are used as the input of the dynamic analysis phase.
-Each execution summary describes (i) the return value of each transaction instance and (ii) the final map state
- 
+An interesting observation w.r.t. the raw performance results is that while warping provides stable and consistent performance improvement across all benchmarks, STM seems to do much worse on Tomcat compared to all other benchmarks. We have analyzed this gap.
 
-In our experiments,  we have two threads running two types of transactions ($TX_1$ and $TX_2$) respectively. One exemplary execution summary is, $[key\rightarrow v^1_1, r^1_1:v^1_1, r^n_1:v^1_1, r^1_2:v^1_1, r^n_2:v^1_1]$, where $r^1_1$ is the symbolic form of the return value of $TX^1_1$ (1$st$ instance of $TX_1$), $v^1_1$ is the symbolic form of the value put by the transaction instance, and $r^1_1:v^1_1$ describes the return value of the transaction instance. The readers may notice $r^n_1$. This symbol represents the return value of the instances that are not explicitly specified.  Here $n$ is determined by the capability of the static analysis. At runtime, we track the instance order and use $n$ by default if the number is not specified in the summary. The tracking of the instance order requires us to synchronize the first $n-1$ instances. However, the $n$ is typically a small number, and the synchronization overhead is negligible. We do not need to synchronize starting from the $n$th instance because all these instances are represented as $n$ by default. In addition, $key\rightarrow v^1_1$ tells what the key is associated with in the final map state. 
+The reason for this discrepancy, in our analysis, is that in both dyuproject and Flexive and Gridkit, once a first transaction manages to update the value corresponding to the input key, all other (nonoverlapping) transactions effectively become read-only transactions. As such, their execution does not induce any conflicts, and so STM achieves significant improvement compared to locks. In the case of Tomcat, however, this pattern does not hold. Transactions throughout the entire run perform write operations, and hence there are more conflicts and STM has poor performance.
 
-The execution summary is not limited to the above basic case. In general, it is initial-state sensitive, schedule-oblivious and site-sensitive. 
-First, the initial state about whether the key is mapped to some value affects the computation of the execution summaries. Therefore, we prefix each execution summary with a specific initial state, e.g., the state with initial key $[key^{init}\rightarrow v^{init}]$ or the state without initial key $[key^{init}\rightarrow void]$.
-Second, our execution summary is designed to be oblivious of the schedules. The schedule-obliviousness frees us from tracking the schedules at runtime and avoids the high tracking overhead. Third, the execution summary is site-sensitive. A transaction $TX^1_1$ may put a value dynamically created at site $A$ to the map. We symbolically represent the value using the site and the occurrence of the site (inside the transaction instance), e.g., $A1$ in $TX^1_1$. The extent to which we can distinguish the occurrences is determined by the static analysis, e.g., how many iterations can be unrolled.
+Interestingly, even on the benchmarks other than Tomcat STM is not able to compete with the low overhead, and thus better performance, of warping. We suspect that the reason is that STM has to instrument memory accesses, whereas warping applies state corrections directly.
 
-
-{\bf Runtime System\ }
-The runtime works as follows. We first use the counters to track the transaction instance and assemble the symbolic return accordingly, e.g., $r^1_1$.
-Then we search for the symbolic value in the execution summaries, e.g., $v^1_1$. Last, using the symbolic value as a key, we look up the cache, which is maintained to associate each symbolic value with a runtime value, for the concrete runtime value.
-
-The second step, i.e., searching for symbolic value in the summaries, is challenging. The searching is demanded on the fly at the return of each transaction instance. 
-However, the returns should be consistent with each other such that the warped execution represents a realistic execution. In the other words, the return values should be searched for in the same execution summary. To achieve this, we implement an on-the-fly pruning algorithm. At the first return, it finds the symbolic value in a randomly picked execution summary. After the value is picked, the execution summaries with different value for the return will be pruned, leading to a smaller solution space. 
-The algorithm is iteratively applied. In addition, to achieve initial-state sensitivity, we also reduce the solution space based on the initial states. 
-
-Another tricky issue is, at some return, the symbolic value found in the execution summaries may have not been associated with any concrete runtime value yet.
-For example, at the return of $TX^1_2$, we find the returned value as $v^1_1$ but $TX^1_1$ has not been executed, then we cannot find the runtime value associated with $v^1_1$ in the cache. This case happens because the execution summary is computed for certain schedule, which differs from the current schedule. In this case, we apply the notify/wait primitives to synchronize the cache lookup and cache maintenance. Even more complex, the returned value may never be put into the cache if the value creation site is disabled in the current schedule, e.g., its guarding branch condition is false. We simply remove all the guarding branches for the creation site such that it is always executed. This simple strategy is based on the insight that we treat the transaction as a blackbox and we only care about its return values. It is unnecessary to preserve the internal program semantics.
-
-
-We also implemented the optimization for the caching. From the summaries, we see that only the values put by the first few transactions are used. Therefore, we only record such values into the cache and discard the rest at runtime.
-
-
-
-
-
-
-\subsection{Evaluation}
-
-%TODO: check if we need to remove teh business op from the warp version.
-For performance measurement, we compare 4 versions with different types of synchronizations, the original version $orig$, the abstract key locking version $key$, the software transactional memory version $stm$, and the warping version $warp$.  The original version is without any synchronization, which may produce incorrect outputs. 
-We use this version to approximate the best performance any synchronization can achieve. The abstract key locking protects each key with a unique lock~\cite{}. As compared to protecting the whole map with a single lock, it allows parallelism among the invocations with different keys. For the software transactional memory, we use the open sourced implementation {\sf Deuce}~\cite{}. {\sf Deuce} features the easiness of use. {\sf Deuce} is essentially a Java agent that instruments the classes during the class loading to insert the STM functionality. However, the JDK classes are loaded before the agent starts to work. Therefore, we re-import the JDK implementation as application classes, which {\sf Deuce} successfully apply to. 
-The $warp$ version adopts our algorithm. In our evaluation, we use both the initial state with the key and the initial state without the key.  For space reason and clarity of figure, we only show the result based on the initial state with the key (other results are put into the technique report).
-
-
-Our benchmark is adapted from real world applications, including XXX and YYY. In our experiment, we consider two types of transactions for each benchmark, and each thread runs a combination of the transactions. In our experiment, we measure the performance under two changes: (1) We fix the number of threads as 8, the number of cores in the machine, and then change the number of transactions each thread runs from 10 to 100. This setting helps us understand the performance in different workloads, (2) we fix the number of transactions each thread runs as 100, and change the number of threads following the sequence: 1,2,4,6,8,10,12,14,16. This setting allows us to study the thread scalability. In our experiments, all threads operate on the same key.
+%In Figure~\ref{fig:case2Iter}, the X axis is the number of transactions in each thread, Y axis is the running time (unit: milliseconds). We fix the number of threads as 8. Although the number of transactions changes, the ratio between the $lock/stm$ time and the $warp$ time remains around 5, i.e., the $warp$ version runs as  5X times as the $lock/stm$ versions. We interpret the results in the following ways. First, the $lock$ version essentially serialize all the transaction instances because they involve the same key. The $stm$ version also exhibits the  parallelism embarrassingly in this case: Many transaction instances unconditionally update the location of the key in the map, which conflict with the transaction instances that read the location and force them to rollback. The $stm$ and $lock$ versions have similar performance because they  both serialize the transaction instances. Second, the speedup of our approach over $lock/stm$ is fixed when the thread number is fixed, indicating that the speedup is subject to the number of threads. 
+%
+%
+%
+%In Figure~\ref{fig:case2Th}, the X axis is the number of threads, Y axis is the running time. We fix the number of transactions each thread runs as 100. The ratio between the $lock/stm$ time and the $warp$ increases when the number of threads increases. For example, the $lock/stm$ version takes around 2X time as the $warp$ with 2 threads, around 3X time with 4 threads, around 5X with 8 threads, and remain 5X with more than 8 threads. This observation confirms our previous conclusion that the speedup is subject to the the number of threads. In this case, we get the best the speedup with 8 threads, where 8 is also the number of the cores, indicating that we make full exploitation of the cores with 8 threads. The figure shows that our approach has the dramatically better thread scalability than existing approaches. Another interesting observation is, when there is a single thread, the stm version takes 164 ms, while both our version and the lock version takes 112 ms. The stm takes longer time because the Deuce implementation instruments the classes on  the fly when they are loaded, which consumes extra time. 
+%
+%
+%Figure~\ref{fig:case3Iter}, Figure~\ref{fig:case4Iter} and Figure~\ref{fig:case4Iter} show the performance when the workload increases and follow the same setting as the test 2 shown in Figure~\ref{fig:case2Iter}. Similar to Figure~\ref{fig:case2Th}, Figure~\ref{fig:case3Th}, Figure~\ref{fig:case4Iter} and Figure~\ref{fig:case4Iter} show the performance when the number of threads increases. From the figures, we see the trend of the lock version and our version resemble case 2, but the stm version behaves quite differently. An interesting observation is, the time difference between the stm version and ours is almost a constant. This suggests that the stm version achieves the same parallelism degree as ours, while incurring some extra  overhead of class instrumentation. We inspected the code and confirmed this conclusion. In these cases, many transaction instances first check and then update conditionally. After the first instances update, the following instances will fail the checking and are degenerated to read-only transactions. The read-only transactions allow the maximal parallelism like ours. 
+%
+%\subsection{Discussion}
+%
+%{\bf Execution Summary\ } The static analysis phase computes a set of execution summaries, each representing a legal execution, which are used as the input of the dynamic analysis phase.
+%Each execution summary describes (i) the return value of each transaction instance and (ii) the final map state
+% 
+%
+%In our experiments,  we have two threads running two types of transactions ($TX_1$ and $TX_2$) respectively. One exemplary execution summary is, $[key\rightarrow v^1_1, r^1_1:v^1_1, r^n_1:v^1_1, r^1_2:v^1_1, r^n_2:v^1_1]$, where $r^1_1$ is the symbolic form of the return value of $TX^1_1$ (1$st$ instance of $TX_1$), $v^1_1$ is the symbolic form of the value put by the transaction instance, and $r^1_1:v^1_1$ describes the return value of the transaction instance. The readers may notice $r^n_1$. This symbol represents the return value of the instances that are not explicitly specified.  Here $n$ is determined by the capability of the static analysis. At runtime, we track the instance order and use $n$ by default if the number is not specified in the summary. The tracking of the instance order requires us to synchronize the first $n-1$ instances. However, the $n$ is typically a small number, and the synchronization overhead is negligible. We do not need to synchronize starting from the $n$th instance because all these instances are represented as $n$ by default. In addition, $key\rightarrow v^1_1$ tells what the key is associated with in the final map state. 
+%
+%The execution summary is not limited to the above basic case. In general, it is initial-state sensitive, schedule-oblivious and site-sensitive. 
+%First, the initial state about whether the key is mapped to some value affects the computation of the execution summaries. Therefore, we prefix each execution summary with a specific initial state, e.g., the state with initial key $[key^{init}\rightarrow v^{init}]$ or the state without initial key $[key^{init}\rightarrow void]$.
+%Second, our execution summary is designed to be oblivious of the schedules. The schedule-obliviousness frees us from tracking the schedules at runtime and avoids the high tracking overhead. Third, the execution summary is site-sensitive. A transaction $TX^1_1$ may put a value dynamically created at site $A$ to the map. We symbolically represent the value using the site and the occurrence of the site (inside the transaction instance), e.g., $A1$ in $TX^1_1$. The extent to which we can distinguish the occurrences is determined by the static analysis, e.g., how many iterations can be unrolled.
+%
+%
+%{\bf Runtime System\ }
+%The runtime works as follows. We first use the counters to track the transaction instance and assemble the symbolic return accordingly, e.g., $r^1_1$.
+%Then we search for the symbolic value in the execution summaries, e.g., $v^1_1$. Last, using the symbolic value as a key, we look up the cache, which is maintained to associate each symbolic value with a runtime value, for the concrete runtime value.
+%
+%The second step, i.e., searching for symbolic value in the summaries, is challenging. The searching is demanded on the fly at the return of each transaction instance. 
+%However, the returns should be consistent with each other such that the warped execution represents a realistic execution. In the other words, the return values should be searched for in the same execution summary. To achieve this, we implement an on-the-fly pruning algorithm. At the first return, it finds the symbolic value in a randomly picked execution summary. After the value is picked, the execution summaries with different value for the return will be pruned, leading to a smaller solution space. 
+%The algorithm is iteratively applied. In addition, to achieve initial-state sensitivity, we also reduce the solution space based on the initial states. 
+%
+%Another tricky issue is, at some return, the symbolic value found in the execution summaries may have not been associated with any concrete runtime value yet.
+%For example, at the return of $TX^1_2$, we find the returned value as $v^1_1$ but $TX^1_1$ has not been executed, then we cannot find the runtime value associated with $v^1_1$ in the cache. This case happens because the execution summary is computed for certain schedule, which differs from the current schedule. In this case, we apply the notify/wait primitives to synchronize the cache lookup and cache maintenance. Even more complex, the returned value may never be put into the cache if the value creation site is disabled in the current schedule, e.g., its guarding branch condition is false. We simply remove all the guarding branches for the creation site such that it is always executed. This simple strategy is based on the insight that we treat the transaction as a blackbox and we only care about its return values. It is unnecessary to preserve the internal program semantics.
+%
+%
+%We also implemented the optimization for the caching. From the summaries, we see that only the values put by the first few transactions are used. Therefore, we only record such values into the cache and discard the rest at runtime.
+%
+%
+%
+%
+%
+%
+%\subsection{Evaluation}
+%
+%%TODO: check if we need to remove teh business op from the warp version.
+%For performance measurement, we compare 4 versions with different types of synchronizations, the original version $orig$, the abstract key locking version $key$, the software transactional memory version $stm$, and the warping version $warp$.  The original version is without any synchronization, which may produce incorrect outputs. 
+%We use this version to approximate the best performance any synchronization can achieve. The abstract key locking protects each key with a unique lock~\cite{}. As compared to protecting the whole map with a single lock, it allows parallelism among the invocations with different keys. For the software transactional memory, we use the open sourced implementation {\sf Deuce}~\cite{}. {\sf Deuce} features the easiness of use. {\sf Deuce} is essentially a Java agent that instruments the classes during the class loading to insert the STM functionality. However, the JDK classes are loaded before the agent starts to work. Therefore, we re-import the JDK implementation as application classes, which {\sf Deuce} successfully apply to. 
+%The $warp$ version adopts our algorithm. In our evaluation, we use both the initial state with the key and the initial state without the key.  For space reason and clarity of figure, we only show the result based on the initial state with the key (other results are put into the technique report).
+%
+%
+%Our benchmark is adapted from real world applications, including XXX and YYY. In our experiment, we consider two types of transactions for each benchmark, and each thread runs a combination of the transactions. In our experiment, we measure the performance under two changes: (1) We fix the number of threads as 8, the number of cores in the machine, and then change the number of transactions each thread runs from 10 to 100. This setting helps us understand the performance in different workloads, (2) we fix the number of transactions each thread runs as 100, and change the number of threads following the sequence: 1,2,4,6,8,10,12,14,16. This setting allows us to study the thread scalability. In our experiments, all threads operate on the same key.
 
 \begin{figure*}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case1it.pdf}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 0 10 10, width=\textwidth]{../../eval/32threads/case1it.pdf}
 		\caption{\label{Fi:case1it}Apache Tomcat {\sf ApplicationContext}: workload}
 	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case1th.pdf}
+	\hspace{0.25 \textwidth}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case1th.pdf}
 				\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
 	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case2it.pdf}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case2it.pdf}
 						\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
 	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case2th.pdf}
+	\hspace{0.25 \textwidth}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case2th.pdf}
 						\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
 	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case3it.pdf}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case3it.pdf}
 			\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
 	\end{minipage}
-		\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case3th.pdf}
+		\hspace{0.25 \textwidth}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case3th.pdf}
 			\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
 	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case4it.pdf}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case4it.pdf}
 		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
 	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[trim=190 190 190 190, width=\textwidth]{../../eval/32threads/case4th.pdf}
+	\hspace{0.25 \textwidth}
+	\begin{minipage}{0.375 \textwidth}
+		\includegraphics[trim=10 10 10 10, width=\textwidth]{../../eval/32threads/case4th.pdf}
 		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
 	\end{minipage}
 \end{figure*}
