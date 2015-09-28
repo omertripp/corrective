@@ -1,6 +1,6 @@
 \section{Implementation and Evaluation}\label{Se:experiments}
 
-In this section, we first describe our prototype implementation of the overall system (both the static analysis and the runtime synchronization algorithm), and then its experimental evaluation over a set of five real-world subjects. 
+In this section, we first describe our prototype implementation of the overall system (both the static analysis and the runtime synchronization algorithm), and then its experimental evaluation over a set of four real-world subjects. 
 
 \subsection{Prototype System}
 
@@ -10,7 +10,7 @@ As explained earlier, the interface with the runtime system is a relational warp
 \begin{center}
 $[ {\sf k} \mapsto \bot , {\sf v} \mapsto v ] \leadsto \{ [ {\sf k} \mapsto v , {\sf v} \mapsto v ] \}$
 \end{center}
-denotes that in the poststate, the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
+denotes that if we started from a prestate where ${\sf k}$ was not in the map and the value passed to the function was $v$, then in the poststate the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
 
@@ -22,19 +22,19 @@ The specification is cast by the runtime system into a hierarchical representati
 
 \subsection{Methodology and Experimental Setup}
 
-We conducted our experiments on an X86\_64 ThinkPad W530 workstation with eight 2.30GHz Intel Core i7-3610QM processors, 16GB of RAM and 6M caches. The workstation runs version
-12.04 of the Ubuntu Linux distribution, and has the Sun 64-Bit 1.7 Java virtual machine (JVM) installed.
+We conducted our experiments on server with two Intel(R) Xeon(R) CPU E5-2690 0 @ 2.90GHz (16 cores) CPUs with 132GB of RAM. The server runs version
+6.6 of the CentOS Linux distribution, and has the Sun 64-Bit 1.8 Java virtual machine (JVM) installed.
 
-In our experiments, we measured two aspects of parallel execution:
+In our experiments, we varied two aspects of parallel execution:
 \begin{itemize}
 	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as the number of transactions executed by a given thread, where a single transaction consists of the invocation of a particular method. All inputs share the same key(s).
-	\item \underline{Concurrency level:} For a fixed workload size, set at 10 (\pengtodo{please confirm}), the number of threads is varied along the range of 1 to 32 threads.  
+	\item \underline{Concurrency level:} For a fixed workload size, set at 10 (\pengtodo{please confirm}), the number of threads is varied along the range of 2 to 32 threads.  
 \end{itemize}
 For statistical soundness, we report the average performance results across 10 independent repetitions of each experiment.
 
 We compare our technique against two competing solutions:
 \begin{itemize}
-	\item a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version),\footnote{
+	\item a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
 		\url{https://github.com/DeuceSTM/DeuceSTM}
 	}; and
 	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{EricBoosting}.
@@ -89,8 +89,8 @@ protected void internalSerialize(PofWriter out,Object origVal)
 
 \subsection{Performance Results} 
 
-We depict the performance results in Figures \ref{XXX}-\ref{XXX}. 
-For each benchmark, we present two column diagrams, corresponding to STM and warping (left/red and right/green, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
+We depict the performance results in Figures \ref{Fi:case1it}-\ref{Fi:case4th}. 
+For each benchmark, we present two column diagrams, corresponding to STM and warping (left/black and right/gray, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
 The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
