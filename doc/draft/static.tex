@@ -76,6 +76,8 @@ boolean removeAttribute(Key k, Value v) {
 
 XXX Somewhere else? XXX
 
+In this Section, we will refer to the motivating example of Figure \ref{Fi:introMotivating}. 
+
 Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. This code is inspired by \pietrotodo{XXX}. The first type of transaction (\statement{transaction1}) removes the value associated with the given key \statement{k}, and returns it. Instead, the second type of transaction relates \statement{k} with a given value \statement{v}, and returns \statement{true} if the key was already in the map. During the formalization of the static analysis and the warping system, we will refer to this running example where each transaction is instantiated multiple times, and all transactions conflict on the same key \statement{k}.
 
 
