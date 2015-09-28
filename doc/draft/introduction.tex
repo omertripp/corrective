@@ -18,7 +18,7 @@ public Convertor getConvertor(
       Class cls,boolean create,boolean add) {
   Convertor convertor = _convertors.get(cls.getName());
   if(convertor==null && create) {
-    convertor = newConvertor(cls,add);
+    convertor = new Convertor(cls,add);
     _convertors.putIfAbsent(cls.getName(), convertor); }
     return convertor; }
 	\end{lstlisting}
