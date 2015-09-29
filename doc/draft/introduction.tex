@@ -10,22 +10,37 @@ Toward this end, there are currently two main synchronization paradigms:
 
 \paragraph{Motivation} The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
 
-Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor()}.
+Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor()}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
+
+%\begin{figure}
+%	\begin{lstlisting}[numbers=left]
+%public Convertor getConvertor(
+%      Class cls,boolean create,boolean add) {
+%  Convertor convertor = _convertors.get(cls.getName());
+%  if(convertor==null && create) {
+%    convertor = new Convertor(cls,add);
+%    _convertors.putIfAbsent(cls.getName(), convertor); }
+%    return convertor; }
+%	\end{lstlisting}
+%	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
+%\end{figure}
 
 \begin{figure}
-	\begin{lstlisting}
-public Convertor getConvertor(
-      Class cls,boolean create,boolean add) {
-  Convertor convertor = _convertors.get(cls.getName());
+	\begin{lstlisting}[numbers=left]
+Convertor getConvertor(String name, boolean create) {
+  Convertor convertor = _convertors.get(name);
   if(convertor==null && create) {
-    convertor = new Convertor(cls,add);
-    _convertors.putIfAbsent(cls.getName(), convertor); }
-    return convertor; }
+    convertor = new Convertor(name);
+    _convertors.putIfAbsent(name, convertor);
+  }
+  return convertor;
+}
 	\end{lstlisting}
 	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
 \end{figure}
 
-Assume that different threads invoking this method are all attempting to simultaneously obtain the same {\sf Convertor} object, which has not yet been created. Doing so optimistically would lead to multiple rollbacks, and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf newConvertor()} is an expensive operation.
+
+Assume that different threads invoking this method are all attempting to simultaneously obtain the same {\sf Convertor} object, which has not yet been created. Doing so optimistically would lead to multiple rollbacks, and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
 
 \paragraph{Our Approach} We propose a novel synchronization paradigm, which is conceptually different from both the pessimistic and the optimistic approaches. In our approach, dubbed \emph{corrective synchronization}, the correctness of multi-threaded execution is enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
 
@@ -38,8 +53,8 @@ To illustrate our approach, we revisit the running example. Assume the following
 															  & ${\sf \_convertors.get()} / {\sf null}$ \\
 		${\sf if (...)}$ 								   &							\\
 															  & ${\sf if (...)}$ \\
-		${\sf newConvertor()} / o_1$		& \\
-															  & ${\sf newConvertor()} / o_2$ \\
+		${\sf new\ Convertor()} / o_1$		& \\
+															  & ${\sf new\ Convertor()} / o_2$ \\
 		${\sf \_convertors.putIfAbsent()} / {\sf null}$ &  \\
 									& 		${\sf \_convertors.putIfAbsent()} / o_1$ \\
 		${\sf return}\ o_1$ & \\
