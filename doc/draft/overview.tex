@@ -1,0 +1,27 @@
+\section{Technical Overview}
+
+In this section, we walk the reader through a high-level overview of the warping approach. We first describe the conceptual details at a technical level, and then the two main algorithmic steps and how our prototype implementation carries out these steps.
+
+\subsection{The Warping Concept}
+
+By warping we mean the ability to transform a concurrent run that, in its present state, may not be serializable into a serializable run. Stated formally, warping is a relationship between histories $h \leadsto h'$, such that
+\begin{itemize}
+	\item $h$ and $h'$ share the same initial state; and
+	\item $h$ and $h'$ share the same commit log (i.e., they agree on the operations on the shared-state).
+\end{itemize} 
+
+We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of hte system. We refer to the warping solution as \emph{complete} if for any $h$ there is a corresponding $h'$ in the warping relation.
+
+\subsection{Computing Warping Targets}
+
+A simpler --- and more abstract --- specification to work with, compared to complete execution prefixes, is in the form of triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the runtime instrumentation it maps to is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
+
+Mapping back from pairs of states to prefixes requires an orcale. In our prototype system, the oracle is computed as a relational abstract-intepretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over serial executions of the system. This yields a specification of admissible input-to-intermediate states $(s,s')$.
+
+** Need to say more about unbounded number of threads, etc **
+
+\subsection{Runtime Synchronization} 
+
+The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. Here there is also the challenge, given multiple candidates, of finding the most optimal candidate to warp to.
+
+In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors. If read/write or write/write conflicts arise, then warping is triggered in response. The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a tree representation of 
