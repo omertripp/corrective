@@ -10,13 +10,13 @@ By warping we mean the ability to transform a concurrent run that, in its presen
 	\item $h$ and $h'$ share the same commit log (i.e., they agree on the operations on the shared-state).
 \end{itemize} 
 
-We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of hte system. We refer to the warping solution as \emph{complete} if for any $h$ there is a corresponding $h'$ in the warping relation.
+We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to the warping solution as \emph{complete} if for any $h$ there is a corresponding $h'$ in the warping relation.
 
 \subsection{Computing Warping Targets}
 
 A simpler --- and more abstract --- specification to work with, compared to complete execution prefixes, is in the form of triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the runtime instrumentation it maps to is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
 
-Mapping back from pairs of states to prefixes requires an orcale. In our prototype system, the oracle is computed as a relational abstract-intepretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over serial executions of the system. This yields a specification of admissible input-to-intermediate states $(s,s')$.
+Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over serial executions of the system. This yields a specification of admissible input-to-intermediate states $(s,s')$.
 
 ** Need to say more about unbounded number of threads, etc **
 

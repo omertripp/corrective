@@ -51,34 +51,34 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 We focus our formalization on the fragment of language in Figure \ref{fig:language}. This fragment is focused on a representative set  of operations of the Java \statement{java.util.concurrent.ConcurrentMap} class XXX Add API's URL XXX. We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
 
 
-\subsubsection{Running Example}
-
-\begin{figure}
-\begin{lstlisting}
-Value removeAttribute(Key k) {
-  Value result = null;
-  if(map.containsKey(k)) {
-    result = m.get(k);
-    m.remove(k);
-  }
-  return result;
-}
-	
-boolean removeAttribute(Key k, Value v) {
-  Value oldvalue = m.get(k);
-  m.put(k, v);
-  return oldvalue != null;
-}
-\end{lstlisting}
-\caption{The running example inspired by class \statement{ApplicationContext} of Apache Tomcat}
-\label{lst:runningexamplestaticanalysis}
-\end{figure}
-
-XXX Somewhere else? XXX
-
-In this Section, we will refer to the motivating example of Figure \ref{Fi:introMotivating}. 
-
-Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. This code is inspired by \pietrotodo{XXX}. The first type of transaction (\statement{transaction1}) removes the value associated with the given key \statement{k}, and returns it. Instead, the second type of transaction relates \statement{k} with a given value \statement{v}, and returns \statement{true} if the key was already in the map. During the formalization of the static analysis and the warping system, we will refer to this running example where each transaction is instantiated multiple times, and all transactions conflict on the same key \statement{k}.
+%\subsubsection{Running Example}
+%
+%\begin{figure}
+%\begin{lstlisting}
+%Value removeAttribute(Key k) {
+%  Value result = null;
+%  if(map.containsKey(k)) {
+%    result = m.get(k);
+%    m.remove(k);
+%  }
+%  return result;
+%}
+%	
+%boolean removeAttribute(Key k, Value v) {
+%  Value oldvalue = m.get(k);
+%  m.put(k, v);
+%  return oldvalue != null;
+%}
+%\end{lstlisting}
+%\caption{The running example inspired by class \statement{ApplicationContext} of Apache Tomcat}
+%\label{lst:runningexamplestaticanalysis}
+%\end{figure}
+%
+%XXX Somewhere else? XXX
+%
+%In this Section, we will refer to the motivating example of Figure \ref{Fi:introMotivating}. 
+%
+%Figure \ref{lst:runningexamplestaticanalysis} illustrates our running example. This code is inspired by \pietrotodo{XXX}. The first type of transaction (\statement{transaction1}) removes the value associated with the given key \statement{k}, and returns it. Instead, the second type of transaction relates \statement{k} with a given value \statement{v}, and returns \statement{true} if the key was already in the map. During the formalization of the static analysis and the warping system, we will refer to this running example where each transaction is instantiated multiple times, and all transactions conflict on the same key \statement{k}.
 
 
 \subsection{Concrete Domain and Semantics}
@@ -101,7 +101,7 @@ The lattice structure is obtained by the point-wise application of set operators
 For the sake of simplicity, we omit in the formalization the local log in the abstract domain. The only difference w.r.t. the concrete local log is that the entries refer to abstract heap nodes in $\heapnode$ instead of concrete references in $\reference$, and the presences of the entry \statement{?put} representing a possible \statement{put} action. This will be used in the definition of the abstract semantics of statement \statement{putIfAbsent}. XXX We can formalize the log. However, the problem is that the sequence might be infinite, so we need some kind of regular expressions - not sure I'm willing to go into this direction XXX 
 
 \paragraph{Running example.} 
-Consider the first method in Figure \ref{lst:runningexamplestaticanalysis}. For instance, the abstract state $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{key} is not in the map, while $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to a value. Instead, for the second method, $([\statement{k} \mapsto \{n_1\}, \statement{v} \mapsto n_2], [n_1 \mapsto \{n_2\}])$ represents that \statement{k} is in the map, and it is related to the value pointed by \statement{v}
+Consider the motivating example in Figure \ref{Fi:introMotivating}. For instance, the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{name} is not in the map, while $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to some value $n_2$. Finally, $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents that \statement{name} (i) might not be in the map, \emph{or} (ii) is in the map related to value $n_2$.
 
 \subsection{Concretization function.}
 We define the concretization function $\gamma_\state : \astate \to \wp(\state)$ that, given an abstract state, returns the set of concrete states it represents. First of all, we assume that a function concretizing abstract heap nodes to concrete references is given. Formally, $\gamma_\reference : \heapnode \to \wp(\reference)$. We assume that this concretization function concretizes \statement{null} into itself ($\gamma_\reference(\statement{null})=\{\statement{null}\}$), and that it is coherent w.r.t. the information provided by $\isSummary$ ($\neg \isSummary(n) \Leftrightarrow |\gamma_\reference(n)|=1$).
@@ -122,7 +122,7 @@ The concretization of local logs simply relies on $\gamma_\reference$ to concret
 	The abstract domain is a sound approximation of the concrete domain, that is, they form a Galois connection \cite{CC77}. Formally, $\langle \wp(\state), \subseteq, \cup \rangle \galois{\alpha_\state}{\gamma_\state} \langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$ where $\alpha_\state = \lambda \cset{X} . \cap \{\cset{Y} : \cset{Y} \subseteq \gamma_\state(X)\}$.
 \end{lemma}
 
-\paragraph{Running example:} XXX
+\paragraph{Running example:} Consider again that abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Imagine that $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into the concrete states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map and it is related with the value pointed by reference $\#2$).
 
 
 
@@ -221,14 +221,12 @@ TODO
 \end{proof}
 
 \paragraph{Running example.}
-Consider again the first method in Figure \ref{lst:runningexamplestaticanalysis}. When we start from the abstract state  $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{k} is not in the map), we obtain the abstract state $\sigma = ([\statement{k} \mapsto \{n_1\}, \statement{result} \mapsto \{null\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(null)}. During the following computation of rule \statement{(if)}, we consider:
-\begin{enumerate}
-	\item when the Boolean condition \statement{map.containsKey(k)} holds. When applying rule \statement{(cntK)} on $\sigma$ we obtain $\bot$ since the node pointed by \statement{k} is related to the singleton $\{\statement{null}\}$ in the map, representing that the map does not contain the key \statement{k}; and
-	\item when \statement{! map.containsKey(k)} holds. Rule \statement{(!cntK)} applied to $\sigma$ returns $\sigma$ itself, since \statement{k} is in relation only with \statement{null} in the map.
-\end{enumerate}
-\statement{(if)} returns the upper bound of the two resulting states, that is $\bot \dot{\cup} \sigma = \sigma$, and the value pointed by \statement{result} (that is, \statement{null}) is returned.
-Therefore, our analysis computes on this example that, when the key is not in the map in the entry state, the method returns \statement{null} and does not modify the map.
+Consider again the code of method {\sf getConvertor()} in Figure \ref{Fi:introMotivating}, and suppose that the Boolean flag \statement{create} is \statement{true}. When we start from the abstract state  $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{name} is not in the map), we obtain the abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{\statement{null}\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(get)}. 
 
+Then the semantics of the Boolean condition of the \statement{if} statements at line 3 applies rule \statement{(null)} (that does not modify the abstract state) since \statement{conv} is \statement{null}, and we assumed \statement{create} is \statement{true}. 
+Lines 4 and 5 applies rules \statement{(new)} and \statement{(pIA)}, respectively. Supposing that $\freshNode(t)$ returns $n_2$, we obtain $\sigma'=([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{n_2\}], [n_1 \mapsto n_2])$. We then join this state with the one obtained by applying rule \statement{(!null)} to $\sigma$ (that is, $\bot$) obtaining $\sigma'$ itself.
+
+The result of this example represents that, when you start the computation passing a key \statement{name} that is not in the map and \statement{true} for the Boolean flag \statement{create}, after executing method \statement{getConvertor} in isolation you obtain a map relating \statement{name} to the new object instantiated at line 4.
 
 \section{Transaction System Semantics}
 \label{sec:transactionsystemwarping}
@@ -245,15 +243,18 @@ Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each tran
 
 Note that we apply the abstract semantics to the various transactions, and we build a function that for each transaction $t^i_j$ tracks its local state and log. Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$. Then our semantics on a serialized control flow graph returns a function in $\amultistate : \abstracttransactions \to \astate$.
 
-XXX This should be inside the explanations about the running example XXX We suppose that all the transactions conflict on the same key. For instance, in the example in Figure \ref{lst:runningexamplestaticanalysis} we suppose that the parameter \statement{key} is the same for all the instances of both types of transactions. Instead, each instance of the second type has a different value parameter \statement{v}.
-	
+
+\paragraph{Running example.}
+Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized control flow graph where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $\statement{t_1}; \statement{t_n}; \statement{t_2}$ where the code of $\statement{t_n}$ is inside a loop.
+
+Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
 
 \subsection{Extracting Possible Warping States}
 First of all, notice that, given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) producing the same shared log (formally, ${\sf ref}\ t \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : {\sf ref}\ t=\sigma_0$) . In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we warp the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that ${\sf ref}\ t \leadsto (T,\mu', \sigma_0, \epsilon)$.
 
 We need now to compute possible warping targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute warping that, given an entry state representing an observational equivalence class, is in an equivalence class that is reachable through a serialized execution. 
 
-However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot used to define a warping destination.
+However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot define a warping destination.
 
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,
 \[
@@ -277,18 +278,14 @@ Note that in general the concretization of an abstract is not computable or extr
 The definition of $\isconcrete$ is extended to state $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$/
 We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and compute the exit states on the serialized CFG $tc$ and for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations.
 
-\paragraph{Running example:} XXX
-
-
 After running the semantics $\semanticanome{S}$, we represent the result as a function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
-
-
 \[
-\begin{array}{r}
-\warpdestination(\set{T}, \set{S}) =[\phi \mapsto \{ \phi': \phi' \in \csemantics{S}{tc, \phi} \land\\
-\isconcrete(e', m')\} : \phi \in S]\\
-\end{array}
+\warpdestination(\set{T}, \set{S}) =[\phi \mapsto \{ \phi': \phi' \in \csemantics{S}{tc, \phi} \land
+\isconcrete(\phi')\} : \phi \in S]
 \]
+
+\paragraph{Running example:} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
+$([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 
 \subsection{Dynamic Warping}
 

@@ -28,12 +28,12 @@ Beyond these cases, however, there are many other situations of practical intere
 \begin{figure}
 	\begin{lstlisting}[numbers=left]
 Convertor getConvertor(String name, boolean create) {
-  Convertor convertor = _convertors.get(name);
-  if(convertor==null && create) {
-    convertor = new Convertor(name);
-    _convertors.putIfAbsent(name, convertor);
+  Convertor conv = _convertors.get(name);
+  if(conv==null && create) {
+    conv = new Convertor(name);
+    _convertors.putIfAbsent(name, conv);
   }
-  return convertor;
+  return conv;
 }
 	\end{lstlisting}
 	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
@@ -61,9 +61,9 @@ To illustrate our approach, we revisit the running example. Assume the following
 									& ${\sf return}\ o_2$ \\
 	\end{tabular}
 \end{center}
-This history is clearly nonserializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf convertor}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf cls.getName()} in the same way.
+This history is clearly nonserializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf cls.getName()} in the same way.
 
-Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf convertor}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. Also note that the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
+Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. Also note that the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
 
 Two important challenges w.r.t. the corrective synchronization paradigm that this paper takes a first step in addressing are (i) how to compute correct poststates; and (ii) given an incorrect poststate, how to decide which correct poststate to transition to. We govern our discussion of these challenges by a formal framework, based on the push/pull model for transactions \cite{KoskinenP15}, with rigorous soundness guarantees. We also provide a clear statement of the limitations of corrective synchronization.
 
