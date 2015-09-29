@@ -12,6 +12,13 @@ By warping we mean the ability to transform a concurrent run that, in its presen
 
 We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to the warping solution as \emph{complete} if for any $h$ there is a corresponding $h'$ in the warping relation.
 
+--------- PIETRO ------------
+
+Not sure about completeness. For me it would be complete iff it computes all possible warping destinations (obviously not possible).
+
+I would add: (i) that the goal of warping is to compute a function that from the last state of $h'$ jumps to the last state of $h$ by correcting the state, (ii) add a diagram where we show what we do and how it "visually" differs from optimistic/pessimistic approaches.
+
+
 \subsection{Computing Warping Targets}
 
 A simpler --- and more abstract --- specification to work with, compared to complete execution prefixes, is in the form of triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the runtime instrumentation it maps to is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
@@ -20,8 +27,22 @@ Mapping back from pairs of states to prefixes requires an oracle. In our prototy
 
 ** Need to say more about unbounded number of threads, etc **
 
+
+--------- PIETRO ------------
+
+I think the 1st paragraph would be captured by what I proposed for the previous subsection. 
+
+I would add (i) given the code of some transactions, we can build up a representation of serialized executions of an *unbounded* number of instances of these transactions, (ii) on this representation we compute an underapproximation of the executions such that can map an entry state $\sigma$ to an exit/intermediate state $\sigma'$ that is reached only through a serialized/serializable execution, and (iii) we instantiate this to maps.
+
 \subsection{Runtime Synchronization} 
 
 The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. Here there is also the challenge, given multiple candidates, of finding the most optimal candidate to warp to.
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors. If read/write or write/write conflicts arise, then warping is triggered in response. The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a tree representation of 
+
+
+--------- PIETRO ------------
+
+In the formalization and in the implementation we do not have anything about how you can find the best candidate. I might add this to the formalization but I am not sure how we can justify it, we don't need it at all for maps, and we didn't investigate this aspect.
+
+I would rephrase that the second challenge consists in "adjusting" the computational state created during the bad execution to one of a serializable execution. I do not know the details of the implementation and how Peng solved it, you should talk with him on this.
