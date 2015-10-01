@@ -48,7 +48,7 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 	\caption{Fragment of the language dealing with map-related operations}
 	\label{fig:language}
 \end{figure}
-We focus our formalization on the fragment of language in Figure \ref{fig:language}. This fragment is focused on a representative set  of operations of the Java \statement{java.util.concurrent.ConcurrentMap} class XXX Add API's URL XXX. We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
+We focus our formalization on the fragment of language in Figure \ref{fig:language}. This fragment is focused on a representative set  of operations of the Java 7 \statement{java.util.concurrent.ConcurrentMap} class.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentHashMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
 
 
 %\subsubsection{Running Example}
@@ -89,12 +89,45 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 
 In addition to the local state, the concrete domain tracks the log of operations. Given the language defined in Section \ref{sect:language}, the operations tracked in the concrete log are $\statement{put}(r_k, r_v)$ and $\statement{remove}(r_k)$ where $r_k, r_v \in \reference$.
 
-We do not provide the complete formalization of the concrete semantics since it is the straightforward definition of map operations over the concrete domain. Note that \statement{putIfAbsent} creates an entry $\statement{put}$ iff the key is not yet in the map. XXX Add the concrete semantics to an appendix? XXX
+
+\begin{figure}
+	\[
+	\begin{array}{l}
+	\csemantics{C}{\statement{m.put(k, v)}, (e, m)} = 
+	(e, m[e(\statement{k}) \mapsto e(\statement{v})])\\
+	\csemantics{C}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto m(n)], m) \\
+	\csemantics{C}{\statement{m.remove(k)}, (e, m)} = 
+	(e, m[e(\statement{k}) \mapsto \statement{null}])\\
+	\csemantics{C}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} =  (e[\statement{v} \mapsto m(n)], m') : \\
+	\hspace{70pt} 
+	m'=
+	\left\{
+	\begin{array}{ll}
+	m[n \mapsto e(\statement{v})]) & \textrm{ if } m(e(\statement{k})) = \statement{null}\\
+	m & \textrm{ otherwise}\\
+	\end{array}
+	\right. \\
+	\csemantics{C}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)\\
+	\csemantics{C}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)\\
+	\csemantics{C}{\statement{assert(x==null)}, (e, m)} = (e,m) \textrm{ if } e(\statement{x})=\statement{null}\\
+	\csemantics{C}{\statement{assert(x!=null)}, (e, m)} = (e,m ) \textrm{ if } e(\statement{x})\neq\statement{null}\\
+	\csemantics{C}{\statement{assert(m.containsKey(k))}, (e, m)} = (e, m)\\
+	\hspace{140pt} \textrm{ if } m(e(\statement{k})) \neq \statement{null}\\
+	\csemantics{C}{\statement{assert(!m.containsKey(k))}, (e, m)} =(e, m)\\
+	\hspace{140pt} \textrm{ if } m(e(\statement{k})) = \statement{null}\\
+	\end{array}
+	\]
+	\caption{Concrete semantics}
+	\label{fig:concretesemantics}
+\end{figure}
+
+
+Figure \ref{fig:concretesemantics} defines the concrete semantics. For the most part, the concrete semantics formalizes the API specification of the corresponding Java method. Note that \statement{assert} is defined only on the states that satisfy the given Boolean conditions. In this way, the concrete semantics filters out only the states that might execute a branch of an \statement{if} or \statement{while} statement.
 
 \subsection{Abstract Domain}
 \label{sect:abstractate}
 
-Let $\heapnode$ be the set of abstract heap nodes with $\statement{null} \in \heapnode$. Both keys and values are abstracted as heap nodes. As usual with heap abstractions, each heap node might represent one or many concrete references. Therefore, we suppose that a function $\isSummary : \heapnode \to \{\true, \false\}$ is provided; $\isSummary(h)$ returns $\true$ if and only if $h$ represents many concrete nodes (that is, it is a summary node). We define by $\aenv : \variable \to \wp(\heapnode)$ the set of (abstract) environments relating each variable to the set of heap nodes it might point to. A map is represented as a function $\amap : \heapnode \to \wp(\heapnode)$, connecting each key to the set of possible values it might be related to in the map. The value $\statement{null}$ represents that the key is not in the map. For instance, $[n_1 \mapsto \{\statement{null}, n_2\}]$ represents that the key $n_1$ might not be in the map, or it is in the map, and it is related to value $n_2$. An abstract state is a pair made by an abstract environment and an abstract map. We augment this set with a special bottom value $\bot$ to will be used to represent that a statement is unreachable. Formally, $\astate = (\aenv \times \amap) \cup \{\bot\}$.
+Let $\heapnode$ be the set of abstract heap nodes with $\statement{null} \in \heapnode$. Both keys and values are abstracted as heap nodes. As usual with heap abstractions, each heap node might represent one or many concrete references. Therefore, we suppose that a function $\isSummary : \heapnode \to \{\true, \false\}$ is provided; $\isSummary(n)$ returns $\true$ if $n$ might represent many concrete nodes (that is, it is a summary node). We define by $\aenv : \variable \to \wp(\heapnode)$ the set of (abstract) environments relating each variable to the set of heap nodes it might point to. A map is represented as a function $\amap : \heapnode \to \wp(\heapnode)$, connecting each key to the set of possible values it might be related to in the map. The value $\statement{null}$ represents that the key is not in the map. For instance, $[n_1 \mapsto \{\statement{null}, n_2\}]$ represents that the key $n_1$ might not be in the map, or it is in the map, and it is related to value $n_2$. An abstract state is a pair made by an abstract environment and an abstract map. We augment this set with a special bottom value $\bot$ to will be used to represent that a statement is unreachable. Formally, $\astate = (\aenv \times \amap) \cup \{\bot\}$.
 
 The lattice structure is obtained by the point-wise application of set operators to elements in the codomain of abstract environments and functions. Therefore, the abstract lattice is defined as $\langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$, where $\dot{\subseteq}$ and$\dot{\cup}$ represents the point-wise application of set operators $\subseteq$ and $\cup$, respectively.
 
@@ -121,6 +154,11 @@ The concretization of local logs simply relies on $\gamma_\reference$ to concret
 \begin{lemma}[Soundness of the domain]
 	The abstract domain is a sound approximation of the concrete domain, that is, they form a Galois connection \cite{CC77}. Formally, $\langle \wp(\state), \subseteq, \cup \rangle \galois{\alpha_\state}{\gamma_\state} \langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$ where $\alpha_\state = \lambda \cset{X} . \cap \{\cset{Y} : \cset{Y} \subseteq \gamma_\state(X)\}$.
 \end{lemma}
+\begin{proof}
+
+$\gamma_\astates$ is a complete meet-morphism since it produces all possible environments and maps starting from a given reference concretization. Then, $\alpha_\astates$ is well-defined since $\gamma_\astates$ is a complete $\cap$-morphism. The fact that it forms a Galois connection follows immediately from the definition of $\alpha_\astates$ (Proposition 7 of \cite{CC92}).
+\end{proof}
+
 
 \paragraph{Running example:} Consider again that abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Imagine that $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into the concrete states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map and it is related with the value pointed by reference $\#2$).
 
@@ -153,9 +191,9 @@ The concretization of local logs simply relies on $\gamma_\reference$ to concret
 m'=
 \left\{
 \begin{array}{ll}
-(e, m[n \mapsto e(\statement{v})]) & \textrm{ if } e(\statement{k})=\{\statement{n}\} \land m(n) = \{\statement{null}\}\\
-(e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})]) & \textrm{ if } \statement{null} \in m(n) \land |m(n)| > 1\\
-(e, m) & \textrm{ otherwise}\\
+m[n \mapsto e(\statement{v})] & \textrm{ if } e(\statement{k})=\{\statement{n}\} \land m(n) = \{\statement{null}\}\\
+m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})] & \textrm{ if } \statement{null} \in m(n) \land |m(n)| > 1\\
+m & \textrm{ otherwise}\\
 \end{array}
 \right. & (\mathtt{pIA})\\
 \\
@@ -187,7 +225,7 @@ m'=
 \csemantics{S}{\statement{assert(m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
-(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neq \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
+(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land m(n) \neq \{\statement{null}\}\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{cntK})\\
@@ -195,7 +233,7 @@ m'=
 \csemantics{S}{\statement{assert(!m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
-(e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neq \isSummary(n) \land \statement{null} \in m(n)\\
+(e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \statement{null} \in m(n)\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{!cntK})\\
@@ -214,10 +252,11 @@ For the sake of simplicity, we omit in the formalization of the abstract semanti
 
 
 \begin{lemma}[Soundness of the semantics]
+	\label{lemma:soundnessabstractsemantics}
 	The abstract semantics is a sound approximation of the concrete semantics. Formally, $\forall \statement{st}, (e, m) \in \astate: \gamma_\state(\csemantics{S}{\statement{st}, (e, m)}) \supseteq \csemantics{C}{\statement{st}, \gamma_\state(e, m)}$, where $\semanticanome{C}$ represents the pointwise application of the concrete semantics introduced in Section \ref{sec:concretemap} to a set of concrete states.
 \end{lemma}
 \begin{proof}
-TODO
+The proof of this lemma follows by case splitting on the statement, and by definition of the concrete and abstract semantics.
 \end{proof}
 
 \paragraph{Running example.}
@@ -269,10 +308,11 @@ Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ th
 Note that in general the concretization of an abstract is not computable or extremely expensive. Therefore, we rely on $\isconcrete$ to check if an abstract state represents one precise concrete state.
 
 \begin{lemma}
-	$\forall (e, m) \in \Sigma : \isconcrete(e, m) \Leftrightarrow |\gamma(e, m)|=1$
+	\label{lemma:singleconcretization}
+	$\forall (e, m) \in \Sigma : \isconcrete(e, m) \Rightarrow |\gamma_\state(e, m)|=1$
 \end{lemma}
 \begin{proof}
-	TODO
+ By definition of $\isconcrete$, we have that $\neg \isSummary(n)$ for all the nodes $n$ in $e$ or $n$. By definition of $\isSummary$ we have that $|\gamma_\reference(n)|=1$. Thanks to this result and by definition of $\gamma_\astate$ we obtain that $|\gamma_\state(e, m)|=1$.
 \end{proof}
 
 The definition of $\isconcrete$ is extended to state $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$/
@@ -315,11 +355,11 @@ Finally, we can prove that the warping destinations computed by $\warpdestinatio
 	Let $t=\warpdestination(\cset{T}, \cset{S})$ be the results computed by our system. Then, $\forall \sigma_0 \in \gamma_\multistate(\phi_0), \sigma_n \in \gamma_\multistate(\phi_n) : \phi_0 \in \dom{t} \land \phi_n \in t(\phi_0)$ we have that $\sigma_0 \leadsto \sigma_n$
 \end{theorem}
 \begin{proof}
-	TODO
+By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and $\isconcrete(\phi_n)$ hold. Therefore, by Lemma \ref{lemma:singleconcretization} we have that $\gamma_\state(\phi_0) = \{\sigma_0\}$ and $\gamma_\state(\phi_0) = \{\sigma_n\}$. In addition, by definition of $\warpdestination$ we have that $\phi_n \in \csemantics{S}{tc, \phi_0}$. Then, by lemma \ref{lemma:soundnessabstractsemantics} (soundness of the abstract semantics) we have that $\sigma_n$ is exactly what is computed by the concrete semantics on the given program starting from $\sigma_0$, that is, $\sigma_0 \leadsto \sigma_n$. 
 \end{proof}
 
 
-Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\ref t}$ for all the concrete transaction identifiers $t$.
+Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\sf t}$ for all the concrete transaction identifiers $t$.
 
 
 %\section{Dynamic Warping}
