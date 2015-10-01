@@ -4,45 +4,56 @@ In this section, we walk the reader through a high-level overview of the warping
 
 \subsection{The Warping Concept}
 
-By warping we mean the ability to transform a concurrent run that, in its present state, may not be serializable into a serializable run. Stated formally, warping is a relationship between histories $h \leadsto h'$, such that
+By warping we mean the ability to transform a concurrent run that, in its present state, may not be serializable into a serializable run. Stated formally, warping is a relationship $h \leadsto h'$ between histories, such that
 \begin{itemize}
 	\item $h$ and $h'$ share the same initial state; and
 	\item $h$ and $h'$ share the same commit log (i.e., they agree on the operations on the shared-state).
 \end{itemize} 
 
-We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to the warping solution as \emph{complete} if for any $h$ there is a corresponding $h'$ in the warping relation.
+The first condition ensures that warping yields a feasible outcome. The second is effectively the requirement not to roll back updates to the shared state. These two conditions distinguish warping from existing synchronization solutions: Unlike pessimistic solutions, bad behaviors may occur under warping. That is, they are not avoided, but handled as they manifest. Unlike optimistic solutions, the core handling mechanism is not to retry the transaction (or parts thereof), which implies rolling back (either committed or uncommitted) updates to the shared log, but rather to ``jump'' to another state.
 
---------- PIETRO ------------
+We illustrate the difference between warping and classic optimistic and pessimistic synchronization in Figure \ref{Fi:motivatingOverview}, where we visually represent concurrent execution of two instances of the code listed in Figure \ref{Fi:introMotivating} using locks, STM and warping (proceeding horizontally left-to-right). Locking serializes execution, and so there is no performance gain whatsoever. As for STM and warping, we consider the interleaving scenario from Figure \ref{Fi:motivatingInterleaving}. 
 
-Not sure about completeness. For me it would be complete iff it computes all possible warping destinations (obviously not possible).
+\begin{figure*}
+	\begin{center}
+	\includegraphics[width=\textwidth]{OverviewSlide.pdf}
+	\end{center}
+	\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of the method in Figure \ref{Fi:introMotivating} using lock-, STM- and warping-based synchronization}
+\end{figure*}
 
-I would add: (i) that the goal of warping is to compute a function that from the last state of $h'$ jumps to the last state of $h$ by correcting the state, (ii) add a diagram where we show what we do and how it "visually" differs from optimistic/pessimistic approaches.
+Both STM and warping, allowing the problematic chain of interleavings, reach a nonserializable state. STM resolves this by retrying the entire transaction executed by thread $T_2$. This effectively yields serial execution, similarly to the lock-based run, where $T_2$ runs after $T_1$. Warping, instead, ``fixes'' the final state, thereby allowing $T_2$ to complete without rerunning any or all of its code.
+
+We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to the warping solution as \emph{complete} if for any $h$, all the $h'$s that satisfy the conditions above are in the warping relation. Obviously a sound and complete warping solution is undecidable. In the following, we describe our method of computing a sound yet incomplete set of warping targets via static analysis of the concurrent library.
+
+A warping solution that is not complete faces the problem of stuck runs. Given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem:
+\begin{itemize}
+	\item Manual specification: The user completes the set of warping targets computed automatically, such that there are no stuck runs. In our implementation of warping, the warping targets are computed offline via static analysis, which lets the user complete the specification prior to the deployment runs.
+	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This ensures 
+\end{itemize}
 
 
 \subsection{Computing Warping Targets}
 
 A simpler --- and more abstract --- specification to work with, compared to complete execution prefixes, is in the form of triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the runtime instrumentation it maps to is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
 
-Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over serial executions of the system. This yields a specification of admissible input-to-intermediate states $(s,s')$.
+Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over a interprocedural control-flow graph of the form: 
+\begin{center}
+$$
+	T_1 \rightarrow T^\star_{2 \ldots n} \rightarrow T_{n+1} \rightarrow T'_1 \rightarrow T'^\star_{2 \ldots n} \rightarrow T'_{n+1} \rightarrow \ldots
+$$
+\end{center}
+where $T$, $T'$, etc denote different transaction types (i.e., transactions executing different code), and $n$ is unbounded, simulating a nondeterministic loop. 
 
-** Need to say more about unbounded number of threads, etc **
+We go into detail about this representation in Section \ref{XXX}, but note now briefly that (i) this representation reflects the effects of serial execution of the transactions, and so the warping targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 
-
---------- PIETRO ------------
-
-I think the 1st paragraph would be captured by what I proposed for the previous subsection. 
-
-I would add (i) given the code of some transactions, we can build up a representation of serialized executions of an *unbounded* number of instances of these transactions, (ii) on this representation we compute an underapproximation of the executions such that can map an entry state $\sigma$ to an exit/intermediate state $\sigma'$ that is reached only through a serialized/serializable execution, and (iii) we instantiate this to maps.
+As an illustration of the third point, in our running example (Figure \ref{Fi:introMotivating}) the first transaction ( $T_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($T_{n+1}$) can be confirmed not to update the key/value mapping.
 
 \subsection{Runtime Synchronization} 
 
 The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. Here there is also the challenge, given multiple candidates, of finding the most optimal candidate to warp to.
 
-In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors. If read/write or write/write conflicts arise, then warping is triggered in response. The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a tree representation of 
+In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then warping is triggered in response. 
 
+The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that --- for a given bad states --- stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
 
---------- PIETRO ------------
-
-In the formalization and in the implementation we do not have anything about how you can find the best candidate. I might add this to the formalization but I am not sure how we can justify it, we don't need it at all for maps, and we didn't investigate this aspect.
-
-I would rephrase that the second challenge consists in "adjusting" the computational state created during the bad execution to one of a serializable execution. I do not know the details of the implementation and how Peng solved it, you should talk with him on this.
+We expand on both of these challenges in Sections \ref{XXX} and \ref{XXX}, respectively. Prior to that, in Section \ref{XXX}, we provide a formal statement of the warping approach.
