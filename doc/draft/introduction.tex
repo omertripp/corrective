@@ -6,12 +6,11 @@ Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
 	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has passed away. Locks, mutexes and semaphores are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
 	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and appropriate remediation steps are taken. A notable instance of this paradigm is transactional memory (TM) \cite{DBLP:conf/isca/HerlihyM93}, where the system logs memory accesses by each of the threads, and is able to reverse the effects of a thread and abort/restart it.
-	XXX Should we say that existing approaches re-execute smthing? Otherwise also our approach is purely optimistic XXX 
 \end{itemize}
 
 \paragraph{Motivation} The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
 
-Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor()}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
+Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 
 %\begin{figure}
 %	\begin{lstlisting}[numbers=left]
@@ -41,7 +40,7 @@ Convertor getConvertor(String name, boolean create) {
 \end{figure}
 
 
-Assume that different threads invoking this method are all attempting to simultaneously obtain the same {\sf Convertor} object, which has not yet been created. Doing so optimistically would lead to multiple rollbacks, and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
+Assume that different threads invoking this method are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks, and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
 
 \paragraph{Our Approach} We propose a novel synchronization paradigm, which is conceptually different from both the pessimistic and the optimistic approaches. In our approach, dubbed \emph{corrective synchronization}, the correctness of multi-threaded execution is enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
 
@@ -74,7 +73,7 @@ Two important challenges w.r.t. the corrective synchronization paradigm that thi
 
 Beyond the formal details, this paper additionally addresses practical challenges, and in particular the question of how to implement corrective synchronization efficiently, such that it incurs low overhead. To this end, we present a solution based on static analysis to derive the correct poststates in relation to a given prestate. We have implemented a version of the analysis for shared {\sf Map} data structures. {\sf Map}s are used to represent the shared state of many Java programs \cite{OhadOOPSLA}, and so this first step toward a comprehensive static analysis for corrective synchronization is already of practical value.
 
-\red{say that the implementation does something very simple (assumes one transaction), yet illustrates something very powerful that is completely novel}
+\red{say that the implementation does something very simple (assumes one transaction), yet illustrates something very powerful that is completely novel, add something about the experimental results}
 
 \paragraph{Contributions} This paper makes the following principal contributions: XXX REWRITE AT THE END XXX
 \begin{enumerate}

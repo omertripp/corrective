@@ -28,7 +28,7 @@ We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a seri
 A warping solution that is not complete faces the problem of stuck runs. Given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem:
 \begin{itemize}
 	\item Manual specification: The user completes the set of warping targets computed automatically, such that there are no stuck runs. In our implementation of warping, the warping targets are computed offline via static analysis, which lets the user complete the specification prior to the deployment runs.
-	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This ensures 
+	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This ensures XXX
 \end{itemize}
 
 
@@ -44,7 +44,7 @@ $$
 \end{center}
 where $T$, $T'$, etc denote different transaction types (i.e., transactions executing different code), and $n$ is unbounded, simulating a nondeterministic loop. 
 
-We go into detail about this representation in Section \ref{XXX}, but note now briefly that (i) this representation reflects the effects of serial execution of the transactions, and so the warping targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
+We go into detail about this representation in Section \ref{Se:concabs}, but note now briefly that (i) this representation reflects the effects of serial execution of the transactions, and so the warping targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 
 As an illustration of the third point, in our running example (Figure \ref{Fi:introMotivating}) the first transaction ( $T_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($T_{n+1}$) can be confirmed not to update the key/value mapping.
 
@@ -56,4 +56,4 @@ In our implementation, the first challenge is addressed via a coarse conflict-de
 
 The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that --- for a given bad states --- stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
 
-We expand on both of these challenges in Sections \ref{XXX} and \ref{XXX}, respectively. Prior to that, in Section \ref{XXX}, we provide a formal statement of the warping approach.
+We expand on both of these challenges in Section \ref{Se:system}. Prior to that, in Sections \ref{se:instance} and \ref{sec:transactionsystemwarping}, we provide a formal statement of the warping approach.
