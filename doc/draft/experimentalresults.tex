@@ -38,12 +38,12 @@ We compare our technique against two competing solutions:
 	\item a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
 		\url{https://github.com/DeuceSTM/DeuceSTM}
 	}; and
-	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{EricBoosting}.
+	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}.
 \end{itemize}
 
 \subsection{Subjects}
 
-Our benchmark suite consists of four subjects, all of which are taken from popular open-source code bases and have been used in past studies on concurrency \cite{OhadShacham,...}, as follows:
+Our benchmark suite consists of four subjects, all of which are taken from popular open-source code bases and have been used in past studies on concurrency \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}, as follows:
 \begin{itemize}
 	\item \underline{Apache Tomcat:} A web-application container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is a concrete representation of a web application's execution environment.
 	\item \underline{dyuproject:} A framework for development of Java web applications. We experiment with {\sf StandardConvertorCache}, which handles conversion of objects to/from JSON format.
@@ -51,7 +51,7 @@ Our benchmark suite consists of four subjects, all of which are taken from popul
 	\item \underline{Gridkit:} A library containing utilities and functionality related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
 \end{itemize}
 
-We have extracted two concurrent methods out of each of benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{OhadShacham}. 
+We have extracted two concurrent methods out of each benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{oopsla/ShachamBASVY11}. 
 
 As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in XXX. We do not include their code in the paper for lack of space.
 
