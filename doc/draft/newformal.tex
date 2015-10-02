@@ -1,5 +1,8 @@
 \section{Transaction Semantics}
 \label{sec:concretesemantics}
+
+In this Section, we introduce a generic transaction semantics supporting corrective synchronization.
+
 \subsection{Notation}
 \label{sec:concretedomain}
 
@@ -30,8 +33,6 @@ The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. T
 \subsection{Transition System}
 \label{sec:transitionsystem}
 
-XXX We need to plug there the running example XXX
-
 We define five transactional events, as follows:
 \begin{itemize}
 \item The {\sf bgn} event marks the beginning of a transaction.
@@ -58,12 +59,13 @@ The events are defined as follows:
 	{\sf ref}\ t \leadsto (T,\mu', \sigma, L)}$\\
 \\
 {\sf local}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L_t)], \sigma, L)}
-{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
+{t \in T, \csemantics{C}{c_t, \sigma_t} = (c'_t, \sigma'_t)}$\\
+%{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
 \\
 \end{tabular}
 \\
 Note that the {\sf warp} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations.
-In the {\sf local} rule, $\to_l$ represents the transition relation for local operations.
+In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations.
 
 \subsection{Formal Guarantees}\label{Se:guarantees}
 
@@ -83,8 +85,6 @@ In the {\sf local} rule, $\to_l$ represents the transition relation for local op
 	$(\sigma_t,c_t,L_t) {\longrightarrow} (\sigma'_t,c'_t,L'_t)$, such that 
 	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf warp}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
 \end{definition}
-
-XXX Need to explain these definitions XXX
 
 Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
 $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.

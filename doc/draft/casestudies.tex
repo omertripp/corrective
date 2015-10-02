@@ -1,11 +1,7 @@
 \section{Case Studies}
+\label{appendix:casestudies}
 
-
-\subsection{Case 2}
-Applications: Apache Tomcat
-
-Class: ApplicationContext
-
+\subsection{Apache Tomcat}
 
 \subsubsection{Transaction 1}
 \begin{lstlisting}
@@ -20,21 +16,21 @@ Attribute removeAttribute(String name){
 }
 \end{lstlisting}
 
-
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-ret=null;
-if(map.containsKey(key)) {
-	ret=map.get(key);
-	map.remove(key);
-}
-return ret;
-\end{lstlisting}
+%
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%ret=null;
+%if(map.containsKey(key)) {
+%	ret=map.get(key);
+%	map.remove(key);
+%}
+%return ret;
+%\end{lstlisting}
 
 \subsubsection{Transaction 2}
 \begin{lstlisting}
@@ -49,22 +45,19 @@ boolean removeAttribute(String name, Attribute value){
 \end{lstlisting}
 
 
-**********************
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%ret=map.containsKey(key);
+%map.put(key, value);
+%return ret;
+%\end{lstlisting}
 
-Our code
-
-**********************
-
-\begin{lstlisting}
-ret=map.containsKey(key);
-map.put(key, value);
-return ret;
-\end{lstlisting}
-
-\subsection{Case 3}
-Applications: dyuproject
-
-Class: StandardConvertorCache
+\subsection{dyuproject}
 
 \subsubsection{Transaction 1}
 \begin{lstlisting}
@@ -79,20 +72,20 @@ public Convertor getConvertor(Class<?> clazz, boolean create, boolean addClass) 
 \end{lstlisting}
 
 
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-value=map.get(key);
-if(value==null && b) {
-	value=new Value();
-	map.putIfAbsent(key, value);
-}
-retrun value;
-\end{lstlisting}
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%value=map.get(key);
+%if(value==null && b) {
+%	value=new Value();
+%	map.putIfAbsent(key, value);
+%}
+%retrun value;
+%\end{lstlisting}
 
 \subsubsection{Transaction 2}
 \begin{lstlisting}
@@ -108,25 +101,22 @@ protected Convertor getConvertor(String className) {
 \end{lstlisting}
 
 
-**********************
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%value=map.get(key);
+%if(value==null) {
+%	value=new Value();
+%	map.putIfAbsent(key, value);
+%}
+%return value;
+%\end{lstlisting}
 
-Our code
-
-**********************
-
-\begin{lstlisting}
-value=map.get(key);
-if(value==null) {
-	value=new Value();
-	map.putIfAbsent(key, value);
-}
-return value;
-\end{lstlisting}
-
-\subsection{Case 4}
-Applications: Flexive
-
-Class: FxValueRendererFactory
+\subsection{Flexive}
 
 \subsubsection{Transaction 1}
 \begin{lstlisting}
@@ -142,20 +132,20 @@ public static FxValueRenderer getInstance(FxLanguage language) {
 }
 \end{lstlisting}
 
-
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-if(!map.containsKey(key)) {
-	loc_w=new Value();
-	map.putIfAbsent(key, loc_w);
-}
-return map.get(key)"
-\end{lstlisting}
+%
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%if(!map.containsKey(key)) {
+%	loc_w=new Value();
+%	map.putIfAbsent(key, loc_w);
+%}
+%return map.get(key)"
+%\end{lstlisting}
 
 \subsubsection{Transaction 2}
 \begin{lstlisting}
@@ -165,24 +155,20 @@ void addRenderer(FxLanguage language, Class<T> valueType, FxValueFormatter<DT, T
 }
 \end{lstlisting}
 
+%
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%loc_w=new Value();
+%map.putIfAbsent(key, loc_w);
+%loc_w=map.get(key);
+%\end{lstlisting}
 
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-loc_w=new Value();
-map.putIfAbsent(key, loc_w);
-loc_w=map.get(key);
-\end{lstlisting}
-
-\subsection{Case 5}
-Applications: Gridkit
-
-Class: ReflectionPofSerializer
-
+\subsection{Gridkit}
 \subsubsection{Transaction 1}
 \begin{lstlisting}
 protected Object internalDeserialize(PofReader in) throws IOException {
@@ -201,22 +187,22 @@ protected Object internalDeserialize(PofReader in) throws IOException {
 }
 \end{lstlisting}
 
-
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-if(map.containsKey(key)) {
-	value=new Value();
-	map.put(key, value);
-	ret=null;
-} else
-	ret=map.get(key);
-return ret;
-\end{lstlisting}
+%
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%if(map.containsKey(key)) {
+%	value=new Value();
+%	map.put(key, value);
+%	ret=null;
+%} else
+%	ret=map.get(key);
+%return ret;
+%\end{lstlisting}
 
 \subsubsection{Transaction 2}
 \begin{lstlisting}
@@ -237,14 +223,14 @@ protected void internalSerialize(PofWriter out, Object origValue) throws IOExcep
 \end{lstlisting}
 
 
-**********************
-
-Our code
-
-**********************
-
-\begin{lstlisting}
-if(map.containsKey(key))
-	value=new Value();
-map.put(key, value);
-\end{lstlisting}
+%**********************
+%
+%Our code
+%
+%**********************
+%
+%\begin{lstlisting}
+%if(map.containsKey(key))
+%	value=new Value();
+%map.put(key, value);
+%\end{lstlisting}

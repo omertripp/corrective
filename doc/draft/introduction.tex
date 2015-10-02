@@ -77,10 +77,10 @@ To examine the promise and viability of corrective synchronization, we have expe
 
 %\red{say that the implementation does something very simple (assumes one transaction), yet illustrates something very powerful that is completely novel, add something about the experimental results}
 
-\paragraph{Contributions} This paper makes the following principal contributions: XXX REWRITE AT THE END XXX
+\paragraph{Contributions} This paper makes the following principal contributions:
 \begin{enumerate}
 	\item \underline{Corrective synchronization:} We present an alternative to both the pessimistic and the optimistic synchronization paradigms, dubbed \emph{corrective synchronization}, whereby serializability is achieved neither via mutual exclusion nor via rollbacks, but through correction of the poststate according to a relational prestate/poststates specification.
-	\item \underline{Formal guarantees:} We provide a formal description of corrective synchronization in terms of the Push/Pull model for transactions. This includes a correctness (i.e. soundness) proof as well as a clear statement of limitations.
-	\item \underline{Static analysis:} We have developed a static analysis to derive the prestate/poststates specification for programs that encode the shared state as one or more assoiciative mappings. We describe the analysis in full formal detail.
-	\item \underline{Implementation and evaluation}: We have created a protoype implementation of corrective synchronization assuming the shared state is represented as a collection of associative mappings. We discuss techniques and optimizations to achieve low overhead. We present experimental evidence in favor of corrective synchronization, where our subjects are derived from real-world Java applications.
+	\item \underline{Formal guarantees:} We provide a formal description of corrective synchronization. This includes a correctness (i.e. soundness) proof as well as a clear statement of limitations.
+	\item \underline{Static analysis:} We have developed a static analysis to derive the prestate/poststates specification for programs that encode the shared state as one or more concurrent maps. We describe the analysis in full formal details.
+	\item \underline{Implementation and evaluation}: We have created an implementation of corrective synchronization assuming the shared state is represented as a collection of concurrent maps. We present experimental evidence in favor of corrective synchronization, where our subjects are real-world Java applications.
 \end{enumerate}

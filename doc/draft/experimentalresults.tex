@@ -5,7 +5,7 @@ In this section, we first describe our prototype implementation of the overall s
 \subsection{Prototype System}
 \label{Se:system}
 
-We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{Se:instance}. Our implementation covers all the operations listed in Figure \ref{fig:language}. \pietrotodo{Move paragraph on $T_1,T_2,T_n$ over here.} 
+We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Our implementation covers all the operations listed in Figure \ref{fig:language}.
 
 As explained earlier, the interface with the runtime system is a relational warping specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
 \begin{center}
@@ -15,7 +15,7 @@ denotes that if we started from a prestate where ${\sf k}$ was not in the map an
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
 
-As mentioned earlier, in our current prototype all transactions are assumed to start simultaneously, which is useful for the common case of loop parallelization. Each concrete transaction $t$ is mapped to its abstract counterpart $\overline{t}$, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
+As discussed in Section \ref{sec:dynamicwarping}, in our current prototype all transactions are assumed to start simultaneously, which is useful for the common case of loop parallelization. Each concrete transaction $t$ is mapped to its abstract counterpart $\overline{t}$, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
 
 During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Warping occurs only on failed commits (as discussed in Section \ref{Se:guarantees}), in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the warping specification. 
 
@@ -29,7 +29,8 @@ We conducted our experiments on server with two Intel(R) Xeon(R) CPU E5-2690 0 @
 In our experiments, we varied two aspects of parallel execution:
 \begin{itemize}
 	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as the number of transactions executed by a given thread, where a single transaction consists of the invocation of a particular method. All inputs share the same key(s).
-	\item \underline{Concurrency level:} For a fixed workload size, set at 10 (\pengtodo{please confirm}), the number of threads is varied along the range of 2 to 32 threads.  
+	\item \underline{Concurrency level:} For a fixed workload size, set at 10%\pengtodo{please confirm}
+	, the number of threads is varied along the range of 2 to 32 threads.  
 \end{itemize}
 For statistical soundness, we report the average performance results across 10 independent repetitions of each experiment.
 
@@ -53,7 +54,7 @@ Our benchmark suite consists of four subjects, all of which are taken from popul
 
 We have extracted two concurrent methods out of each benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{oopsla/ShachamBASVY11}. 
 
-As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in XXX. We do not include their code in the paper for lack of space.
+As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in Appendix \ref{appendix:casestudies}.
 
 \begin{figure}
 	\begin{lstlisting}

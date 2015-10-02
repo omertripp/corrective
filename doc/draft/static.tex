@@ -6,7 +6,7 @@
 \newcommand{\variable}{\set{Var}}
 \newcommand{\env}{\set{Env}}
 \newcommand{\map}{\set{Map}}
-\newcommand{\aset}[1]{\set{#1}^\#}
+\newcommand{\aset}[1]{\set{#1}}
 \newcommand{\state}{\set{\Sigma}}
 \newcommand{\aenv}{\aset{Env}}
 \newcommand{\amap}{\aset{Map}}
@@ -16,12 +16,12 @@
 \newcommand{\serializedCFGs}{\set{serializedCFGs}}
 \newcommand{\isconcrete}{\set{single}}
 \newcommand{\warpdestination}{\set{warpDest}}
-\newcommand{\concretetransactions}{\set{TId}}
-\newcommand{\abstracttransactions}{\aset{\concretetransactions}}
+\newcommand{\concretetransactions}{{\cal T}}
+\newcommand{\abstracttransactions}{\concretetransactions^\#}
 
 \section{Thread Local Semantics}
 \label{se:instance}
-We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. In this Section, we define the thread-local concrete semantics of this language. This instantiates the {\sf local} rule introduced in Section \ref{sec:transitionsystem}. Following the abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe warping destinations.
+We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. In this Section, we define the thread-local concrete semantics of this language instantiating $\semanticanome{C}$ of the {\sf local} rule introduced in Section \ref{sec:transitionsystem}. Following the abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe warping destinations.
 
 
 \subsection{Language}
@@ -48,7 +48,7 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 	\caption{Fragment of the language dealing with map-related operations}
 	\label{fig:language}
 \end{figure}
-We focus our formalization on the fragment of language in Figure \ref{fig:language}. This fragment is focused on a representative set  of operations of the Java 7 \statement{java.util.concurrent.ConcurrentMap} class.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentHashMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
+We focus our formalization on the fragment of language in Figure \ref{fig:language}. This fragment is focused on a representative set  of operations of the Java 7 \statement{java.util.concurrent.ConcurrentMap} class.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
 
 
 %\subsubsection{Running Example}
@@ -83,11 +83,10 @@ We focus our formalization on the fragment of language in Figure \ref{fig:langua
 
 \subsection{Concrete Domain and Semantics}
 \label{sec:concretemap}
-First of all, we instantiate the local state and log of a transaction $t$ introduced in \ref{sec:concretedomain} to the language of Section \ref{sect:language}.
+First of all, we instantiate the state of a transaction $t$ introduced in \ref{sec:concretedomain} to the language of Section \ref{sect:language}.
 
 Let $\variable$ and $\reference$ be the set of variables and references, respectively. Keys and values are identified by concrete references, and we assume $\statement{null}$ is in $\reference$. We define by $\env : \variable \to \reference$ the environments relating local variables to references. A map is then represented as a function $\map : \reference \to \reference$, relating keys to values. The value $\statement{null}$ represents that the related key is not in the map. A single concrete state is a pair made by an environment and a map. Formally, $\state = \env \times \map$. As usual in abstract interpretation, we collect a set of states per program point. Therefore, our concrete domain is made by elements in $\wp(\state)$, and the lattice relies on standard set operators. Formally, $\langle \wp(\state), \subseteq, \cup \rangle$.
 
-In addition to the local state, the concrete domain tracks the log of operations. Given the language defined in Section \ref{sect:language}, the operations tracked in the concrete log are $\statement{put}(r_k, r_v)$ and $\statement{remove}(r_k)$ where $r_k, r_v \in \reference$.
 
 
 \begin{figure}
@@ -131,7 +130,7 @@ Let $\heapnode$ be the set of abstract heap nodes with $\statement{null} \in \he
 
 The lattice structure is obtained by the point-wise application of set operators to elements in the codomain of abstract environments and functions. Therefore, the abstract lattice is defined as $\langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$, where $\dot{\subseteq}$ and$\dot{\cup}$ represents the point-wise application of set operators $\subseteq$ and $\cup$, respectively.
 
-For the sake of simplicity, we omit in the formalization the local log in the abstract domain. The only difference w.r.t. the concrete local log is that the entries refer to abstract heap nodes in $\heapnode$ instead of concrete references in $\reference$, and the presences of the entry \statement{?put} representing a possible \statement{put} action. This will be used in the definition of the abstract semantics of statement \statement{putIfAbsent}. XXX We can formalize the log. However, the problem is that the sequence might be infinite, so we need some kind of regular expressions - not sure I'm willing to go into this direction XXX 
+%For the sake of simplicity, we omit in the formalization the local log in the abstract domain. The only difference w.r.t. the concrete local log is that the entries refer to abstract heap nodes in $\heapnode$ instead of concrete references in $\reference$, and the presences of the entry \statement{?put} representing a possible \statement{put} action. This will be used in the definition of the abstract semantics of statement \statement{putIfAbsent}. XXX We can formalize the log. However, the problem is that the sequence might be infinite, so we need some kind of regular expressions - not sure I'm willing to go into this direction XXX 
 
 \paragraph{Running example.} 
 Consider the motivating example in Figure \ref{Fi:introMotivating}. For instance, the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{name} is not in the map, while $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to some value $n_2$. Finally, $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents that \statement{name} (i) might not be in the map, \emph{or} (ii) is in the map related to value $n_2$.
@@ -146,10 +145,9 @@ The concretization function of abstract environments relates each variable in th
 \gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land\\
 \hspace{100pt} \exists n_2 \in m(n_1) : r_2 \in \gamma_\reference(n_2) \}\\
 \gamma_\state(e, m) = \{(e', m') : e' \in \gamma_\env(e) \land m' \in \gamma_\map(m)\}\\
+\gamma_\state(\bot) =\emptyset\\
 \end{array}
 \]
-
-The concretization of local logs simply relies on $\gamma_\reference$ to concretizes abstract heap nodes into concrete references, and it produces traces where a \statement{put} entry is or is not present when concretizing the abstract entry \statement{?put}.
 
 \begin{lemma}[Soundness of the domain]
 	The abstract domain is a sound approximation of the concrete domain, that is, they form a Galois connection \cite{CC77}. Formally, $\langle \wp(\state), \subseteq, \cup \rangle \galois{\alpha_\state}{\gamma_\state} \langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$ where $\alpha_\state = \lambda \cset{X} . \cap \{\cset{Y} : \cset{Y} \subseteq \gamma_\state(X)\}$.
@@ -199,7 +197,7 @@ m & \textrm{ otherwise}\\
 \\
 \csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
 \\
-\csemantics{S}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{null})\\
+\csemantics{S}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{nlas})\\
 \\
 %\csemantics{S}{\statement{if(b)\ s_1;\ else\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e, m)}} \dot{\cup} \csemantics{S}{\statement{s_2}, \csemantics{B}{\statement{! b}, (e, m)}} & \statement{(if)}\\
 %\\
@@ -244,11 +242,9 @@ m & \textrm{ otherwise}\\
 \end{figure*}
 Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state. We focus the formalization on abstract states in $\aenv \times \amap$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
 
-\statement{(put)} relates \statement{k} to \statement{v} in the map. In particular, if \statement{k} points to a unique non-summary node, it performs a so-called strong update, overwriting previous values related with \statement{k}. Otherwise, it performs a weak update by adding to the previous values the new ones. \statement{(get)} relates the assigned variable \statement{v} to all the heap nodes of values that might be related with \statement{k} in the map. Note that if \statement{k} is not in the map, then the abstract map $m$ relates it to a \statement{null} node, and therefore this value is propagated to \statement{v} then calling \statement{get}, representing the concrete semantics of this statement. Similarly to \statement{(put)}, \statement{(rmv)} removes \statement{k} from the map (by relating it to the singleton $\{\statement{null}\}$) iff \statement{k} points to a unique concrete node. Otherwise, it conservatively adds the heap node \statement{null} to the heap nodes related to all the values pointed by \statement{k}. \statement{(pIA)} updates the map like \statement{(put)} but only if the updated key node might have been absent, that is, when $\statement{null} \in m(n)$. \statement{new} creates a new heap node through $\freshNode(t)$ (where $t$ is the identifier of the transaction performing the creation), and assigns it to \statement{v}. The number of nodes is kept bounded by parameterizing the analysis with an upper bound $i$ such that (i) the first $i$ nodes created by a transaction are all concrete nodes, and (ii) all the other nodes are represented by a summary node. Instead, \statement{(null)} relates the given variable to the singleton $\{\statement{null}\}$.
+\statement{(put)} relates \statement{k} to \statement{v} in the map. In particular, if \statement{k} points to a unique non-summary node, it performs a so-called strong update, overwriting previous values related with \statement{k}. Otherwise, it performs a weak update by adding to the previous values the new ones. \statement{(get)} relates the assigned variable \statement{v} to all the heap nodes of values that might be related with \statement{k} in the map. Note that if \statement{k} is not in the map, then the abstract map $m$ relates it to a \statement{null} node, and therefore this value is propagated to \statement{v} then calling \statement{get}, representing the concrete semantics of this statement. Similarly to \statement{(put)}, \statement{(rmv)} removes \statement{k} from the map (by relating it to the singleton $\{\statement{null}\}$) iff \statement{k} points to a unique concrete node. Otherwise, it conservatively adds the heap node \statement{null} to the heap nodes related to all the values pointed by \statement{k}. \statement{(pIA)} updates the map like \statement{(put)} but only if the updated key node might have been absent, that is, when $\statement{null} \in m(n)$. \statement{(new)} creates a new heap node through $\freshNode(t)$ (where $t$ is the identifier of the transaction performing the creation), and assigns it to \statement{v}. The number of nodes is kept bounded by parameterizing the analysis with an upper bound $i$ such that (i) the first $i$ nodes created by a transaction are all concrete nodes, and (ii) all the other nodes are represented by a summary node. Instead, \statement{(nlas)} relates the given variable to the singleton $\{\statement{null}\}$.
 The abstract semantics on Boolean conditions produces $\bot$ statements if the given Boolean condition cannot hold on the given abstract semantics. Therefore, \statement{(null)} returns $\bot$ if the given variable \statement{x} cannot be \statement{null}, or a state relating \statement{x} to the singleton $\{\statement{null}\}$ otherwise. Vice-versa, \statement{(!null)} returns $\bot$ if \statement{x} can be only null, or a state relating \statement{x} to all its previous values except \statement{null} otherwise.
 Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is surely not in the map, it refines the possible values of \statement{k} if it is represented by a concrete node, or it simply returns the entry state otherwise. Vice-versa, \statement{(!cntK)} returns $\bot$ if \statement{k} is surely in the map.
-
-For the sake of simplicity, we omit in the formalization of the abstract semantics the local log. Intuitively, the abstract semantics of \statement{put} produces a \statement{put} entry, \statement{remove} a \statement{remove} entry, while \statement{putIfAbsent} produces \statement{put} in the first case of the definition of $m'$ of rule \statement{(pIA)}, \statement{?put} in the second case, and nothing in the third case.
 
 
 \begin{lemma}[Soundness of the semantics]
@@ -269,9 +265,9 @@ The result of this example represents that, when you start the computation passi
 
 \section{Transaction System Semantics}
 \label{sec:transactionsystemwarping}
-In this Section, we apply the local abstract semantics defined in Section \ref{sect:abstractsemantics} to infer warping destinations.
+In this Section, we apply the abstract semantics $\semanticanome{S}$ defined in Section \ref{sect:abstractsemantics} to infer warping destinations.
 
-In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together at the beginning of the execution, each transaction commit only once, and and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} warping at the end of the execution. While these restrictions might be relaxed, this scenario is particularly interesting in practice XXX
+In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} warping at the end of the execution.
 
 
 \subsection{Serialized Control Flow Graph}
@@ -280,20 +276,20 @@ We apply the abstract semantics defined in Section \ref{sect:abstractsemantics} 
 
 Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each transaction type $i$, we create three static transaction identifiers $t^i_1$, $t^i_2$, and $t^i_n$. $t^i_1$ and $t^i_2$ represent precisely two concrete instances of $c^i$, while $t^i_n$ is a \emph{summary} abstract instance representing many concrete instances of $c^i$. We then build up a control flow graph representing a serialized execution of all these abstract transactions. In particular, each transaction type $c^i$ leads to a control flow graph $tc^i$ that executes (i) first $t^i_1$, (ii) then $t^i_n$ inside a non-deterministic loop (to overapproximate many instances of $c^i$)), and (iii) finally $t^i_2$. While the choice of having the two concrete transaction instances before and after the summary instance is arbitrary and other solutions are possible, we found this solution particularly effective in practice as we will show in Section \ref{Se:experiments}. The overall serialized CFG $tc$ is then built by concatenating the CFGs of all these transactions.
 
-Note that we apply the abstract semantics to the various transactions, and we build a function that for each transaction $t^i_j$ tracks its local state and log. Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$. Then our semantics on a serialized control flow graph returns a function in $\amultistate : \abstracttransactions \to \astate$.
+Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$. Then our semantics on a serialized control flow graph returns a function in $\amultistate : \abstracttransactions \to \astate$.
 
 
 \paragraph{Running example.}
-Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized control flow graph where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $\statement{t_1}; \statement{t_n}; \statement{t_2}$ where the code of $\statement{t_n}$ is inside a loop.
+Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized control flow graph where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $t_1; t_n^\star; t_2$ where $t_n^\star$ represents that the code of $t_n$ is inside a loop.
 
 Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
 
 \subsection{Extracting Possible Warping States}
 First of all, notice that, given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) producing the same shared log (formally, ${\sf ref}\ t \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : {\sf ref}\ t=\sigma_0$) . In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we warp the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that ${\sf ref}\ t \leadsto (T,\mu', \sigma_0, \epsilon)$.
 
-We need now to compute possible warping targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute warping that, given an entry state representing an observational equivalence class, is in an equivalence class that is reachable through a serialized execution. 
+We compute possible warping targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute warping targets that, given an entry state representing a precise observable entry state, are reachable through a serialized execution. 
 
-However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging to different equivalence classes, and it cannot define a warping destination.
+However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a warping destination.
 
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,
 \[
@@ -305,7 +301,7 @@ Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ th
 \end{array}
 \]
 
-Note that in general the concretization of an abstract is not computable or extremely expensive. Therefore, we rely on $\isconcrete$ to check if an abstract state represents one precise concrete state.
+Note that in general the concretization of an abstract state is not computable. Therefore, we rely on $\isconcrete$ to check if an abstract state represents one precise concrete state.
 
 \begin{lemma}
 	\label{lemma:singleconcretization}
@@ -315,10 +311,10 @@ Note that in general the concretization of an abstract is not computable or extr
  By definition of $\isconcrete$, we have that $\neg \isSummary(n)$ for all the nodes $n$ in $e$ or $n$. By definition of $\isSummary$ we have that $|\gamma_\reference(n)|=1$. Thanks to this result and by definition of $\gamma_\astate$ we obtain that $|\gamma_\state(e, m)|=1$.
 \end{proof}
 
-The definition of $\isconcrete$ is extended to state $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$/
-We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and compute the exit states on the serialized CFG $tc$ and for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations.
+The definition of $\isconcrete$ is extended to states $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$. 
+We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and we compute the exit states on the serialized CFG $tc$ for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations.
 
-After running the semantics $\semanticanome{S}$, we represent the result as a function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
+We then use the results of the abstract semantics $\semanticanome{S}$ to build upa function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
 \[
 \warpdestination(\set{T}, \set{S}) =[\phi \mapsto \{ \phi': \phi' \in \csemantics{S}{tc, \phi} \land
 \isconcrete(\phi')\} : \phi \in S]
@@ -326,9 +322,9 @@ After running the semantics $\semanticanome{S}$, we represent the result as a fu
 
 \paragraph{Running example:} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
-
+	
 \subsection{Dynamic Warping}
-
+\label{sec:dynamicwarping}
 In our model, when we start the execution we have a finite number of concrete instances of each type of transaction. We denote by $\concretetransactions = \{s^i_j : j \in [0..m] \land i \in [1..k_j]\}$ the set of identifiers of concrete transactions, where $m$ is the number of different types of transactions, $k_j$ is the number of instances of transaction $j$, and $s^i_j$ represents the $j$-th instance of the $i$-th type of transaction.
 
 We can then bind abstract transaction identifiers to concrete ones. Since the set of abstract transactions is defined as $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$, we bind the first two concrete identifiers to the corresponding abstract identifiers, and all the others to the $n$ abstract instance. We formally define the concretization of transaction identifiers as follows:
