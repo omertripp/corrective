@@ -28,7 +28,7 @@ We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a seri
 A warping solution that is not complete faces the problem of stuck runs. Given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem:
 \begin{itemize}
 	\item Manual specification: The user completes the set of warping targets computed automatically, such that there are no stuck runs. In our implementation of warping, the warping targets are computed offline via static analysis, which lets the user complete the specification prior to the deployment runs.
-	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This ensures XXX
+	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This provides a general means to avoid stuck states.
 \end{itemize}
 
 
