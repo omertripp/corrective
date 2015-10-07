@@ -50,7 +50,7 @@ As an illustration of the third point, in our running example (Figure \ref{Fi:in
 
 \subsection{Runtime Synchronization} 
 
-The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. Here there is also the challenge, given multiple candidates, of finding the most optimal candidate to warp to.
+The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. 
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then warping is triggered in response. 
 

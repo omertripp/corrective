@@ -355,7 +355,11 @@ By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and
 \end{proof}
 
 
-Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\sf t}$ for all the concrete transaction identifiers $t$.
+%Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\sf t}$ for all the concrete transaction identifiers $t$.
+
+\paragraph{Discussion}
+$\warpdestination$ returns a set of possible exit states given an entry state. This means that, given a concrete incorrect poststate, we can choose the exit state produced by $\warpdestination$ that requires a \emph{minimal} correction to the incorrect post state. In this way, we would minimize the runtime overhead of adjusting the concrete state when warping. The target state can be chosen by calculating the number of operations we need to apply to correct the poststate, and select the one with the minimal number. This might be further optimized by hashing the correct post states computed by $\warpdestination$ based on similarity.
+However, we did not investigate this aspect since in our experiments the overhead of correcting the poststate was already almost negligible by choosing a random destination. We believe that this is due to our specific setting, that is, concurrent maps. In fact, in this scenario the corrective operations that we have to apply are to put or remove an element, and the corrections always required very few of them. We believe that other data structures (e.g., involving ordering of elements like lists) might require more complicated corrections, and we plan to investigate them as future work.
 
 
 %\section{Dynamic Warping}
