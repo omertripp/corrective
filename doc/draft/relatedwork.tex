@@ -16,7 +16,7 @@ Another approach to reduce conflict is to leverage available nondeterminism \cit
 
 A well-known solution to restrict the extent to which a transaction rolls back is checkpointing \cite{spaa08a,Egwutuoha:2013}. Checkpointing introduces the notion of a partial abort, where the transaction resumes from some intermediate point rather than fully resetting its execution and effects. Nested transactions \cite{ont,beeri} achieve a similar effect in that only the nested transaction, but not its parent transaction, aborts and restarts. Yet another mechanism to reduce rollback overhead is elastic transactions~\cite{FGG:DISC09}, which avoid wasted work by splitting into multiple pieces.  
 
-\paragraph{Use of static analysis.} In our solution, static analysis is used to identify admissible shared-state configurations to warp to from a given input state. Multiple past works on synchronization synthesis have also relied on static analysis, albeit for the extraction of other types of information. We survey some of these works in the following.
+\paragraph{Use of static analysis.} In our solution, static analysis is used to identify admissible shared-state configurations to correct to from a given input state. Multiple past works on synchronization synthesis have also relied on static analysis, albeit for the extraction of other types of information. We survey some of these works in the following.
 
 Golan-Gueta et al.~\cite{GRSY:PLDI13} utilize static analysis to compute a conservative approximation of the possible actions that a transaction may perform in its future from a given intermediate point. This enables more granular synchronization compared to the worst-case assumption that the transaction may perform any action in its future.
 

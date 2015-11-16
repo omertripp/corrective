@@ -38,7 +38,7 @@ We define five transactional events, as follows:
 \item The {\sf bgn} event marks the beginning of a transaction.
 \item The {\sf cmt} event fires when a transaction publishes its outstanding log of operations that affect the shared state to the shared state and log.
 \item The {\sf end} event marks the termination of a transaction.
-\item The {\sf warp} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
+\item The {\sf corr} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
 \item The {\sf local} event executes a local action.
 \end{itemize}
 We define the semantics of these events in the following. For rules where a transaction $t$ is defined in the prestate, its corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$. We utilize helper function ${\sf serpref} \colon\ {\cal L} \rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively) determine whether a given shared log is the prefix of some serializable execution log. Finally, we define helper function
@@ -54,7 +54,7 @@ The events are defined as follows:
 \\
 {\sf end}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T \setminus \{ t \}, \mu \setminus [t \mapsto \mu(t)], \sigma, L)}{t \in T, \mu(t) = ({\sf skip}, \_, \epsilon)}$ \\
 \\
-{\sf warp}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
+{\sf corr}\ $t$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
 	t \in T, 
 	{\sf ref}\ t \leadsto (T,\mu', \sigma, L)}$\\
 \\
@@ -64,7 +64,7 @@ The events are defined as follows:
 \\
 \end{tabular}
 \\
-Note that the {\sf warp} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations.
+Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations.
 In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations.
 
 \subsection{Formal Guarantees}\label{Se:guarantees}
@@ -80,32 +80,32 @@ In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation 
 	$s \stackrel{e}{\longrightarrow} s'$ is either a ${\sf cmt}$ event or an ${\sf end}$ event.
 \end{definition}
 
-\begin{definition}[Progress-safe warping]
-	Let ${\sf warp}\ t$ occur at system state $s=(T,\mu,\sigma,L)$, such that state $s'=(T,\mu[t \mapsto (c_t,\sigma_t,L_t)],\sigma,L)$ is reached. Assume that there is a reduction
+\begin{definition}[Progress-safe corrective synchronization]
+	Let ${\sf corr}\ t$ occur at system state $s=(T,\mu,\sigma,L)$, such that state $s'=(T,\mu[t \mapsto (c_t,\sigma_t,L_t)],\sigma,L)$ is reached. Assume that there is a reduction
 	$(\sigma_t,c_t,L_t) {\longrightarrow} (\sigma'_t,c'_t,L'_t)$, such that 
-	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf warp}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
+	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf corr}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
 \end{definition}
 
 Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
 $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 
-\begin{example}[Self warping]\label{Ex:selfwarp}
+\begin{example}[Self corrective synchronization]\label{Ex:selfwarp}
 	Given transaction $t$ with local state $(\sigma_t,c_t,L_t)$, we refer to target
-	$(\sigma'_t,c_t,L'_t)$ as a \emph{self-warping target}. Post warping, the transaction has the same command left to reduce, but its state and outstanding log of operations are modified. A specific instance is $(\sigma_t,{\sf skip},L_t) \rightarrow (\sigma'_t,{\sf skip},L'_t)$. This pattern of warping is progress safe if commits are attempted at join points, which enables simulation of alternative control-flow paths (and therefore also logged effects) via warping.
+	$(\sigma'_t,c_t,L'_t)$ as a \emph{self-corrective target}. Post corrective synchronization, the transaction has the same command left to reduce, but its state and outstanding log of operations are modified. A specific instance is $(\sigma_t,{\sf skip},L_t) \rightarrow (\sigma'_t,{\sf skip},L'_t)$. This pattern of corrective synchronization is progress safe if commits are attempted at join points, which enables simulation of alternative control-flow paths (and therefore also logged effects) via corrective synchronization.
 \end{example}
 
-\begin{theorem}[Progress]\label{Th:progress} Assume that (i) a ${\sf warp}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) warping instances are progress safe. Then progress is guaranteed.
+\begin{theorem}[Progress]\label{Th:progress} Assume that (i) a ${\sf corr}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) corrective synchronization instances are progress safe. Then progress is guaranteed.
 	\begin{proof}
-	Given system state $s$, if there exists a transaction $t$ that is able to either commit or complete then the proof is done. Otherwise, there is a transaction $t$ that reaches a commit point at some state $s'$ and fails. At this point, ${\sf warp}\ t$ is the only enabled transition for $t$, and by assumption (ii), the warping instance is progress safe. At this point, there are two possibilities. Either $t$ proceeds without other threads modifying the shared state, such that a commit or completion point is reached by $t$ (without warping prior to reaching such a point according to assumption (i)), in which case progress has been achieved, or one or more threads interfere with $t$ by committing their effects, in which case too progress has been achieved.
+	Given system state $s$, if there exists a transaction $t$ that is able to either commit or complete then the proof is done. Otherwise, there is a transaction $t$ that reaches a commit point at some state $s'$ and fails. At this point, ${\sf corr}\ t$ is the only enabled transition for $t$, and by assumption (ii), the corrective synchronization instance is progress safe. At this point, there are two possibilities. Either $t$ proceeds without other threads modifying the shared state, such that a commit or completion point is reached by $t$ (without corrective synchronization prior to reaching such a point according to assumption (i)), in which case progress has been achieved, or one or more threads interfere with $t$ by committing their effects, in which case too progress has been achieved.
 	\end{proof}
 \end{theorem}
 
-\begin{definition}[Complete warping] 
-	We say that the system is complete w.r.t. warping if for any state $s$, if a ${\sf warp}\ t$ transition is executed in $s$, then the selected warping target satisfies progress safety.
+\begin{definition}[Complete corrective synchronization] 
+	We say that the system is complete w.r.t. corrective synchronization if for any state $s$, if a ${\sf corr}\ t$ transition is executed in $s$, then the selected corrective target satisfies progress safety.
 \end{definition}
 
 \begin{lemma}[Termination]
-	Assume that the system performs warping only on failed commits, and is complete w.r.t. warping. Further assume that throughout any run of the system, only boundedly many transactions are created (via a {\sf bgn} event), and these transactions do not have infinite executions. Then termination is guaranteed.
+	Assume that the system performs corrective synchronization only on failed commits, and is complete w.r.t. corrective synchronization. Further assume that throughout any run of the system, only boundedly many transactions are created (via a {\sf bgn} event), and these transactions do not have infinite executions. Then termination is guaranteed.
 	\begin{proof}
 		The first two assumptions guarantee progress, as established above in 
 		Theorem \ref{Th:progress}. Since transactions are finite, each transactions may perform finitely many {\sf cmt} transitions before terminating via an {\sf end} transition. This implies that after finitely many transitions, some transaction $t$ will terminate. This argument applies to the resulting system until no transactions are left.
@@ -113,7 +113,7 @@ $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 \end{lemma}
 
 \begin{example}[Loop parallelization]\label{Ex:loops}
-	Assume the common case of loop parallelization, where loop iterations are executed in parallel as transactions. There are normally finitely many transactions, all starting at the same time, and all are expected to terminate within a finite number of steps. Complete on-commit-failure warping guarantees both termination and serializability in this setting.
+	Assume the common case of loop parallelization, where loop iterations are executed in parallel as transactions. There are normally finitely many transactions, all starting at the same time, and all are expected to terminate within a finite number of steps. Complete on-commit-failure corrective synchronization guarantees both termination and serializability in this setting.
 \end{example}
 
 %\subsection{Other Stuff}

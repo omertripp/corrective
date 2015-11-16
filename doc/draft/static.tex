@@ -15,13 +15,13 @@
 \newcommand{\amultistate}{\aset{\multistate}}
 \newcommand{\serializedCFGs}{\set{serializedCFGs}}
 \newcommand{\isconcrete}{\set{single}}
-\newcommand{\warpdestination}{\set{warpDest}}
+\newcommand{\warpdestination}{\set{corrTarg}}
 \newcommand{\concretetransactions}{{\cal T}}
 \newcommand{\abstracttransactions}{\concretetransactions^\#}
 
 \section{Thread Local Semantics}
 \label{se:instance}
-We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. In this Section, we define the thread-local concrete semantics of this language instantiating $\semanticanome{C}$ of the {\sf local} rule introduced in Section \ref{sec:transitionsystem}. Following the abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe warping destinations.
+We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. In this Section, we define the thread-local concrete semantics of this language instantiating $\semanticanome{C}$ of the {\sf local} rule introduced in Section \ref{sec:transitionsystem}. Following the abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe corrective targets.
 
 
 \subsection{Language}
@@ -265,14 +265,14 @@ The result of this example represents that, when you start the computation passi
 
 \section{Transaction System Semantics}
 \label{sec:transactionsystemwarping}
-In this Section, we apply the abstract semantics $\semanticanome{S}$ defined in Section \ref{sect:abstractsemantics} to infer warping destinations.
+In this Section, we apply the abstract semantics $\semanticanome{S}$ defined in Section \ref{sect:abstractsemantics} to infer corrective targets.
 
-In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} warping at the end of the execution.
+In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} corrective synchronization at the end of the execution.
 
 
 \subsection{Serialized Control Flow Graph}
 \label{Se:concabs}
-We apply the abstract semantics defined in Section \ref{sect:abstractsemantics} to compute suitable warping targets. In particular, we need that these targets are reachable from the same \emph{entry state} through a \emph{serializable execution}. Therefore, we build up a control flow graph that represents some specific \emph{serialized} executions. In particular, we assume that we have $k$ distinct types of transactions, and we build up a serialized CFG that represents a serialized execution of \emph{at least} 2 instances of each type of transactions.
+We apply the abstract semantics defined in Section \ref{sect:abstractsemantics} to compute suitable corrective targets. In particular, we need that these targets are reachable from the same \emph{entry state} through a \emph{serializable execution}. Therefore, we build up a control flow graph that represents some specific \emph{serialized} executions. In particular, we assume that we have $k$ distinct types of transactions, and we build up a serialized CFG that represents a serialized execution of \emph{at least} 2 instances of each type of transactions.
 
 Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each transaction type $i$, we create three static transaction identifiers $t^i_1$, $t^i_2$, and $t^i_n$. $t^i_1$ and $t^i_2$ represent precisely two concrete instances of $c^i$, while $t^i_n$ is a \emph{summary} abstract instance representing many concrete instances of $c^i$. We then build up a control flow graph representing a serialized execution of all these abstract transactions. In particular, each transaction type $c^i$ leads to a control flow graph $tc^i$ that executes (i) first $t^i_1$, (ii) then $t^i_n$ inside a non-deterministic loop (to overapproximate many instances of $c^i$)), and (iii) finally $t^i_2$. While the choice of having the two concrete transaction instances before and after the summary instance is arbitrary and other solutions are possible, we found this solution particularly effective in practice as we will show in Section \ref{Se:experiments}. The overall serialized CFG $tc$ is then built by concatenating the CFGs of all these transactions.
 
@@ -284,12 +284,12 @@ Starting from the code in Figure \ref{Fi:introMotivating}, we build up a seriali
 
 Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
 
-\subsection{Extracting Possible Warping States}
-First of all, notice that, given a transaction $t$, the {\sf warp} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system warps to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) producing the same shared log (formally, ${\sf ref}\ t \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : {\sf ref}\ t=\sigma_0$) . In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we warp the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that ${\sf ref}\ t \leadsto (T,\mu', \sigma_0, \epsilon)$.
+\subsection{Extracting Possible Corrective Targets}
+First of all, notice that, given a transaction $t$, the {\sf corr} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system corrects to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by ${\sf ref}\ t$) producing the same shared log (formally, ${\sf ref}\ t \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : {\sf ref}\ t=\sigma_0$) . In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we correct the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that ${\sf ref}\ t \leadsto (T,\mu', \sigma_0, \epsilon)$.
 
-We compute possible warping targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute warping targets that, given an entry state representing a precise observable entry state, are reachable through a serialized execution. 
+We compute possible corrective targets on the serialized control flow graph $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute corrective targets that, given an entry state representing a precise observable entry state, are reachable through a serialized execution. 
 
-However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a warping destination.
+However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a corrective target.
 
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,
 \[
@@ -323,7 +323,7 @@ We then use the results of the abstract semantics $\semanticanome{S}$ to build u
 \paragraph{Running example:} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 	
-\subsection{Dynamic Warping}
+\subsection{Dynamic Corrective Synchronization}
 \label{sec:dynamicwarping}
 In our model, when we start the execution we have a finite number of concrete instances of each type of transaction. We denote by $\concretetransactions = \{s^i_j : j \in [0..m] \land i \in [1..k_j]\}$ the set of identifiers of concrete transactions, where $m$ is the number of different types of transactions, $k_j$ is the number of instances of transaction $j$, and $s^i_j$ represents the $j$-th instance of the $i$-th type of transaction.
 
@@ -345,7 +345,7 @@ We can now formalize the concretization of abstract states in $\amultistate$ by 
 \gamma_\multistate(\phi) = \{t \mapsto \sigma : \exists t' \in \dom{\phi} : t \in \gamma_{\concretetransactions}(t) \land \sigma \in \gamma_{\state}(\phi(t))\}
 \]
 
-Finally, we can prove that the warping destinations computed by $\warpdestination$ satisfies the {\sf ref} conditions as requested by the {\sf warp} rule.
+Finally, we can prove that the corrective targets computed by $\warpdestination$ satisfies the {\sf ref} conditions as requested by the {\sf corr} rule.
 
 \begin{theorem}
 	Let $t=\warpdestination(\cset{T}, \cset{S})$ be the results computed by our system. Then, $\forall \sigma_0 \in \gamma_\multistate(\phi_0), \sigma_n \in \gamma_\multistate(\phi_n) : \phi_0 \in \dom{t} \land \phi_n \in t(\phi_0)$ we have that $\sigma_0 \leadsto \sigma_n$
@@ -358,8 +358,8 @@ By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and
 %Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\sf t}$ for all the concrete transaction identifiers $t$.
 
 \paragraph{Discussion}
-$\warpdestination$ returns a set of possible exit states given an entry state. This means that, given a concrete incorrect poststate, we can choose the exit state produced by $\warpdestination$ that requires a \emph{minimal} correction to the incorrect post state. In this way, we would minimize the runtime overhead of adjusting the concrete state when warping. The target state can be chosen by calculating the number of operations we need to apply to correct the poststate, and select the one with the minimal number. This might be further optimized by hashing the correct post states computed by $\warpdestination$ based on similarity.
-However, we did not investigate this aspect since in our experiments the overhead of correcting the poststate was already almost negligible by choosing a random destination. We believe that this is due to our specific setting, that is, concurrent maps. In fact, in this scenario the corrective operations that we have to apply are to put or remove an element, and the corrections always required very few of them. We believe that other data structures (e.g., involving ordering of elements like lists) might require more complicated corrections, and we plan to investigate them as future work.
+$\warpdestination$ returns a set of possible exit states given an entry state. This means that, given a concrete incorrect poststate, we can choose the exit state produced by $\warpdestination$ that requires a \emph{minimal} correction to the incorrect post state. In this way, we would minimize the runtime overhead of adjusting the concrete state. The target state can be chosen by calculating the number of operations we need to apply to correct the poststate, and select the one with the minimal number. This might be further optimized by hashing the correct post states computed by $\warpdestination$ based on similarity.
+However, we did not investigate this aspect since in our experiments the overhead of correcting the poststate was already almost negligible by choosing a random target. We believe that this is due to our specific setting, that is, concurrent maps. In fact, in this scenario the corrective operations that we have to apply are to put or remove an element, and the corrections always required very few of them. We believe that other data structures (e.g., involving ordering of elements like lists) might require more complicated corrections, and we plan to investigate them as future work.
 
 
 %\section{Dynamic Warping}
