@@ -3,16 +3,16 @@
 
 \subsection{Apache Tomcat}
 
-\subsubsection{Transaction 1}
+\subsubsection*{Transaction 1}
 \begin{lstlisting}
 Attribute removeAttribute(String name){
-	Attribute val = null;
-	found = attr.containsKey(name) ;
-	if (found) {
-		val = attr.get(name);
-		attr.remove(name);
-		}
-	return val;
+  Attribute val = null;
+  found = attr.containsKey(name) ;
+  if (found) {
+    val = attr.get(name);
+    attr.remove(name);
+    }
+  return val;
 }
 \end{lstlisting}
 
@@ -26,21 +26,21 @@ Attribute removeAttribute(String name){
 %\begin{lstlisting}
 %ret=null;
 %if(map.containsKey(key)) {
-%	ret=map.get(key);
-%	map.remove(key);
+%  ret=map.get(key);
+%  map.remove(key);
 %}
 %return ret;
 %\end{lstlisting}
 
-\subsubsection{Transaction 2}
+\subsubsection*{Transaction 2}
 \begin{lstlisting}
 boolean removeAttribute(String name, Attribute value){
-	boolean replaced = false;
-	oldValue = attributes.get(name);
-	if (oldValue != null)
-		replaced = true;
-	attributes.put(name, value);
-	return replaced;
+  boolean replaced = false;
+  oldValue = attributes.get(name);
+  if (oldValue != null)
+    replaced = true;
+  attributes.put(name, value);
+  return replaced;
 }
 \end{lstlisting}
 
@@ -59,15 +59,15 @@ boolean removeAttribute(String name, Attribute value){
 
 \subsection{dyuproject}
 
-\subsubsection{Transaction 1}
+\subsubsection*{Transaction 1}
 \begin{lstlisting}
-public Convertor getConvertor(Class<?> clazz, boolean create, boolean addClass) {
-	Convertor convertor = (Convertor)_convertors.get(clazz.getName());
-	if(convertor==null && create) {
-		convertor = newConvertor(clazz, addClass);
-		_convertors.putIfAbsent(clazz.getName(), convertor);
-	}
-	return convertor;
+Convertor getConvertor(Class cl, boolean b1, boolean b2) {
+  Convertor conv = (Convertor)_convertors.get(cl.getName());
+  if(conv==null && b1) {
+    conv = newConvertor(cl, b2);
+    _convertors.putIfAbsent(cl.getName(), conv);
+  }
+  return conv;
 }
 \end{lstlisting}
 
@@ -81,22 +81,23 @@ public Convertor getConvertor(Class<?> clazz, boolean create, boolean addClass) 
 %\begin{lstlisting}
 %value=map.get(key);
 %if(value==null && b) {
-%	value=new Value();
-%	map.putIfAbsent(key, value);
+%  value=new Value();
+%  map.putIfAbsent(key, value);
 %}
 %retrun value;
 %\end{lstlisting}
 
-\subsubsection{Transaction 2}
+\subsubsection*{Transaction 2}
 \begin{lstlisting}
-protected Convertor getConvertor(String className) {
-	Convertor convertor = (Convertor)_convertors.get(className);
-	if(convertor==null) {
-		Class<?> clazz = StandardJSON.loadClass(className);;
-		convertor = clazz==null ? UNRESOLVED_CONVERTOR : newConvertor(clazz);
-		_convertors.putIfAbsent(className, convertor);
-	}
-	return convertor;
+Convertor getConvertor(String cl) {
+  Convertor conv= (Convertor)_convertors.get(cl);
+  if(conv==null) {
+    Class<?> clazz = StandardJSON.loadClass(cl);;
+    conv = clazz==null ? UNRESOLVED_CONVERTOR : 
+                                      newConvertor(clazz);
+    _convertors.putIfAbsent(cl, convertor);
+  }
+  return conv;
 }
 \end{lstlisting}
 
@@ -110,25 +111,24 @@ protected Convertor getConvertor(String className) {
 %\begin{lstlisting}
 %value=map.get(key);
 %if(value==null) {
-%	value=new Value();
-%	map.putIfAbsent(key, value);
+%  value=new Value();
+%  map.putIfAbsent(key, value);
 %}
 %return value;
 %\end{lstlisting}
 
 \subsection{Flexive}
 
-\subsubsection{Transaction 1}
+\subsubsection*{Transaction 1}
 \begin{lstlisting}
-public static FxValueRenderer getInstance(FxLanguage language) {
-	if (language == null) {
-	// default renderer always exists
-	return renderers.get(DEFAULT);
-	}
-	if (!renderers.containsKey(language)) {
-		renderers.putIfAbsent(language, new FxValueRendererImpl(language));
-	}
-	return renderers.get(language);
+FxValueRenderer getInstance(FxLanguage l) {
+  if (language == null) {
+    return renderers.get(DEFAULT);
+  }
+  if (!renderers.containsKey(l)) {
+    renderers.putIfAbsent(l, new FxValueRendererImpl(l));
+  }
+  return renderers.get(l);
 }
 \end{lstlisting}
 
@@ -141,17 +141,18 @@ public static FxValueRenderer getInstance(FxLanguage language) {
 %
 %\begin{lstlisting}
 %if(!map.containsKey(key)) {
-%	loc_w=new Value();
-%	map.putIfAbsent(key, loc_w);
+%  loc_w=new Value();
+%  map.putIfAbsent(key, loc_w);
 %}
 %return map.get(key)"
 %\end{lstlisting}
-
-\subsubsection{Transaction 2}
+\pagebreak
+\subsubsection*{Transaction 2}
 \begin{lstlisting}
-void addRenderer(FxLanguage language, Class<T> valueType, FxValueFormatter<DT, T> formatter) {
-	renderers.putIfAbsent(language, new FxValueRendererImpl(language));
-	renderers.get(language).put(valueType, formatter);
+void addRenderer
+    (FxLanguage l, Class<T> v, FxValueFormatter<DT, T> f) {
+  renderers.putIfAbsent(l, new FxValueRendererImpl(l));
+  renderers.get(l).put(v, f);
 }
 \end{lstlisting}
 
@@ -169,21 +170,16 @@ void addRenderer(FxLanguage language, Class<T> valueType, FxValueFormatter<DT, T
 %\end{lstlisting}
 
 \subsection{Gridkit}
-\subsubsection{Transaction 1}
+\subsubsection*{Transaction 1}
 \begin{lstlisting}
-protected Object internalDeserialize(PofReader in) throws IOException {
-	Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
-	ObjectFormat format = formats.get(type);
-	if (format == null) {
-		try {
-			format = new ObjectFormat(type);
-		} catch (Exception e) {
-			throw new IOException("Failed to create reflection format for " + type.getName(), e);
-		}
-	formats.put(type, format);
-	}
-	Object result = resolve(format.deserialize(in));
-	return result;
+Object internalDeserialize(PofReader in) {
+  Class t = in.getPofContext().getClass(in.getUserTypeId());
+  ObjectFormat f = formats.get(t);
+  if (f == null) {
+    f = new ObjectFormat(t);
+    formats.put(t, f);
+  }
+  return resolve(f.deserialize(in));
 }
 \end{lstlisting}
 
@@ -196,29 +192,25 @@ protected Object internalDeserialize(PofReader in) throws IOException {
 %
 %\begin{lstlisting}
 %if(map.containsKey(key)) {
-%	value=new Value();
-%	map.put(key, value);
-%	ret=null;
+%  value=new Value();
+%  map.put(key, value);
+%  ret=null;
 %} else
-%	ret=map.get(key);
+%  ret=map.get(key);
 %return ret;
 %\end{lstlisting}
 
-\subsubsection{Transaction 2}
+\subsubsection*{Transaction 2}
 \begin{lstlisting}
-protected void internalSerialize(PofWriter out, Object origValue) throws IOException {
-	Object value = replace(origValue);
-	Class<?> type = value.getClass();
-	ObjectFormat format = formats.get(type);
-	if (format == null) {
-		try {
-			format = new ObjectFormat(type);
-		} catch (Exception e) {
-			throw new IOException("Failed to create reflection format for " + type.getName(), e);
-			}
-		formats.put(type, format);
-	}
-	format.serialize(out, value);
+void internalSerialize(PofWriter out, Object o) {
+  Object v = replace(o);
+  Class t = v.getClass();
+  ObjectFormat f = formats.get(t);
+  if (f == null) {
+    format = new ObjectFormat(t);
+    formats.put(t, f);
+  }
+  format.serialize(out, v);
 }
 \end{lstlisting}
 
@@ -231,6 +223,6 @@ protected void internalSerialize(PofWriter out, Object origValue) throws IOExcep
 %
 %\begin{lstlisting}
 %if(map.containsKey(key))
-%	value=new Value();
+%  value=new Value();
 %map.put(key, value);
 %\end{lstlisting}

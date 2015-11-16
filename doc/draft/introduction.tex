@@ -10,7 +10,7 @@ Toward this end, there are currently two main synchronization paradigms:
 
 \paragraph{Motivation} The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
 
-Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
+Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project,\footnote{\url{https://code.google.com/archive/p/dyuproject/source}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 
 %\begin{figure}
 %	\begin{lstlisting}[numbers=left]
