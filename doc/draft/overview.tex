@@ -28,7 +28,7 @@ We refer to the warping solution as \emph{sound} if $h'$ is the prefix of a seri
 A warping solution that is not complete faces the problem of stuck runs. Given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem:
 \begin{itemize}
 	\item Manual specification: The user completes the set of warping targets computed automatically, such that there are no stuck runs. In our implementation of warping, the warping targets are computed offline via static analysis, which lets the user complete the specification prior to the deployment runs.
-	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This provides a general means to avoid stuck states.
+	\item Complementary techniques: In the absence of a warping target, the system can default to another synchronization technique such as STM. This provides a general means to avoid stuck states without causing any overhead w.r.t. standard techniques.
 \end{itemize}
 
 
@@ -36,7 +36,7 @@ A warping solution that is not complete faces the problem of stuck runs. Given a
 
 A simpler --- and more abstract --- specification to work with, compared to complete execution prefixes, is in the form of triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the runtime instrumentation it maps to is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
 
-Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over a interprocedural control-flow graph of the form: 
+Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over an interprocedural control-flow graph of the form: 
 \begin{center}
 $$
 	t_1 \rightarrow t^\star_{2 \ldots n} \rightarrow t_{n+1} \rightarrow t'_1 \rightarrow t'^\star_{2 \ldots n} \rightarrow t'_{n+1} \rightarrow \ldots
@@ -54,6 +54,6 @@ The runtime system has two main responsibilities. First, it must track whether e
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then warping is triggered in response. 
 
-The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that --- for a given bad states --- stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
+The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that --- for a given bad state --- stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
 
 We expand on both of these challenges in Section \ref{Se:system}. Prior to that, in Sections \ref{se:instance} and \ref{sec:transactionsystemwarping}, we provide a formal statement of the warping approach.

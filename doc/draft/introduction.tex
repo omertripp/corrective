@@ -1,10 +1,10 @@
 \section{Introduction}
 
-Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and ensure that do not take effect.  
+Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
-	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has passed away. Locks, mutexes and semaphores are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
+	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes and semaphores are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
 	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and appropriate remediation steps are taken. A notable instance of this paradigm is transactional memory (TM) \cite{DBLP:conf/isca/HerlihyM93}, where the system logs memory accesses by each of the threads, and is able to reverse the effects of a thread and abort/restart it.
 \end{itemize}
 
