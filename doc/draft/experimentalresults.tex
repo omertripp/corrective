@@ -57,35 +57,60 @@ We have extracted two concurrent methods out of each benchmark. These were selec
 As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in Appendix \ref{appendix:casestudies}.
 
 \begin{figure}
-	\begin{lstlisting}
-protected Object internalDeserialize(PofReader in) 
-   throws IOException {
- Class type = in.getPofContext().getClass(in.getUserTypeId());
- ObjectFormat format = formats.get(type);
- if (format == null) {
-  try {
-   format = new ObjectFormat(type);
-  } catch (Exception e) {
-   throw new IOException(... + type.getName(), e); }
-  formats.put(type, format); }
-  Object result = resolve(format.deserialize(in));
-  return result; }
-	\end{lstlisting}
+%	\begin{lstlisting}
+%protected Object internalDeserialize(PofReader in) 
+%   throws IOException {
+% Class type = in.getPofContext().getClass(in.getUserTypeId());
+% ObjectFormat format = formats.get(type);
+% if (format == null) {
+%  try {
+%   format = new ObjectFormat(type);
+%  } catch (Exception e) {
+%   throw new IOException(... + type.getName(), e); }
+%  formats.put(type, format); }
+%  Object result = resolve(format.deserialize(in));
+%  return result; }
+%	\end{lstlisting}
+%
+%	\begin{lstlisting}
+%protected void internalSerialize(PofWriter out,Object origVal) 
+%   throws IOException {
+% Object value = replace(origVal);
+% Class type = value.getClass();
+% ObjectFormat format = formats.get(type);
+% if (format == null) {
+%  try {
+%   format = new ObjectFormat(type);
+%  } catch (Exception e) {
+%   throw new IOException(... + type.getName(), e); }
+%  formats.put(type, format); }
+% format.serialize(out, value); }
+%	\end{lstlisting}
+\begin{lstlisting}
+Object internalDeserialize(PofReader in) {
+  Class t = in.getPofContext().getClass(in.getUserTypeId());
+  ObjectFormat f = formats.get(t);
+  if (f == null) {
+    f = new ObjectFormat(t);
+    formats.put(t, f);
+  }
+  return resolve(f.deserialize(in));
+}
+\end{lstlisting}
 
-	\begin{lstlisting}
-protected void internalSerialize(PofWriter out,Object origVal) 
-   throws IOException {
- Object value = replace(origVal);
- Class type = value.getClass();
- ObjectFormat format = formats.get(type);
- if (format == null) {
-  try {
-   format = new ObjectFormat(type);
-  } catch (Exception e) {
-   throw new IOException(... + type.getName(), e); }
-  formats.put(type, format); }
- format.serialize(out, value); }
-	\end{lstlisting}
+\begin{lstlisting}
+void internalSerialize(PofWriter out, Object o) {
+  Object v = replace(o);
+  Class t = v.getClass();
+  ObjectFormat f = formats.get(t);
+  if (f == null) {
+    format = new ObjectFormat(t);
+    formats.put(t, f);
+  }
+  format.serialize(out, v);
+}
+\end{lstlisting}
+
 	\caption{\label{Fi:gridkitPair}Two concurrent methods from Gridkit, with concurrency bugs, included as benchmarks}
 \end{figure}
 
