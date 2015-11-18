@@ -131,7 +131,7 @@ The lattice structure is obtained by the point-wise application of set operators
 
 %For the sake of simplicity, we omit in the formalization the local log in the abstract domain. The only difference w.r.t. the concrete local log is that the entries refer to abstract heap nodes in $\heapnode$ instead of concrete references in $\reference$, and the presences of the entry \statement{?put} representing a possible \statement{put} action. This will be used in the definition of the abstract semantics of statement \statement{putIfAbsent}. XXX We can formalize the log. However, the problem is that the sequence might be infinite, so we need some kind of regular expressions - not sure I'm willing to go into this direction XXX 
 
-\paragraph{Running example.} 
+\noindent \textbf{Running example.} 
 Consider the motivating example in Figure \ref{Fi:introMotivating}. For instance, the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{name} is not in the map, while $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to some value $n_2$. Finally, $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents that \statement{name} (i) might not be in the map, \emph{or} (ii) is in the map related to value $n_2$.
 
 \subsection{Concretization function.}
@@ -157,7 +157,7 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 \end{proof}
 
 
-\paragraph{Running example:} Consider again that abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Imagine that $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into the concrete states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map and it is related with the value pointed by reference $\#2$).
+\noindent \textbf{Running example.} Consider again that abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Imagine that $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into the concrete states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map and it is related with the value pointed by reference $\#2$).
 
 
 
@@ -257,7 +257,7 @@ Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is s
 The proof of this lemma follows by case splitting on the statement, and by definition of the concrete and abstract semantics.
 \end{proof}
 
-\paragraph{Running example.}
+\noindent \textbf{Running example.}
 Consider again the code of method {\sf getConvertor()} in Figure \ref{Fi:introMotivating}, and suppose that the Boolean flag \statement{create} is \statement{true}. When we start from the abstract state  $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{name} is not in the map), we obtain the abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{\statement{null}\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(get)}. 
 
 Then the semantics of the Boolean condition of the \statement{if} statements at line 3 applies rule \statement{(null)} (that does not modify the abstract state) since \statement{conv} is \statement{null}, and we assumed \statement{create} is \statement{true}. 
@@ -281,7 +281,7 @@ Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each tran
 Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$. Then our semantics on a serialized control flow graph returns a function in $\amultistate : \abstracttransactions \to \astate$.
 
 
-\paragraph{Running example.}
+\noindent \textbf{Running example.}
 Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized control flow graph where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $t_1; t_n^\star; t_2$ where $t_n^\star$ represents that the code of $t_n$ is inside a loop.
 
 Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
@@ -322,7 +322,7 @@ $$
 \isconcrete(\phi')\} : \phi \in S]
 $$
 
-\paragraph{Running example:} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
+\noindent \textbf{Running example.} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 	
 \subsection{Dynamic Corrective Synchronization}
@@ -357,7 +357,7 @@ By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and
 
 %Note that, since in our model we assume that all the transactions start together, $\sigma_0$ is equivalent to ${\sf t}$ for all the concrete transaction identifiers $t$.
 
-\paragraph{Discussion}
+\noindent \textbf{Discussion.}
 $\warpdestination$ returns a set of possible exit states given an entry state. This means that, given a concrete incorrect poststate, we can choose the exit state produced by $\warpdestination$ that requires a \emph{minimal} correction to the incorrect post state. In this way, we would minimize the runtime overhead of adjusting the concrete state. The target state can be chosen by calculating the number of operations we need to apply to correct the poststate, and select the one with the minimal number. This might be further optimized by hashing the correct post states computed by $\warpdestination$ based on similarity.
 However, we did not investigate this aspect since in our experiments the overhead of correcting the poststate was already almost negligible by choosing a random target. We believe that this is due to our specific setting, that is, concurrent maps. In fact, in this scenario the corrective operations that we have to apply are to put or remove an element, and the corrections always required very few of them. We believe that other data structures (e.g., involving ordering of elements like lists) might require more complicated corrections, and we plan to investigate them as future work.
 
