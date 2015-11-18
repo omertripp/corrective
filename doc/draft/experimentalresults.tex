@@ -116,6 +116,47 @@ void internalSerialize(PofWriter out, Object o) {
 
 \subsection{Performance Results} 
 
+\begin{figure*}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case1it.pdf}
+		\caption{\label{Fi:case1it}Apache Tomcat {\sf ApplicationContext}: workload}
+	\end{minipage}
+	\hspace{0.1 \textwidth}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case1th.pdf}
+		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
+	\end{minipage}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case2it.pdf}
+		\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
+	\end{minipage}
+	\hspace{0.1 \textwidth}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case2th.pdf}
+		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
+	\end{minipage}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case3it.pdf}
+		\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
+	\end{minipage}
+	\hspace{0.1 \textwidth}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case3th.pdf}
+		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
+	\end{minipage}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case4it.pdf}
+		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
+	\end{minipage}
+	\hspace{0.1 \textwidth}
+	\begin{minipage}{0.45 \textwidth}
+		\includegraphics[width=\textwidth]{../../eval/32threads/case4th.pdf}
+		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
+	\end{minipage}
+\end{figure*}
+
+
+
 We depict the performance results in Figures \ref{Fi:case1it}-\ref{Fi:case4th}. 
 For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (left/black and right/gray, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
@@ -196,45 +237,6 @@ Interestingly, even on the benchmarks other than Tomcat STM is not able to compe
 %
 %
 %Our benchmark is adapted from real world applications, including XXX and YYY. In our experiment, we consider two types of transactions for each benchmark, and each thread runs a combination of the transactions. In our experiment, we measure the performance under two changes: (1) We fix the number of threads as 8, the number of cores in the machine, and then change the number of transactions each thread runs from 10 to 100. This setting helps us understand the performance in different workloads, (2) we fix the number of transactions each thread runs as 100, and change the number of threads following the sequence: 1,2,4,6,8,10,12,14,16. This setting allows us to study the thread scalability. In our experiments, all threads operate on the same key.
-
-\begin{figure*}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case1it.pdf}
-		\caption{\label{Fi:case1it}Apache Tomcat {\sf ApplicationContext}: workload}
-	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case1th.pdf}
-				\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
-	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case2it.pdf}
-						\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
-	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case2th.pdf}
-						\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
-	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case3it.pdf}
-			\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
-	\end{minipage}
-		\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case3th.pdf}
-			\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
-	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case4it.pdf}
-		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
-	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case4th.pdf}
-		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
-	\end{minipage}
-\end{figure*}
 
 %\begin{figure*}
 %\centering

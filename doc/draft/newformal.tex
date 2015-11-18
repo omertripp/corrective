@@ -64,7 +64,7 @@ The events are defined as follows:
 \\
 \end{tabular}
 \\
-Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations.
+Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations. The intuition is that {\sf corr} \emph{corrects} the execution by jumping transaction $t$ to a state that is reachable starting from the entry state through a serialized execution.
 In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations.
 
 \subsection{Formal Guarantees}\label{Se:guarantees}
@@ -112,9 +112,9 @@ $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 	\end{proof}
 \end{lemma}
 
-\begin{example}[Loop parallelization]\label{Ex:loops}
-	Assume the common case of loop parallelization, where loop iterations are executed in parallel as transactions. There are normally finitely many transactions, all starting at the same time, and all are expected to terminate within a finite number of steps. Complete on-commit-failure corrective synchronization guarantees both termination and serializability in this setting.
-\end{example}
+%\begin{example}[Loop parallelization]\label{Ex:loops}
+%	Assume the common case of loop parallelization, where loop iterations are executed in parallel as transactions. There are normally finitely many transactions, all starting at the same time, and all are expected to terminate within a finite number of steps. Complete on-commit-failure corrective synchronization guarantees both termination and serializability in this setting.
+%\end{example}
 
 %\subsection{Other Stuff}
 %

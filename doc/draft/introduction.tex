@@ -1,6 +1,6 @@
 \section{Introduction}
 
-Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and avoid them.  
+Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
@@ -66,14 +66,14 @@ This history is clearly nonserializable. In any serializable history, $T_1$ and 
 	\caption{\label{Fi:motivatingInterleaving}Interleaved execution of two instances of the code in Figure \ref{Fi:introMotivating}}
 \end{figure}
 
-Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. Also note that the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
+Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. In addition, our experiments suggest the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
 
 \paragraph{This Paper} Corrective synchronization, as a concept, opens up a vast space of possibilities for concrete synchronization protocols. In this paper, we take a first step in exploring this space. In particular, we focus on concurrent Java programs whose shared state is encoded as one or more {\sf ConcurrentMap} instances. The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
 
 Two important challenges w.r.t. corrective synchronization that we investigate within this scope are (i) how to compute correct poststates; and (ii) given an incorrect poststate, how to efficiently recover the execution to a correct poststate. 
 We tackle these challenges via static analysis. The analysis, equipped with a specialized abstraction for maps, is used to derive the correct poststates in relation to a given prestate. 
 
-To gain insight into the merit of corrective synchronization, we have created a prototype implementation for our scope of {\sf ConcurrentMap} clients. We compare our approach against both STM and lock-based synchronization across different concurrency levels and workload sizes. The results are encouraging: While both STM and corrective synchronization are significantly better than locks, the relative performance improvement thanks to the corrective approach is twice as that achieved by STM.
+To gain insight into the merit of corrective synchronization, we have created a prototype implementation for our scope of {\sf ConcurrentMap} clients. We compare our approach against both STM and lock-based synchronization across different concurrency levels and workload sizes. The results are encouraging: While both STM and corrective synchronization are significantly better than locks, the relative performance improvement thanks to the corrective approach is twice of that achieved by STM.
 %
 %We govern our discussion of these challenges by a formal framework with rigorous soundness guarantees, which extends beyond the limited scope of {\sf ConcurrentMap} objects. 
 %

@@ -93,7 +93,7 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 	\begin{array}{l}
 	\csemantics{C}{\statement{m.put(k, v)}, (e, m)} = 
 	(e, m[e(\statement{k}) \mapsto e(\statement{v})])\\
-	\csemantics{C}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto m(n)], m) \\
+	\csemantics{C}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto m(e(\statement{k}))], m) \\
 	\csemantics{C}{\statement{m.remove(k)}, (e, m)} = 
 	(e, m[e(\statement{k}) \mapsto \statement{null}])\\
 	\csemantics{C}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} =  (e[\statement{v} \mapsto m(n)], m') : \\
@@ -240,7 +240,9 @@ m & \textrm{ otherwise}\\
 \caption{Formal definition of the abstract semantics}
 \label{fig:abstractsemantics}
 \end{figure*}
-Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state. We focus the formalization on abstract states in $\aenv \times \amap$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
+Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state.
+As usual in abstract interpretation-based static analysis \cite{CC77}, this operational abstract semantics is the basis for computing a fixpoint over a control flow graph representing loops and conditional statements.
+We focus the formalization on abstract states in $\aenv \times \amap$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
 
 \statement{(put)} relates \statement{k} to \statement{v} in the map. In particular, if \statement{k} points to a unique non-summary node, it performs a so-called strong update, overwriting previous values related with \statement{k}. Otherwise, it performs a weak update by adding to the previous values the new ones. \statement{(get)} relates the assigned variable \statement{v} to all the heap nodes of values that might be related with \statement{k} in the map. Note that if \statement{k} is not in the map, then the abstract map $m$ relates it to a \statement{null} node, and therefore this value is propagated to \statement{v} then calling \statement{get}, representing the concrete semantics of this statement. Similarly to \statement{(put)}, \statement{(rmv)} removes \statement{k} from the map (by relating it to the singleton $\{\statement{null}\}$) iff \statement{k} points to a unique concrete node. Otherwise, it conservatively adds the heap node \statement{null} to the heap nodes related to all the values pointed by \statement{k}. \statement{(pIA)} updates the map like \statement{(put)} but only if the updated key node might have been absent, that is, when $\statement{null} \in m(n)$. \statement{(new)} creates a new heap node through $\freshNode(t)$ (where $t$ is the identifier of the transaction performing the creation), and assigns it to \statement{v}. The number of nodes is kept bounded by parameterizing the analysis with an upper bound $i$ such that (i) the first $i$ nodes created by a transaction are all concrete nodes, and (ii) all the other nodes are represented by a summary node. Instead, \statement{(nlas)} relates the given variable to the singleton $\{\statement{null}\}$.
 The abstract semantics on Boolean conditions produces $\bot$ statements if the given Boolean condition cannot hold on the given abstract semantics. Therefore, \statement{(null)} returns $\bot$ if the given variable \statement{x} cannot be \statement{null}, or a state relating \statement{x} to the singleton $\{\statement{null}\}$ otherwise. Vice-versa, \statement{(!null)} returns $\bot$ if \statement{x} can be only null, or a state relating \statement{x} to all its previous values except \statement{null} otherwise.
@@ -267,7 +269,7 @@ The result of this example represents that, when you start the computation passi
 \label{sec:transactionsystemwarping}
 In this Section, we apply the abstract semantics $\semanticanome{S}$ defined in Section \ref{sect:abstractsemantics} to infer corrective targets.
 
-In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} corrective synchronization at the end of the execution.
+In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} corrective synchronization at the end of the execution.
 
 
 \subsection{Serialized Control Flow Graph}
@@ -312,13 +314,13 @@ Note that in general the concretization of an abstract state is not computable. 
 \end{proof}
 
 The definition of $\isconcrete$ is extended to states $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$. 
-We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and we compute the exit states on the serialized CFG $tc$ for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations.
+We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and we compute the exit states on the serialized CFG $tc$ for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations. Note that, while in general an abstract state rarely represents a precise single concrete state, this is the case for most of the cases we dealt with as shown by our experimental results. This happens since our static analysis targets a specific data structure (maps), and tracks very precise symbolic information on it.
 
-We then use the results of the abstract semantics $\semanticanome{S}$ to build upa function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
-\[
+We then use the results of the abstract semantics $\semanticanome{S}$ to build up a function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
+$$
 \warpdestination(\set{T}, \set{S}) =[\phi \mapsto \{ \phi': \phi' \in \csemantics{S}{tc, \phi} \land
 \isconcrete(\phi')\} : \phi \in S]
-\]
+$$
 
 \paragraph{Running example:} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
@@ -328,8 +330,7 @@ $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \stat
 In our model, when we start the execution we have a finite number of concrete instances of each type of transaction. We denote by $\concretetransactions = \{s^i_j : j \in [0..m] \land i \in [1..k_j]\}$ the set of identifiers of concrete transactions, where $m$ is the number of different types of transactions, $k_j$ is the number of instances of transaction $j$, and $s^i_j$ represents the $j$-th instance of the $i$-th type of transaction.
 
 We can then bind abstract transaction identifiers to concrete ones. Since the set of abstract transactions is defined as $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$, we bind the first two concrete identifiers to the corresponding abstract identifiers, and all the others to the $n$ abstract instance. We formally define the concretization of transaction identifiers as follows:
-
-\[
+$$
 \gamma_{\concretetransactions}(T) =
 [
 t^i_j \mapsto 
@@ -337,13 +338,12 @@ t^i_j \mapsto
 s^{i'}_j : (i \in \{1, 2\} \Rightarrow i'=i) \lor 3\leq i' \leq k_j
 \} : t^i_j \in T
 ]
-\]
+$$
 
 We can now formalize the concretization of abstract states in $\amultistate$ by relying on the concretization of local states and transaction identifiers.
-
-\[
+$$
 \gamma_\multistate(\phi) = \{t \mapsto \sigma : \exists t' \in \dom{\phi} : t \in \gamma_{\concretetransactions}(t) \land \sigma \in \gamma_{\state}(\phi(t))\}
-\]
+$$
 
 Finally, we can prove that the corrective targets computed by $\warpdestination$ satisfies the {\sf ref} conditions as requested by the {\sf corr} rule.
 
