@@ -5,7 +5,7 @@ In this section, we first describe our prototype implementation of the overall s
 \subsection{Prototype System}
 \label{Se:system}
 
-We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Our implementation covers all the operations listed in Figure \ref{fig:language}.
+We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds up a serialized control flow graph as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Figure \ref{fig:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
 As explained earlier, the interface with the runtime system is a relational corrective specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
 \begin{center}
@@ -34,13 +34,9 @@ In our experiments, we varied two aspects of parallel execution:
 \end{itemize}
 For statistical soundness, we report the average performance results across 10 independent repetitions of each experiment.
 
-We compare our technique against two competing solutions:
-\begin{itemize}
-	\item a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
+We compare our technique against two competing solutions: (i) a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
 		\url{https://github.com/DeuceSTM/DeuceSTM}
-	}; and
-	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}.
-\end{itemize}
+	}, and (ii) a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}.
 
 \subsection{Subjects}
 
@@ -86,6 +82,7 @@ As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair fr
 %  formats.put(type, format); }
 % format.serialize(out, value); }
 %	\end{lstlisting}
+\footnotesize
 \begin{lstlisting}
 Object internalDeserialize(PofReader in) {
   Class t = in.getPofContext().getClass(in.getUserTypeId());
@@ -117,53 +114,75 @@ void internalSerialize(PofWriter out, Object o) {
 \subsection{Performance Results} 
 
 \begin{figure*}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case1it.pdf}
-		\caption{\label{Fi:case1it}Apache Tomcat {\sf ApplicationContext}: workload}
+	\begin{minipage}{0.50 \textwidth}
+		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case1it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case1th.pdf}
+		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}}
 	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case1th.pdf}
-		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
+	\begin{minipage}{0.5 \textwidth}
+		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case2it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case2th.pdf}
+		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}}
 	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case2it.pdf}
-		\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
+	\begin{minipage}{0.5 \textwidth}
+		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case3it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case3th.pdf}
+		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}}
 	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case2th.pdf}
-		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
+	\begin{minipage}{0.5 \textwidth}
+		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case4it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case4th.pdf}
+		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}}
 	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case3it.pdf}
-		\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
-	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case3th.pdf}
-		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
-	\end{minipage}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case4it.pdf}
-		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
-	\end{minipage}
-	\hspace{0.1 \textwidth}
-	\begin{minipage}{0.45 \textwidth}
-		\includegraphics[width=\textwidth]{../../eval/32threads/case4th.pdf}
-		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
-	\end{minipage}
+%	
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case1it.pdf}
+%		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: workload}
+%	\end{minipage}
+%	\hspace{0.05 \textwidth}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case1th.pdf}
+%		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
+%	\end{minipage}
+%	\hspace{0.05 \textwidth}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case2it.pdf}
+%		\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
+%	\end{minipage}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case2th.pdf}
+%		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
+%	\end{minipage}
+%	\hspace{0.05 \textwidth}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case3it.pdf}
+%		\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
+%	\end{minipage}
+%	\hspace{0.05 \textwidth}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case3th.pdf}
+%		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
+%	\end{minipage}
+%	\begin{minipage}{0.15 \textwidth}
+%		\ 
+%	\end{minipage}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case4it.pdf}
+%		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
+%	\end{minipage}
+%	\hspace{0.1 \textwidth}
+%	\begin{minipage}{0.3 \textwidth}
+%		\includegraphics[width=\textwidth]{../../eval/32threads/case4th.pdf}
+%		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
+%	\end{minipage}
 \end{figure*}
 
 
 
 We depict the performance results in Figures \ref{Fi:case1it}-\ref{Fi:case4th}. 
-For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (left/black and right/gray, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
+For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (right/white and left/black, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
 The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
 The aggregate performance results, averaging across all workloads and concurrency levels, are as follows:
 \begin{center}
+	\footnotesize
 \begin{tabular}{l|c|c|c|c}
 					& \multicolumn{2}{c|}{STM} & \multicolumn{2}{c}{corrective synchronization} \\
 					\cline{2-5} 

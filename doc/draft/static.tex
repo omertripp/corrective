@@ -29,6 +29,7 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 
 \begin{figure}[t]
 	\begin{center}
+		\footnotesize
 		\begin{tabular}{l}
 			\statement{s ::= m.put(k, v)}\\
 			\hspace{15pt} \statement{|\ v=m.get(k)}\\
@@ -89,6 +90,7 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 
 
 \begin{figure}
+	\footnotesize
 	\[
 	\begin{array}{l}
 	\csemantics{C}{\statement{m.put(k, v)}, (e, m)} = 
@@ -139,6 +141,7 @@ We define the concretization function $\gamma_\state : \astate \to \wp(\state)$ 
 
 The concretization function of abstract environments relates each variable in the environment to one of the references concretized from the node it is in relation with. Similarly, the concretization of abstract maps relate a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states is the pointwise application of the concretization of environments and maps. This is formalized as follows:
 \[
+\footnotesize
 \begin{array}{l}
 \gamma_\env(e) = \{\lambda x . r : x \in \dom{e} \land \exists n \in e(x) : r \in \gamma_\reference(n)\}\\
 \gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land\\
@@ -165,6 +168,7 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 \label{sect:abstractsemantics}
 
 \begin{figure*}
+\footnotesize
 \[
 \begin{array}{ll}
 \csemantics{S}{\statement{m.put(k, v)}, (e, m)} = \left\{
@@ -173,16 +177,16 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 (e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{put})\\
-\\
+%\\
 \csemantics{S}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & (\mathtt{get})\\
-\\
+%\\
 \csemantics{S}{\statement{m.remove(k)}, (e, m)} =  \left\{
 \begin{array}{ll}
 (e, m[n \mapsto \{\statement{null}\}]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
 (e, m[n \mapsto m(n) \cup \{\statement{null}\} : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{rmv})\\ 
-\\
+%\\
 \csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} =  (\pi_1(\csemantics{S}{\statement{v = m.get(k)}, (e, m)}), m') : & \\
 \hspace{70pt} 
 m'=
@@ -193,17 +197,10 @@ m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})] & \textrm{ if }
 m & \textrm{ otherwise}\\
 \end{array}
 \right. & (\mathtt{pIA})\\
-\\
+%\\
 \csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
-\\
+%\\
 \csemantics{S}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{nlas})\\
-\\
-%\csemantics{S}{\statement{if(b)\ s_1;\ else\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e, m)}} \dot{\cup} \csemantics{S}{\statement{s_2}, \csemantics{B}{\statement{! b}, (e, m)}} & \statement{(if)}\\
-%\\
-%\csemantics{S}{\statement{while(b)\ s_1;}, (e, m)} = \csemantics{B}{\statement{! b}, (e_1, m_1)} : 
-%(e_1, m_1) = \mathit{lfp}^{\dot{\subseteq}}_{\bot} \lambda (e', m') . (e, m) \dot{\cup} \csemantics{S}{\statement{s_1}, \csemantics{B}{\statement{b}, (e', m')}}& \statement{(while)}\\
-%\\
-%\csemantics{S}{\statement{s_1;\ s_2}, (e, m)} =  \csemantics{S}{\statement{s_2}, \csemantics{S}{\statement{s_1}, (e, m)}} & \statement{(cnc)}\\
 %\\
 \csemantics{S}{\statement{assert(x==null)}, (e, m)} = \left\{
 \begin{array}{ll}
@@ -211,14 +208,14 @@ m & \textrm{ otherwise}\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{null})\\
-\\
+%\\
 \csemantics{S}{\statement{assert(x!=null)}, (e, m)} = \left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto e(\statement{x}) \setminus \{\statement{null}\}], m) & \textrm{if } \exists n \in \heapnode : n \neq \statement{null} \land n \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{!null})\\
-\\
+%\\
 \csemantics{S}{\statement{assert(m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
@@ -227,7 +224,7 @@ m & \textrm{ otherwise}\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{cntK})\\
-\\
+%\\
 \csemantics{S}{\statement{assert(!m.containsKey(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
@@ -295,6 +292,7 @@ However, an abstract state in $\astate$ might represent multiple concrete states
 
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,
 \[
+\footnotesize
 \begin{array}{c}
 \isconcrete(e, m)\\
 \Updownarrow\\
@@ -317,10 +315,13 @@ The definition of $\isconcrete$ is extended to states $\phi \in \amultistate$ by
 We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and we compute the exit states on the serialized CFG $tc$ for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations. Note that, while in general an abstract state rarely represents a precise single concrete state, this is the case for most of the cases we dealt with as shown by our experimental results. This happens since our static analysis targets a specific data structure (maps), and tracks very precise symbolic information on it.
 
 We then use the results of the abstract semantics $\semanticanome{S}$ to build up a function that relates each entry state to a set of possible exit states. This is formalized by the following $\warpdestination$ function.
+
+\footnotesize
 $$
 \warpdestination(\set{T}, \set{S}) =[\phi \mapsto \{ \phi': \phi' \in \csemantics{S}{tc, \phi} \land
 \isconcrete(\phi')\} : \phi \in S]
 $$
+\normalsize
 
 \noindent \textbf{Running example.} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
@@ -330,6 +331,8 @@ $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \stat
 In our model, when we start the execution we have a finite number of concrete instances of each type of transaction. We denote by $\concretetransactions = \{s^i_j : j \in [0..m] \land i \in [1..k_j]\}$ the set of identifiers of concrete transactions, where $m$ is the number of different types of transactions, $k_j$ is the number of instances of transaction $j$, and $s^i_j$ represents the $j$-th instance of the $i$-th type of transaction.
 
 We can then bind abstract transaction identifiers to concrete ones. Since the set of abstract transactions is defined as $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$, we bind the first two concrete identifiers to the corresponding abstract identifiers, and all the others to the $n$ abstract instance. We formally define the concretization of transaction identifiers as follows:
+
+\footnotesize
 $$
 \gamma_{\concretetransactions}(T) =
 [
@@ -339,11 +342,14 @@ s^{i'}_j : (i \in \{1, 2\} \Rightarrow i'=i) \lor 3\leq i' \leq k_j
 \} : t^i_j \in T
 ]
 $$
-
+\normalsize
 We can now formalize the concretization of abstract states in $\amultistate$ by relying on the concretization of local states and transaction identifiers.
+
+\footnotesize
 $$
 \gamma_\multistate(\phi) = \{t \mapsto \sigma : \exists t' \in \dom{\phi} : t \in \gamma_{\concretetransactions}(t) \land \sigma \in \gamma_{\state}(\phi(t))\}
 $$
+\normalsize
 
 Finally, we can prove that the corrective targets computed by $\warpdestination$ satisfies the {\sf ref} conditions as requested by the {\sf corr} rule.
 

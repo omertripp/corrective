@@ -8,6 +8,7 @@ In this Section, we introduce a generic transaction semantics supporting correct
 
 In our description of the transition system, we utilize the following semantic domains:
 \\
+\footnotesize
 \begin{tabular}{rcll}
 	\\
 	$t \in T \subset {\cal T}$ & $:=$ & transaction IDs \\
@@ -20,6 +21,7 @@ In our description of the transition system, we utilize the following semantic d
 	\\
 \end{tabular}
 \\
+\normalsize
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
 $\forall \sigma,\sigma' \in \Sigma.\ \sigma \cdot \sigma' \in \Sigma$. Hence, we can decompose a given shared state into (disjoint) substates (the standard decomposition being into memory locations), such that we can easily refer to the read/write effects of a given operation.
 
@@ -46,6 +48,7 @@ ${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $
 
 The events are defined as follows:
 \\
+\footnotesize
 \begin{tabular}{rc}
 \\
 {\sf bgn}\ $t,c$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T \cup \{ t \}, \mu \cdot [t \mapsto (c,\bot,\epsilon)], \sigma, L)}{t \notin T}$ \\
@@ -63,6 +66,7 @@ The events are defined as follows:
 %{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
 \\
 \end{tabular}
+\normalsize
 \\
 Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations. The intuition is that {\sf corr} \emph{corrects} the execution by jumping transaction $t$ to a state that is reachable starting from the entry state through a serialized execution.
 In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations.
