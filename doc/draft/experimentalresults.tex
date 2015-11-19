@@ -39,7 +39,7 @@ We compare our technique against two competing solutions:
 	\item a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
 		\url{https://github.com/DeuceSTM/DeuceSTM}
 	}; and
-	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}.
+	\item a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}, such that the locks are of the same grain as their corresponding abstract locks in boosted STM.
 \end{itemize}
 
 \subsection{Subjects}
@@ -158,7 +158,7 @@ void internalSerialize(PofWriter out, Object o) {
 
 
 We depict the performance results in Figures \ref{Fi:case1it}-\ref{Fi:case4th}. 
-For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (left/black and right/gray, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
+For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (left/black and right/grey, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
 The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
