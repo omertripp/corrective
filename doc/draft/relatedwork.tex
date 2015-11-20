@@ -1,16 +1,14 @@
 \section{Related work}
-To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings from the ability to roll back execution. We focus our survery of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
+To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. We focus our survery of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
 
 \paragraph{Rollback optimizations.}
-The Push/Pull model \cite{KoskinenP15} is expressive enough to define rollbacks transactional systems. The transaction semantics portion of our formal work bares some similarity to the Push/Pull model in the use of shared/local logs. However, corrective synchronization is not expressible in Push/Pull: we introduce a new rule ({\sf corr}) and treat commit differently with the {\sf serpref} function.
-
-There are two main optimizations to decrease rollback overhead: reducing abort rate and reducing the extent to which a transaction rolls back upon detecting a conflict. Different solutions have been proposed along each of these directions.
+There are two main optimizations to decrease rollback overhead, reducing either abort rate or the extent to which a conflicted transaction rolls back. Different solutions have been proposed along each of these directions.
 
 Conflict detection is primarily based on violations of disjoint parallelism. That is, if two transactions perform simultaneous read/write or write/write accesses to the same memory location, then they are deemed conflicting. 
 %
 An effective approach to mitigate false conflicts is to leverage the built-in guarantees of concurrent data structures \cite{ppopp/HerlihyK08,Galois,TYFS:OOPSLA11}. As an example, two {\sf ConcurrentHashMap} instances that perform {\sf put} operations involving different keys may still appear to conflict as they both access the {\sf size} field.
 
-Transactional boosting, developed by Herlihy and Koskinen~\cite{ppopp/HerlihyK08}, is a systematic methodology to specify the behavior of linearizable data-structure operations in terms of their semantic, rather than concrete, footprint. The Galois system, built by Kulkarni et al. \cite{Galois}, follows a similar approach while focusing on the {\sf Graph} ADT in particular. The Hawkeye tool for detection of impediments to parallelization, by Tripp et al.~\cite{TYFS:OOPSLA11}, achieves the effect of abstract-level reasoning over memory accesses semi automatically by utilizing a mapping between the concrete and abstract representations of the data structure (albeit not its operations).  
+Transactional boosting, developed by Herlihy and Koskinen~\cite{ppopp/HerlihyK08}, is a systematic methodology to specify the behavior of linearizable data-structure operations in terms of their semantic footprint. The Galois system, built by Kulkarni et al. \cite{Galois}, follows a similar approach with emphasis on the {\sf Graph} ADT. The Hawkeye tool for detection of impediments to parallelization, by Tripp et al.~\cite{TYFS:OOPSLA11}, utilizes a mapping between the concrete and abstract representations of the data structure (albeit not its operations) for semantic conflict detection.  
 
 In another study, Tripp et al.~\cite{TMFS:PLDI12} mine commutative behaviors involving \emph{multiple} operations out of execution traces of the program that appear to conflict when viewed at the granularity of individual operations. Conservative conditions under which the operation sequences commute are computed, such that at runtime, if the sequences manifest under these conditions, then false conflict is avoided.
 

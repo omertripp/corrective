@@ -52,7 +52,7 @@ Our benchmark suite consists of four subjects, all of which are taken from popul
 
 We have extracted two concurrent methods out of each benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{oopsla/ShachamBASVY11}. 
 %
-As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in Appendix \ref{appendix:casestudies}.
+As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. (We omit other method pairs for lack of space.)
 
 \begin{figure}[tb]
 %	\begin{lstlisting}
@@ -177,14 +177,15 @@ The aggregate performance results, averaging across all workloads and concurrenc
 					& workload & conc. & workload & conc. \\
 \hline
 Tomcat	  	 &	1.5\%		&	3\% & 29\%		& 30\% \\			   
-dyuproject	 & 	18\%		& 	24\%	    & 30\% &	30\%	\\
+dyuproject	 & 	18\%		& 	24\%	    & 30\% &	29\%	\\
 Flexive 		&	17\%	  &		14\%			& 29\% & 30\%	\\ 
-Gridkit 		&	20\% 	&		16\%		& 32\% & 30\%	\\
+Gridkit 		&	20\% 	&		16\%		& 32\% & 31\%	\\
 \hline\hline	
 {\bf average} & {\bf 14\%} 	&   {\bf 14\%}    & {\bf 30\%}   & {\bf 30\%} \\
 \end{tabular}
 \end{center}
-As the numbers indicate, the gap between corrective synchronization and STM is significant with corrective synchronization providing over x2 more performance improvement relative to locks than STM.
+For completeness, we also note the absolute running times, as min/max intervals in seconds, for the lock-based solution for the workload and concurrency configurations respectively: Tomcat -- [6,10], [7,12]; dyuproject -- [6,9], [7,11]; Flexive -- [6,10], [7,11]; and Gridkit -- [6,9], [7,11]. 
+As the numbers indicate, corrective synchronization achieves better performance than STM with relative improvement on locks that is more than x2 better than STM.
 
 \subsection{Discussion}
 
