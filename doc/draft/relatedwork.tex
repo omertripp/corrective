@@ -1,5 +1,7 @@
 \section{Related work}
-To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. We focus our survery of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
+To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. 
+
+We focus our survey of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
 
 \noindent \textbf{Rollback optimizations.}
 There are two main optimizations to decrease rollback overhead, reducing either abort rate or the extent to which a conflicted transaction rolls back. Different solutions have been proposed along each of these directions.
@@ -8,23 +10,28 @@ Conflict detection is primarily based on violations of disjoint parallelism. Tha
 %
 An effective approach to mitigate false conflicts is to leverage the built-in guarantees of concurrent data structures \cite{ppopp/HerlihyK08,Galois,TYFS:OOPSLA11}. As an example, two {\sf ConcurrentHashMap} instances that perform {\sf put} operations involving different keys may still appear to conflict as they both access the {\sf size} field.
 
-Transactional boosting, developed by Herlihy and Koskinen~\cite{ppopp/HerlihyK08}, is a systematic methodology to specify the behavior of linearizable data-structure operations in terms of their semantic footprint. The Galois system, built by Kulkarni et al. \cite{Galois}, follows a similar approach with emphasis on the {\sf Graph} ADT. The Hawkeye tool for detection of impediments to parallelization, by Tripp et al.~\cite{TYFS:OOPSLA11}, utilizes a mapping between the concrete and abstract representations of the data structure (albeit not its operations) for semantic conflict detection.  
+Transactional boosting~\cite{ppopp/HerlihyK08} is a systematic methodology to specify the behavior of linearizable data-structure operations in terms of their semantic footprint. The Galois system \cite{Galois}, follows a similar approach with emphasis on the {\sf Graph} ADT. The Hawkeye tool~\cite{TYFS:OOPSLA11} detects impediments to parallelization accurately by mapping between the concrete and abstract representations of the data structure (albeit not its operations).
 
-In another study, Tripp et al.~\cite{TMFS:PLDI12} mine commutative behaviors involving \emph{multiple} operations out of execution traces of the program that appear to conflict when viewed at the granularity of individual operations. Conservative conditions under which the operation sequences commute are computed, such that at runtime, if the sequences manifest under these conditions, then false conflict is avoided.
+In another study, Tripp et al.~\cite{TMFS:PLDI12} mine commutative behaviors involving \emph{multiple} operations out of execution traces of the program that appear to conflict when viewed at the granularity of individual operations. These are then translated into logical conditions used to avoid spurious conflicts in lazy STM.
 
-Another approach to reduce conflict is to leverage available nondeterminism \cite{TKS:OOPSLA13}. If a transaction can choose between different nondeterministic behaviors (e.g., when selecting one among multiple elements in a container that satisfy a given property), then conflict is potentially reduced by directing the transaction toward a path that is less likely to conflict with other concurrent transactions.
+Another approach to reduce conflict is to leverage available nondeterminism \cite{TKS:OOPSLA13}. If a transaction can choose between different nondeterministic behaviors (e.g., selecting among different paths between two graph nodes), then conflict is potentially reduced by directing the transaction toward a path where interference with other threads is less likely.
 
 A well-known solution to restrict the extent to which a transaction rolls back is checkpointing \cite{spaa08a,Egwutuoha:2013}. Checkpointing introduces the notion of a partial abort, where the transaction resumes from some intermediate point rather than fully resetting its execution and effects. Nested transactions \cite{ont,beeri} achieve a similar effect in that only the nested transaction, but not its parent transaction, aborts and restarts. Yet another mechanism to reduce rollback overhead is elastic transactions~\cite{FGG:DISC09}, which avoid wasted work by splitting into multiple pieces.  
+
+Finally, we note the Push/Pull model \cite{KoskinenP15}, which also makes use of local/shared logs, and is flexible enough to express rollback-based transactions. However, corrective synchronization is not expressible in Push/Pull. We introduce a new rule, {\sf corr}, and treat {\sf cmt} differently with the {\sf serpref} function.
 
 \noindent \textbf{Use of static analysis.} In our solution, static analysis is used to identify admissible shared-state configurations to correct to from a given input state. Multiple past works on synchronization synthesis have also relied on static analysis, albeit for the extraction of other types of information. We survey some of these works in the following.
 
 Golan-Gueta et al.~\cite{GRSY:PLDI13} utilize static analysis to compute a conservative approximation of the possible actions that a transaction may perform in its future from a given intermediate point. This enables more granular synchronization compared to the worst-case assumption that the transaction may perform any action in its future.
 
-In the Autolocker system for synchronization synthesis, McCloskey et al. \cite{popl/McCloskeyZGB06} apply static analysis to determine a correct locking policy, free of deadlocks and race conditions, given (i) a specification of pessimistic atomic sections and (ii) annotations that connect locks to shared sections. The analysis, encoded as a type system, guarantees that the choice and order of locks guarding each of the atomic sections will lead neither to deadlocks nor to races.
+Autolocker \cite{popl/McCloskeyZGB06} applies static analysis to determine a correct locking policy, free of deadlocks and race conditions, given (i) a specification of pessimistic atomic sections and (ii) annotations that connect locks to shared sections. The analysis, encoded as a type system, guarantees deadlock and race freedom.
 
-Hawkins et al. \cite{HawkinsAFRS12} propose a system to synthesize data representations for concurrent programs. The input is a program that consists, in part, of concurrent relations. The output is a representation of the relations as concrete concurrent data structures, as well as locks, that together ensure correct synchronization by construction. The aggregate set of operations is serializable and deadlock free.
+Hawkins et al. \cite{HawkinsAFRS12} propose a system that transforms a program consisting, in part, of concurrent relations into a program where the relations are represented as concrete concurrent data structures, as well as locks, that together ensure correct synchronization by construction. They guarantee serializability and deadlock freedom.
 
-Prountzos et al. \cite{PrountzosMPM11} optimize the Galois system \cite{Galois} via static shape analysis \cite{MoolyToplas}. They apply the TVLA system to identify fail-safe points during the transaction's execution. This gives rise to two optimizations: (i) the transaction does not need to back up modified data, and (ii) redundant conflict checking can be eliminated. In Proznos et al.'s solution, the shape analysis, which is parametric in essence, is instantiated via a predicate discovery algorithm that exploits common patterns of data-structure usage.
+Prountzos et al. \cite{PrountzosMPM11} optimize the Galois system \cite{Galois} via static shape analysis \cite{MoolyToplas}. They apply the TVLA system to identify fail-safe points during the transaction's execution, beyond which neither backup nor conflict detection are necessary. 
+
+%This gives rise to two optimizations: (i) the transaction does not need to back up modified data, and (ii) redundant conflict checking can be eliminated. In Proznos et al.'s solution, the shape analysis, which is parametric in essence, is instantiated via a predicate discovery algorithm that exploits common patterns of data-structure usage.
+
 
 
 
