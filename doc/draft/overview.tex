@@ -35,7 +35,7 @@ A simpler, and more abstract, specification to work with, compared to complete e
 
 Mapping back from pairs of states to prefixes requires an oracle. In our prototype system, the oracle is computed as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over an interprocedural control-flow graph (CFG) of the form: 
 	$t_1 \rightarrow t^\star_{2 \ldots n} \rightarrow t_{n+1} \rightarrow t'_1 \rightarrow t'^\star_{2 \ldots n} \rightarrow t'_{n+1} \rightarrow \ldots$,
-where $t$, $t'$, etc denote different transaction types (i.e., transactions executing different code), and $n$ is unbounded, simulating a nondeterministic loop. Through this representation, we simulate an unbounded number of instances of transactions that are executed sequentially.
+where $t$, $t'$, etc denote different transaction types (i.e., transactions executing different code), and $n$ is unbounded, simulating a nondeterministic loop. This representation simulates an unbounded number of instances of transactions that are executed sequentially.
 
 We go into detail about this representation in Section \ref{Se:concabs}, but note now briefly that (i) this representation reflects the effects of serial execution of the transactions, and so the corrective targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 
@@ -43,10 +43,10 @@ We go into detail about this representation in Section \ref{Se:concabs}, but not
 
 \subsection{Runtime Synchronization} 
 
-The runtime system has two main responsibilities. First, it must track whether execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. 
+The runtime system has two main responsibilities. First, it must track whether an execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. 
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then corrective synchronization is triggered in response. 
 
-The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that --- for a given bad state --- stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
+The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that, for a given bad state, stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
 
 We expand on both of these challenges in Section \ref{Se:system}. Prior to that, in Sections \ref{se:instance} and \ref{sec:transactionsystemwarping}, we provide a formal statement of corrective synchronization.

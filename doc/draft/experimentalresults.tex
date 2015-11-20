@@ -47,7 +47,7 @@ Our benchmark suite consists of four subjects, all of which are taken from popul
 	Apache Tomcat is web-app container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is a concrete representation of a web application's execution environment.
 	dyuproject is a framework for development of Java web applications. We experiment with {\sf StandardConvertorCache}, which handles conversion of objects to/from JSON format.
 	Flexive is a next-generation content repository for development of web apps, in particular in an enterprise setting. We have included {\sf FxValueRendererFactory} from it, which is responsible to render transparently certain objects in a language.
-	Finally, Gridkit is a library containing utilities and functionality related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
+	Finally, Gridkit is a library containing utilities related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
 %\end{itemize}
 
 We have extracted two concurrent methods out of each benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{oopsla/ShachamBASVY11}. 
