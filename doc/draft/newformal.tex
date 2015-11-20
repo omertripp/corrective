@@ -7,20 +7,17 @@ In this section, we introduce a generic transaction semantics supporting correct
 \label{sec:concretedomain}
 
 In our description of the transition system, we utilize the following semantic domains:
-\\
+\begin{center}
 \footnotesize
-\begin{tabular}{rcll}
-	\\
-	$t \in T \subset {\cal T}$ & $:=$ & transaction IDs \\
-	$c \in {\cal C}$ & $:=$ & command \\
-	$\sigma \in \Sigma$ & $:=$ & shared state \\
-	${\sigma_t}$ & $:=$ & local state of $t$ \\
-	$L \in {\cal L}$ & $:=$ & shared log \\
+\begin{tabular}{rcllrcll}
+	$c \in {\cal C}$ & $:=$ & command & $t \in T \subset {\cal T}$ & $:=$ & transaction IDs \\
+	$\sigma \in \Sigma$ & $:=$ & shared state & ${\sigma_t}$ & $:=$ & local state of $t$ \\
+	$L \in {\cal L}$ & $:=$ & shared log &
 	$L_t$ & $:=$ & local log of $t$ \\
-	$s = (T, [t \mapsto (c_t,\sigma_t,L_t)]_{t \in T}, \sigma, L) \in {\cal S}$ & $:=$ & system state \\
-	\\
+	\multicolumn{4}{r}{
+		$s = (T, [t \mapsto (c_t,\sigma_t,L_t)]_{t \in T}, \sigma, L) \in {\cal S}$} & $:=$ & system state \\
 \end{tabular}
-\\
+\end{center}
 \normalsize
 Following \cite{KoskinenP15}, our transaction semantics uses shared and local logs.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
@@ -82,7 +79,7 @@ In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation 
 
 \subsection{Formal Guarantees}\label{Se:guarantees}
 
-\begin{theorem}[Soundness] Any terminating execution of the transition system is guaranteed to yield a serializable shared log.
+\begin{theorem}[Soundness] A terminating execution of the transition system yields a serializable shared log.
 \begin{proof}
 	The {\sf cmt} event acts as a gatekeeper, demanding that the log prefix including the outstanding events about to be committed is serializable. The check executes atomically together with the log update. Hence the system is guaranteed to terminate with a serializable shared log.	
 \end{proof}

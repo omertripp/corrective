@@ -1,7 +1,6 @@
 \section{Conclusion and Future Work}
 
-We have presented an alternative to the lock- and retry-based synchronization methods, which we dub \emph{corrective}. The key insight is to correct a bad execution, rather than retrying the involved transaction(s), which is expensive, or preventing bad behaviors from arising in the first place, which often obviates the performance advantages of concurrent execution.
+We have presented an alternative to the lock- and retry-based synchronization methods, which we dub \emph{corrective synchronization}. The key insight is to correct a bad execution, rather than aborting/retrying the transaction or conservatively avoiding the bad execution in the first place. We have explored, and experimented with, an instantiation of corrective synchronization for composed operations over ${\sf ConcurrentMap}$s, where correct states are computed via offline static analysis. Our initial results show promise.
 
-In our implementation of corrective synchronization, we utilize static analysis to compute candidate fixes. Then, at runtime, we track lightweight information to verify serializability, and compute an appropriate fix if needed. Our evaluation over methods from five popular concurrent libraries demonstrates the viability of corrective synchronization as an alternative, or complement, to existing synchronization approaches. 
+In the future, we intend to define, and experiment with, more variants of corrective synchronization. As part of that, we plan to develop compositional synchronization methods that integrate corrective synchronization with lock- and STM-based synchronization.
 
-In the future, we intend to develop compositional synchronization methods that integrate corrective synchronization with lock- and STM-based synchronization. We also plan to explore other ways of achieving completeness. 

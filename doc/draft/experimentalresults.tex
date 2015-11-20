@@ -5,7 +5,7 @@ In this section, we first describe our prototype implementation of the overall s
 \subsection{Prototype System}
 \label{Se:system}
 
-We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds a serialized CFG as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Figure \ref{fig:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
+We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds a serialized CFG as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Section \ref{sect:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
 As explained earlier, the interface with the runtime system is a relational corrective specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
 %\begin{center}
@@ -98,7 +98,7 @@ void internalSerialize(PofWriter out, Object o) {
   if (f == null) { format = new ObjectFormat(t); formats.put(t, f); }
   format.serialize(out, v); }
 \end{lstlisting}
-	\caption{\label{Fi:gridkitPair}Two concurrent methods from Gridkit, with concurrency bugs, included as benchmarks}
+	\caption{\label{Fi:gridkitPair}Concurrent methods from the Gridkit benchmark}
 \end{figure}
 
 \subsection{Performance Results} 
@@ -189,8 +189,8 @@ As the numbers indicate, the gap between corrective synchronization and STM is s
 \subsection{Discussion}
 
 An interesting observation w.r.t. the raw performance results is that while corrective synchronization provides stable and consistent performance improvement across all benchmarks, STM seems to do much worse on Tomcat compared to all other benchmarks. We have analyzed this gap.
-
-The reason for this discrepancy, in our analysis, is that in both dyuproject and Flexive and Gridkit, once a first transaction manages to update the value corresponding to the input key, all other (nonoverlapping) transactions effectively become read-only transactions. As such, their execution does not induce any conflicts, and so STM achieves significant improvement compared to locks. In the case of Tomcat, however, this pattern does not hold. Transactions throughout the entire run perform write operations, and hence there are more conflicts and STM has poor performance.
+%
+The reason for this discrepancy,is that in both dyuproject and Flexive and Gridkit, once a first transaction manages to update the value corresponding to the input key, all other (nonoverlapping) transactions effectively become read-only transactions, and so conflict free. Hence STM achieves significant improvement compared to locks. In the case of Tomcat, however, this pattern does not hold. Transactions throughout the entire run perform write operations, leading to conflicts that degrade the performance of STM.
 
 Interestingly, even on the benchmarks other than Tomcat STM is not able to compete with the low overhead, and thus better performance, of corrective synchronization. We suspect that the reason is that STM has to instrument memory accesses, whereas corrective synchronization applies state corrections directly.
 
