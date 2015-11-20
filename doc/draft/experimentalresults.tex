@@ -5,12 +5,12 @@ In this section, we first describe our prototype implementation of the overall s
 \subsection{Prototype System}
 \label{Se:system}
 
-We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds up a serialized control flow graph as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Figure \ref{fig:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
+We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds a serialized CFG as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Figure \ref{fig:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
 As explained earlier, the interface with the runtime system is a relational corrective specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
-\begin{center}
+%\begin{center}
 $[ {\sf k} \mapsto \bot , {\sf v} \mapsto v ] \leadsto \{ [ {\sf k} \mapsto v , {\sf v} \mapsto v ] \}$
-\end{center}
+%\end{center}
 denotes that if we started from a prestate where ${\sf k}$ was not in the map and the value passed to the function was $v$, then in the poststate the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
@@ -26,30 +26,32 @@ The specification is cast by the runtime system into a hierarchical representati
 We conducted our experiments on server with two Intel(R) Xeon(R) CPU E5-2690 0 @ 2.90GHz (16 cores) CPUs with 132GB of RAM. The server runs version
 6.6 of the CentOS Linux distribution, and has the Sun 64-Bit 1.8 Java virtual machine (JVM) installed.
 
-In our experiments, we varied two aspects of parallel execution:
-\begin{itemize}
-	\item \underline{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as the number of transactions executed by a given thread, where a single transaction consists of the invocation of a particular method. All inputs share the same key(s).
-	\item \underline{Concurrency level:} For a fixed workload size, set at 10%\pengtodo{please confirm}
-	, the number of threads is varied along the range of 2 to 32 threads.  
-\end{itemize}
+In our experiments, we varied two aspects of parallel execution: \emph{workload size}, measured as the number of transactions executed by a given thread for a fixed number $n$ of threads, and \emph{concurrency level}, setting the number of threads for a fixed workload size. For the former, we fixed $n=8$ and varied the number of transactions, where each transaction executes a single client method. For the latter, we experimented with 2 to 32 threads with workload size fixed at 10.
+%\begin{itemize}
+	%\item
+%	\emph{Workload size:} For a fixed number $n$ of threads, where $n=8$,  the workload size is varied. The workload is measured as the number of transactions executed by a given thread, where a single transaction consists of the invocation of a particular method. All inputs share the same key(s).
+%	\item \underline{Concurrency level:} For a fixed workload size, set at 10%\pengtodo{please confirm}
+%	, the number of threads is varied along the range of 2 to 32 threads.  
+%\end{itemize}
 For statistical soundness, we report the average performance results across 10 independent repetitions of each experiment.
 
 We compare our technique against two competing solutions: (i) a pessimistic concrete-level variant of STM, as available via version 1.3 of the Deuce STM (the latest version)\footnote{
 		\url{https://github.com/DeuceSTM/DeuceSTM}
-	}, and (ii) a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}.
+	}, and (ii)  a lock-based synchronization algorithm boosted with {\sf Map} semantics \cite{ppopp/HerlihyK08}, such that the locks are of the same grain as their corresponding abstract locks in boosted STM.
 
 \subsection{Subjects}
 
-Our benchmark suite consists of four subjects, all of which are taken from popular open-source code bases and have been used in past studies on concurrency \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}, as follows:
-\begin{itemize}
-	\item \underline{Apache Tomcat:} A web-application container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is a concrete representation of a web application's execution environment.
-	\item \underline{dyuproject:} A framework for development of Java web applications. We experiment with {\sf StandardConvertorCache}, which handles conversion of objects to/from JSON format.
-	\item \underline{Flexive:} A next-generation content repository for the development of web applications, in particular in an enterprise setting. We have included {\sf FxValueRendererFactory} from it, which is responsible to render transparently certain objects in a language.
-	\item \underline{Gridkit:} A library containing utilities and functionality related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
-\end{itemize}
+Our benchmark suite consists of four subjects, all of which are taken from popular open-source code bases and have been used in past studies on concurrency \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}.
+%\begin{itemize}
+	%\item 
+	Apache Tomcat is web-app container in wide deployment. Within it, we consider {\sf ApplicationContext}, which is a concrete representation of a web application's execution environment.
+	dyuproject is a framework for development of Java web applications. We experiment with {\sf StandardConvertorCache}, which handles conversion of objects to/from JSON format.
+	Flexive is a next-generation content repository for development of web apps, in particular in an enterprise setting. We have included {\sf FxValueRendererFactory} from it, which is responsible to render transparently certain objects in a language.
+	Finally, Gridkit is a library containing utilities and functionality related to in-memory data grids. In it, {\sf ReflectionPofSerializer} is a concurrent data structure that supports generic POF serialization via reflection.
+%\end{itemize}
 
 We have extracted two concurrent methods out of each benchmark. These were selected based on past studies that report on concurrency bugs in, and interference between, the selected methods \cite{oopsla/ShachamBASVY11}. 
-
+%
 As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair from Gridkit. In both of these methods, the intended atomic ``put-if-absent'' behavior (available as the {\sf putIfAbsent} API) is misimplemented due to the separation between the {\sf get} and {\sf put} calls. The other methods we experimented with are in Appendix \ref{appendix:casestudies}.
 
 \begin{figure}
@@ -87,27 +89,15 @@ As an illustration, in Figure \ref{Fi:gridkitPair} we present the method pair fr
 Object internalDeserialize(PofReader in) {
   Class t = in.getPofContext().getClass(in.getUserTypeId());
   ObjectFormat f = formats.get(t);
-  if (f == null) {
-    f = new ObjectFormat(t);
-    formats.put(t, f);
-  }
-  return resolve(f.deserialize(in));
-}
-\end{lstlisting}
+  if (f == null) { f = new ObjectFormat(t); formats.put(t, f); }
+  return resolve(f.deserialize(in)); }
 
-\begin{lstlisting}
 void internalSerialize(PofWriter out, Object o) {
-  Object v = replace(o);
-  Class t = v.getClass();
+  Object v = replace(o); Class t = v.getClass();
   ObjectFormat f = formats.get(t);
-  if (f == null) {
-    format = new ObjectFormat(t);
-    formats.put(t, f);
-  }
-  format.serialize(out, v);
-}
+  if (f == null) { format = new ObjectFormat(t); formats.put(t, f); }
+  format.serialize(out, v); }
 \end{lstlisting}
-
 	\caption{\label{Fi:gridkitPair}Two concurrent methods from Gridkit, with concurrency bugs, included as benchmarks}
 \end{figure}
 
@@ -173,12 +163,10 @@ void internalSerialize(PofWriter out, Object o) {
 %	\end{minipage}
 \end{figure*}
 
-
-
 We depict the performance results in Figures \ref{Fi:case1it}-\ref{Fi:case4th}. 
-For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (right/white and left/black, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
+For each benchmark, we present two column diagrams, corresponding to STM and corrective synchronization (left/black and right/grey, respectively), which indicate the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based solution is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
-The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while keeping the number of threads fixed at 8. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
+The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while fixing the number of threads. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
 The aggregate performance results, averaging across all workloads and concurrency levels, are as follows:
 \begin{center}

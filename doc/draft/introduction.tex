@@ -1,4 +1,4 @@
-\section{Introduction}
+\section{Introduction}\label{Se:intro}
 
 Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and avoid them.  
 
@@ -26,54 +26,68 @@ Beyond these cases, however, there are many other situations of practical intere
 %\end{figure}
 
 \begin{figure}
-	\footnotesize
 	\begin{lstlisting}[numbers=left]
 Convertor getConvertor(String name, boolean create) {
   Convertor conv = _convertors.get(name);
   if(conv==null && create) {
     conv = new Convertor(name);
-    _convertors.putIfAbsent(name, conv);
-  }
-  return conv;
-}
+    _convertors.putIfAbsent(name, conv); }
+  return conv; }
 	\end{lstlisting}
 	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
 \end{figure}
 
-Assume that different threads invoking this method are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks, and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
+Assume that different threads invoking this method are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
 
 \paragraph{Corrective Synchronization} In this paper, we take a first step in formulating and exploring a novel synchronization paradigm, which is conceptually different from both the pessimistic and the optimistic approaches. In our approach, dubbed \emph{corrective synchronization}, the correctness of multi-threaded execution is enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
 
-To illustrate our approach, we revisit the running example. Assume the execution history in Figure \ref{Fi:motivatingInterleaving}.
-This history is clearly nonserializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
-
-\begin{figure}
+To illustrate our approach, we revisit the running example. Assume the following execution history: % in Figure \ref{Fi:motivatingInterleaving}.
 	\begin{center}
 		\footnotesize
-		\begin{tabular}{c||c}
-			$T_1$ & $T_2$ \\
-			\hline
-			${\sf \_convertors.get()} / {\sf null}$ &  \\
-			& ${\sf \_convertors.get()} / {\sf null}$ \\
-			${\sf if (...)}$ 								   &							\\
-			& ${\sf if (...)}$ \\
-			${\sf new\ Convertor()} / o_1$		& \\
-			& ${\sf new\ Convertor()} / o_2$ \\
-			${\sf \_convertors.putIfAbsent()} / {\sf null}$ &  \\
-			& 		${\sf \_convertors.putIfAbsent()} / o_1$ \\
-			${\sf return}\ o_1$ & \\
-			& ${\sf return}\ o_2$ \\
-			\end{tabular}
-			\end{center}
-	\caption{\label{Fi:motivatingInterleaving}Interleaved execution of two instances of the code in Figure \ref{Fi:introMotivating}}
-\end{figure}
+		\begin{tabular}{rrll}
+			[ & $T_1$: ${\sf get()}/{\sf null}$, & $T_2$: ${\sf get()}/{\sf null}$,  & \\
+			& $T_1$: ${\sf if(\ldots)}$, & $T_2$: ${\sf if(\ldots)}$, & \\ 
+			& $T_1$: ${\sf new\ \ldots}/o_1$, & $T_2$: ${\sf new\ \ldots}/o_2$, & \\ 
+			& $T_1$: ${\sf putIfAbsent()}/{\sf null}$, & $T_2$: ${\sf putIfAbsent()}/o_1$,  & \\ 
+			& $T_1$: ${\sf return}\ o_1$, & $T_2$: ${\sf return}\ o_2$ & ]
+		\end{tabular}
+		\end{center}
+This history is clearly nonserializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
+
+%\begin{figure}
+%	\begin{center}
+%		\footnotesize
+%		\begin{tabular}{rrll}
+%[ & $T_1$: ${\sf get()}/{\sf null}$, & $T_2$: ${\sf get()}/{\sf null}$,  & \\
+%& $T_1$: ${\sf if(\ldots)}$, & $T_2$: ${\sf if(\ldots)}$, & \\ 
+%& $T_1$: ${\sf new\ \ldots}/o_1$, & $T_2$: ${\sf new\ \ldots}/o_2$, & \\ 
+%& $T_1$: ${\sf putIfAbsent()}/{\sf null}$, & $T_2$: ${\sf putIfAbsent()}/o_1$,  & \\ 
+%& $T_1$: ${\sf return}\ o_1$, & $T_2$: ${\sf return}\ o_2$ & ]
+%		\end{tabular}
+%%		\begin{tabular}{c||c}
+%%			$T_1$ & $T_2$ \\
+%%			\hline
+%%			${\sf \_convertors.get()} / {\sf null}$ &  \\
+%%			& ${\sf \_convertors.get()} / {\sf null}$ \\
+%%			${\sf if (...)}$ 								   &							\\
+%%			& ${\sf if (...)}$ \\
+%%			${\sf new\ Convertor()} / o_1$		& \\
+%%			& ${\sf new\ Convertor()} / o_2$ \\
+%%			${\sf \_convertors.putIfAbsent()} / {\sf null}$ &  \\
+%%			& 		${\sf \_convertors.putIfAbsent()} / o_1$ \\
+%%			${\sf return}\ o_1$ & \\
+%%			& ${\sf return}\ o_2$ \\
+%%			\end{tabular}
+%			\end{center}
+%	\caption{\label{Fi:motivatingInterleaving}Interleaved execution of two instances of the code in Figure \ref{Fi:introMotivating}}
+%\end{figure}
 
 Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. In addition, our experiments suggest the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
 
 \paragraph{This Paper} Corrective synchronization, as a concept, opens up a vast space of possibilities for concrete synchronization protocols. In this paper, we take a first step in exploring this space. In particular, we focus on concurrent Java programs whose shared state is encoded as one or more {\sf ConcurrentMap} instances. The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
 
 Two important challenges w.r.t. corrective synchronization that we investigate within this scope are (i) how to compute correct poststates; and (ii) given an incorrect poststate, how to efficiently recover the execution to a correct poststate. 
-We tackle these challenges via static analysis. The analysis, equipped with a specialized abstraction for maps, is used to derive the correct poststates in relation to a given prestate. 
+We tackle these challenges via static analysis based on abstract interpretation. The analysis, equipped with a specialized abstraction for maps, is used to derive the correct poststates in relation to a given prestate. 
 
 To gain insight into the merit of corrective synchronization, we have created a prototype implementation for our scope of {\sf ConcurrentMap} clients. We compare our approach against both STM and lock-based synchronization across different concurrency levels and workload sizes. The results are encouraging: While both STM and corrective synchronization are significantly better than locks, the relative performance improvement thanks to the corrective approach is twice of that achieved by STM.
 %

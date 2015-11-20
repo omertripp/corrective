@@ -1,7 +1,7 @@
 \section{Transaction Semantics}
 \label{sec:concretesemantics}
 
-In this Section, we introduce a generic transaction semantics supporting corrective synchronization.
+In this section, we introduce a generic transaction semantics supporting corrective synchronization.
 
 \subsection{Notation}
 \label{sec:concretedomain}
@@ -22,27 +22,36 @@ In our description of the transition system, we utilize the following semantic d
 \end{tabular}
 \\
 \normalsize
+Following \cite{KoskinenP15}, our transaction semantics uses shared and local logs.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
 $\forall \sigma,\sigma' \in \Sigma.\ \sigma \cdot \sigma' \in \Sigma$. Hence, we can decompose a given shared state into (disjoint) substates (the standard decomposition being into memory locations), such that we can easily refer to the read/write effects of a given operation.
 
-We additionally define two helper functions:
-\begin{itemize}
-\item $w \colon\ {\cal C} \times {\cal S} \rightharpoonup \Sigma$: the portion of the shared state written by a given atomic operation
-\item $r \colon\ {\cal C} \times {\cal S} \rightharpoonup \Sigma$: the portion of the shared state read by a given atomic operation
-\end{itemize}
+For that, we additionally define two helper functions,
+%\begin{itemize}
+%\item 
+$r,w \colon\ {\cal C} \times {\cal S} \rightharpoonup \Sigma$, such that $r$ (\textit{resp.} $w$) computes the portion of the shared state read (\textit{resp.} written) by a given atomic operation.
+%\item 
+%$r \colon\ {\cal C} \times {\cal S} \rightharpoonup \Sigma$: the portion of the shared state read by a given atomic operation
+%\end{itemize}
 The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. The shared log $L$ consists of pairs $\left\langle t,o \right\rangle$, where $t$ is a transaction identifier and $w(c) \neq \bot$.
 
 \subsection{Transition System}
 \label{sec:transitionsystem}
 
 We define five transactional events, as follows:
-\begin{itemize}
-\item The {\sf bgn} event marks the beginning of a transaction.
-\item The {\sf cmt} event fires when a transaction publishes its outstanding log of operations that affect the shared state to the shared state and log.
-\item The {\sf end} event marks the termination of a transaction.
-\item The {\sf corr} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
-\item The {\sf local} event executes a local action.
-\end{itemize}
+%\begin{itemize}
+%\item 
+The {\sf bgn} event marks the beginning of a transaction.
+%\item 
+The {\sf cmt} event fires when a transaction publishes its outstanding log of operations that affect the shared state to the shared state and log.
+%\item 
+The {\sf end} event marks the termination of a transaction.
+%\item 
+The {\sf corr} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
+%\item 
+The {\sf local} event executes a local action.
+%\end{itemize}
+
 We define the semantics of these events in the following. For rules where a transaction $t$ is defined in the prestate, its corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$. We utilize helper function ${\sf serpref} \colon\ {\cal L} \rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively) determine whether a given shared log is the prefix of some serializable execution log. Finally, we define helper function
 ${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the (global) system state immediately preceding $t$'s start.
 

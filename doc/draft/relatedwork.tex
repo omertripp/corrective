@@ -1,8 +1,10 @@
 \section{Related work}
-
 To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings from the ability to roll back execution. We focus our survery of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
 
-\paragraph{Rollback optimizations.} There are two main optimizations to decrease rollback overhead: reducing abort rate and reducing the extent to which a transaction rolls back upon detecting a conflict. Different solutions have been proposed along each of these directions.
+\paragraph{Rollback optimizations.}
+The Push/Pull model \cite{KoskinenP15} is expressive enough to define rollbacks transactional systems. The transaction semantics portion of our formal work bares some similarity to the Push/Pull model in the use of shared/local logs. However, corrective synchronization is not expressible in Push/Pull: we introduce a new rule ({\sf corr}) and treat commit differently with the {\sf serpref} function.
+
+There are two main optimizations to decrease rollback overhead: reducing abort rate and reducing the extent to which a transaction rolls back upon detecting a conflict. Different solutions have been proposed along each of these directions.
 
 Conflict detection is primarily based on violations of disjoint parallelism. That is, if two transactions perform simultaneous read/write or write/write accesses to the same memory location, then they are deemed conflicting. 
 %
@@ -24,7 +26,7 @@ In the Autolocker system for synchronization synthesis, McCloskey et al. \cite{p
 
 Hawkins et al. \cite{HawkinsAFRS12} propose a system to synthesize data representations for concurrent programs. The input is a program that consists, in part, of concurrent relations. The output is a representation of the relations as concrete concurrent data structures, as well as locks, that together ensure correct synchronization by construction. The aggregate set of operations is serializable and deadlock free.
 
-	Prountzos et al. \cite{PrountzosMPM11} optimize the Galois system \cite{Galois} via static shape analysis \cite{MoolyToplas}. They apply the TVLA system to identify fail-safe points during the transaction's execution. This gives rise to two optimizations: (i) the transaction does not need to back up modified data, and (ii) redundant conflict checking can be eliminated. In Proznos et al.'s solution, the shape analysis, which is parametric in essence, is instantiated via a predicate discovery algorithm that exploits common patterns of data-structure usage.
+Prountzos et al. \cite{PrountzosMPM11} optimize the Galois system \cite{Galois} via static shape analysis \cite{MoolyToplas}. They apply the TVLA system to identify fail-safe points during the transaction's execution. This gives rise to two optimizations: (i) the transaction does not need to back up modified data, and (ii) redundant conflict checking can be eliminated. In Proznos et al.'s solution, the shape analysis, which is parametric in essence, is instantiated via a predicate discovery algorithm that exploits common patterns of data-structure usage.
 
 
 

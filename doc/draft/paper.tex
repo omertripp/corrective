@@ -1,6 +1,8 @@
 \documentclass[preprint,nocopyrightspace,pldi]{sigplanconf-pldi16}
 
-\usepackage{caption}
+\usepackage{times}
+%\usepackage{mathptmx}
+\usepackage[small, it]{caption}
 \usepackage{microtype}
 \usepackage{amsmath,amsthm,amssymb,stmaryrd}
 \usepackage{graphicx}
@@ -37,7 +39,7 @@
 
 % program listings
 \usepackage{listings}
-\lstset{language=java,columns=flexible,numberstyle=\tiny,showstringspaces=false,basicstyle=\sffamily} %,frame=single
+\lstset{language=java,columns=flexible,numberstyle=\tiny,showstringspaces=false,basicstyle=\scriptsize\sffamily} %,frame=single
 \lstset{escapechar=`}
 \lstset{morekeywords={
         var, val}}
@@ -101,6 +103,7 @@
 
 \title{Corrective Synchronization}
 
+
 % \authorinfo{Pietro Ferrara} {} {} 
 %\authorinfo{Omer Tripp} {} {}
 % \authorinfo{Peng Liu} {} {} 
@@ -114,7 +117,7 @@ Concurrency control is a challenging problem. While some thread interleavings ar
 
 We propose a novel synchronization paradigm. In our approach, dubbed \emph{corrective synchronization}, the correctness of multithreaded execution is enforced neither by reducing parallelism nor by rolling back illegal thread interleavings, but by correcting the inadmissible state after the fact. The system automatically compensates, if necessary, for the effects of inadmissible interleavings by modifying the program state as a transaction completes while accounting for the behavior of concurrent transactions. We have proven that corrective synchronization is serializable.
 
-Within the general scope of corrective synchronization, we explore the combination of (i) offline static analysis to compute correct states w.r.t. the entry states with (ii) a runtime protocol that utilizes the artifacts computed statically to perform online state correction. We instantiate this setup to clients of the Java {\sf ConcurrentMap} abstract data type (ADT) to ensure safe composition of map operations.
+Within the general scope of corrective synchronization, we explore the combination of (i) an offline static analysis to compute correct states w.r.t. the entry states with (ii) a runtime protocol that utilizes the artifacts computed statically to perform online state correction. We instantiate this setup to clients of the Java {\sf ConcurrentMap} abstract data type (ADT) to ensure safe composition of map operations.
 
 We have created a prototype implementation of this system in Java, which we compare against two mainstream techniques: a lock-based approach boosted with abstract {\sf Map} semantics as well as a standard software transactional memory (STM). Our experimental evaluation on several real-world benchmarks indicates x2 speedup improvement compared to these techniques. Further, our technique incurs negligible overhead as compared to the original execution.
 \end{abstract}
