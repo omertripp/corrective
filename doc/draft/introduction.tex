@@ -3,10 +3,10 @@
 Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability \cite{Serializability}. The goal is to automatically detect --- with high precision and low overhead --- the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
-\begin{itemize}
+\begin{compactitem}
 	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes and semaphores are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
 	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and appropriate remediation steps are taken. A notable instance of this paradigm is transactional memory (TM) \cite{DBLP:conf/isca/HerlihyM93}, where the system logs memory accesses by each of the threads, and is able to reverse the effects of a thread and abort/restart it.
-\end{itemize}
+\end{compactitem}
 
 \paragraph{Motivation} The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
 
@@ -44,12 +44,12 @@ Assume that different threads invoking this method are all attempting to simulta
 To illustrate our approach, we revisit the running example. Assume the following execution history: % in Figure \ref{Fi:motivatingInterleaving}.
 	\begin{center}
 		\footnotesize
-		\begin{tabular}{rrll}
-			[ & $T_1$: ${\sf get()}/{\sf null}$, & $T_2$: ${\sf get()}/{\sf null}$,  & \\
-			& $T_1$: ${\sf if(\ldots)}$, & $T_2$: ${\sf if(\ldots)}$, & \\ 
-			& $T_1$: ${\sf new\ \ldots}/o_1$, & $T_2$: ${\sf new\ \ldots}/o_2$, & \\ 
-			& $T_1$: ${\sf putIfAbsent()}/{\sf null}$, & $T_2$: ${\sf putIfAbsent()}/o_1$,  & \\ 
-			& $T_1$: ${\sf return}\ o_1$, & $T_2$: ${\sf return}\ o_2$ & ]
+		\begin{tabular}{rlrcll}
+			[ & & $T_1$: ${\sf get()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf get()}/{\sf null}$  & \\
+			& $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf if(\ldots)}$ & \\ 
+			& $\hookrightarrow$ & $T_1$: ${\sf new\ \ldots}/o_1$ & $\rightarrow$ & $T_2$: ${\sf new\ \ldots}/o_2$ & \\ 
+			& $\hookrightarrow$ & $T_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
+			& $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
 		\end{tabular}
 		\end{center}
 This history is clearly nonserializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
@@ -101,9 +101,9 @@ To gain insight into the merit of corrective synchronization, we have created a 
 %\red{say that the implementation does something very simple (assumes one transaction), yet illustrates something very powerful that is completely novel, add something about the experimental results}
 
 \paragraph{Contributions} This paper makes the following principal contributions:
-\begin{enumerate}
+\begin{compactenum}
 	\item \underline{Corrective synchronization:} We present an alternative to both the pessimistic and the optimistic synchronization paradigms, dubbed \emph{corrective synchronization}, whereby serializability is achieved neither via mutual exclusion nor via rollbacks, but through correction of the poststate according to a relational prestate/poststates specification.
 	\item \underline{Formal guarantees:} We provide a formal description of corrective synchronization. This includes a correctness (i.e. soundness) proof as well as a clear statement of limitations.
 	\item \underline{Static analysis:} We have developed a static analysis to derive the prestate/poststates specification for programs that encode the shared state as one or more concurrent maps. We describe the analysis in full formal details.
 	\item \underline{Implementation and evaluation}: We have created an implementation of corrective synchronization assuming the shared state is represented as a collection of concurrent maps. We present experimental evidence in favor of corrective synchronization, where our subjects are real-world Java applications.
-\end{enumerate}
+\end{compactenum}

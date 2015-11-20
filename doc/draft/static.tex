@@ -48,14 +48,14 @@ We focus our formalization on the following language fragment:
 \begin{center}
 	\footnotesize
 	\begin{tabular}{l}
-		\statement{s ::= m.put(k, v)} \statement{|\ v=m.get(k)}\\
-		\hspace{15pt} \statement{|\ m.remove(k)} \statement{|\ v=m.putIfAbsent(k, v)}\\
-		\hspace{15pt} \statement{|\ v=new\ Value()} \statement{|\ v=null} \statement{|\ assert(b)}\\
+		\statement{s ::= m.put(k, v)} \statement{|\ v=m.get(k)}
+		\statement{|\ m.remove(k)} \\
+		\hspace{7.5pt} \statement{|\ v=m.putIfAbsent(k, v)} \statement{|\ v=new\ Value()} \statement{|\ v=null} \statement{|\ assert(b)}\\
 		%			\hspace{15pt} \statement{|\ if(b)\ s_1;\ else\ s_2}\\
 		%			\hspace{15pt} \statement{|\ while(b)\ s_1;}\\
 		%			\hspace{15pt} \statement{|\ s_1;\ s_2}\\
-		\statement{b ::= x\ ==\ null\ |\  x\ !=\ null}\\
-		\hspace{15pt} \statement{|\ m.containsKey(k)\ |\ ! m.containsKey(k)}
+		\statement{b ::= x\ ==\ null\ |\  x\ !=\ null}
+		\statement{|\ m.containsKey(k)\ |\ ! m.containsKey(k)}
 	\end{tabular}
 \end{center}
 This fragment captures a representative set of operations of the Java 7 \statement{java.util.concurrent.ConcurrentMap} class.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
@@ -298,18 +298,16 @@ We compute possible corrective targets on the serialized CFG $tc$ (as defined in
 
 However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a corrective target.
 
-Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally, 
-\[
+Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,\\ 
 \footnotesize
-\begin{array}{rl}
-%\isconcrete(e, m)\\
-%\Updownarrow\\
-& \isconcrete(e, m) \Longleftrightarrow \\
-& \forall \statement{x} \in \dom{e} : |e(\statement{x})|=1 \land e(\statement{x})=\{n_1\} \land \neg \isSummary(n_1) \\
-\bigwedge & \forall n \in \dom{m} : |m(n)|=1 \land m(n)=\{n_2\} \land \neg \isSummary(n_2) \\
-\end{array}
-\].
-
+\begin{tabular}{rl}
+	%\isconcrete(e, m)\\
+	%\Updownarrow\\
+	\multicolumn{2}{c}{$\isconcrete(e, m) \Longleftrightarrow$} \\
+	& $\forall \statement{x} \in \dom{e} \colon |e(\statement{x})|=1 \land e(\statement{x})=\{n_1\} \land \neg \isSummary(n_1)$ \\
+	$\bigwedge$ & $\forall n \in \dom{m} : |m(n)|=1 \land m(n)=\{n_2\} \land \neg \isSummary(n_2)$
+\end{tabular}
+\normalsize
 Note that in general the concretization of an abstract state is not computable. Therefore, we rely on $\isconcrete$ to check if an abstract state represents one precise concrete state.
 
 \begin{lemma}
