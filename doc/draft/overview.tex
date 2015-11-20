@@ -18,7 +18,7 @@ We illustrate the difference between corrective synchronization and classic opti
 	\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of the method in Figure \ref{Fi:introMotivating} using lock-, STM- and corrective synchronization}
 \end{figure*}
 
-Both STM and corrective synchronization, allowing the problematic chain of interleavings, reach a nonserializable state. STM resolves this by retrying the entire transaction executed by thread $t_2$. This effectively yields serial execution, similarly to the lock-based run, where $t_2$ runs after $t_1$. Corrective synchronization, instead, ``fixes'' the final state, thereby allowing $t_2$ to complete without rerunning any or all of its code.
+Both STM and corrective synchronization, allowing the problematic chain of interleavings, reach a nonserializable state. STM resolves this by retrying the entire transaction executed by thread $t_2$. This effectively yields serial execution, similarly to the lock-based run, where $t_2$ runs after $t_1$. Corrective synchronization, instead, ``fixes'' the final state, allowing $t_2$ to complete without rerunning any or all of its code.
 
 We refer to corrective synchronization as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to corrective synchronization as \emph{complete} if for any $h$, all the $h'$s that satisfy the conditions above are in the relation. Obviously a sound and complete corrective synchronization solution is undecidable. In the following, we describe our method of computing a sound yet incomplete set of corrective targets via static analysis of the concurrent library.
 

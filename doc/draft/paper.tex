@@ -27,13 +27,13 @@
 \usepackage{galois}
 \usepackage{titlesec}
 
+
 \titlespacing\section{0pt}{2pt}{0pt}
 \titlespacing\subsection{0pt}{2pt}{0pt}
 \titlespacing\subsubsection{0pt}{2pt}{0pt}
 
 
 
-\usepackage{supertabular}
 
 \input{defs}
 %\input{defs-pmpy}
@@ -48,15 +48,27 @@
 \newcommand{\juc}{\lstinline+java+.\!\lstinline+util+.\lstinline+concurrent+}
 \newcommand{\cConcurrentSkipListMap}{\lstinline+ConcurrentSkipListMap+}
 
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}{Definition}[section]
-\newtheorem{parameter}{Parameter}[section]
-\newtheorem{property}{Property}[section]
-\newtheorem{example}[equation]{Example}
-\newtheorem{algorithm}[theorem]{Algorithm}
+
+\newtheoremstyle{exampstyle}
+{2pt} % Space above
+{2pt} % Space below
+{\itshape} % Body font
+{} % Indent amount
+{\bfseries} % Theorem head font
+{.} % Punctuation after theorem head
+{.5em} % Space after theorem head
+{} % Theorem head spec (can be left empty, meaning `normal')
+
+\theoremstyle{exampstyle}\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{exampstyle}\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{exampstyle}\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{exampstyle}\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{exampstyle}\newtheorem{definition}{Definition}[section]
+\theoremstyle{exampstyle}\newtheorem{parameter}{Parameter}[section]
+\theoremstyle{exampstyle}\newtheorem{property}{Property}[section]
+\theoremstyle{exampstyle}\newtheorem{example}[equation]{Example}
+\theoremstyle{exampstyle}\newtheorem{algorithm}[theorem]{Algorithm}
+
 
 %\newenvironment{itemize*}%
 %  {\begin{itemize}%
@@ -85,7 +97,19 @@
 \def\URL{\bgroup\URLprepare\realURL}%
 \def\realURL#1{\tt #1\egroup}%
 
-
+\renewenvironment{proof}[1][\proofname]{\par
+	\vspace{-\topsep}% remove the space after the theorem
+	\pushQED{\qed}%
+	\normalfont
+	\topsep0pt \partopsep5pt % no space before
+	\trivlist
+	\item[\hskip\labelsep
+	\itshape
+	#1\@addpunct{.}]\ignorespaces
+}{%
+\popQED\endtrivlist\@endpefalse
+\addvspace{0pt plus 0pt} % some space after
+}
 
 
 \newcommand\figbox[1]{\noindent{\ \\\fbox{\begin{minipage}{3.2in}

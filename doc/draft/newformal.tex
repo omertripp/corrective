@@ -7,6 +7,7 @@ In this section, we introduce a generic transaction semantics supporting correct
 \label{sec:concretedomain}
 
 In our description of the transition system, we utilize the following semantic domains:
+\vspace{-4pt}
 \begin{center}
 \footnotesize
 \begin{tabular}{rcllrcll}
@@ -18,6 +19,7 @@ In our description of the transition system, we utilize the following semantic d
 		$s = (T, [t \mapsto (c_t,\sigma_t,L_t)]_{t \in T}, \sigma, L) \in {\cal S}$} & $:=$ & system state \\
 \end{tabular}
 \end{center}
+\vspace{-4pt}
 \normalsize
 Following \cite{KoskinenP15}, our transaction semantics uses shared and local logs.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
@@ -50,7 +52,7 @@ The {\sf local} event executes a local action.
 %\end{itemize}
 
 We define the semantics of these events in the following. For rules where a transaction $t$ is defined in the prestate, its corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$. We utilize helper function ${\sf serpref} \colon\ {\cal L} \rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively) determine whether a given shared log is the prefix of some serializable execution log. Finally, we define helper function
-${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the (global) system state immediately preceding $t$'s start.
+${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state immediately preceding $t$'s start.
 
 The events are defined as follows:
 \\
