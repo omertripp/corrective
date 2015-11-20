@@ -147,8 +147,8 @@ Consider the motivating example in Figure \ref{Fi:introMotivating}. For instance
 We define the concretization function $\gamma_\state : \astate \to \wp(\state)$ that, given an abstract state, returns the set of concrete states it represents. First of all, we assume that a function concretizing abstract heap nodes to concrete references is given. Formally, $\gamma_\reference : \heapnode \to \wp(\reference)$. We assume that this concretization function concretizes \statement{null} into itself ($\gamma_\reference(\statement{null})=\{\statement{null}\}$), and that it is coherent w.r.t. the information provided by $\isSummary$ ($\neg \isSummary(n) \Leftrightarrow |\gamma_\reference(n)|=1$).
 
 The concretization function of abstract environments relates each variable in the environment to one of the references concretized from the node it is in relation with. Similarly, the concretization of abstract maps relate a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states is the pointwise application of the concretization of environments and maps. This is formalized as follows:
-\[
 \footnotesize
+\[
 \begin{array}{l}
 \gamma_\env(e) = \{\lambda x . r : x \in \dom{e} \land \exists n \in e(x) : r \in \gamma_\reference(n)\}\\
 \gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land\\
@@ -157,7 +157,7 @@ The concretization function of abstract environments relates each variable in th
 \gamma_\state(\bot) =\emptyset\\
 \end{array}
 \]
-
+\normalsize
 \begin{lemma}[Soundness of the domain]
 	The abstract domain is a sound approximation of the concrete domain, that is, they form a Galois connection \cite{CC77}. Formally, $\langle \wp(\state), \subseteq, \cup \rangle \galois{\alpha_\state}{\gamma_\state} \langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$ where $\alpha_\state = \lambda \cset{X} . \cap \{\cset{Y} : \cset{Y} \subseteq \gamma_\state(X)\}$.
 \end{lemma}
