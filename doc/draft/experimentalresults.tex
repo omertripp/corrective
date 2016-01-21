@@ -19,7 +19,7 @@ As discussed in Section \ref{sec:dynamicwarping}, in our current prototype all t
 
 During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Corrective synchronization occurs only on failed commits (as discussed in Section \ref{Se:guarantees}), in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the corrective specification. 
 
-The specification is cast by the runtime system into a hierarchical representation, which conveys constraints between past and (potential) future corrective decisions to ensure overall consistency toward converging on a correct poststate. This means in particular that as execution progresses, the number of possible corrective targets for a given transaction decreases monotonically.
+\OmerAdded{Analogously to the pruning technique used to map between states and their corrective counterparts, the decision whether a commit has failed is based on incremental pruning of the good global states $G$ according to the final states of committed transactions. If the final state of a transaction is not consistent with state $g \in G$, then $g$ is pruned out. If $G$ at any point becomes empty, then the system has reached a bad state.}
 
 \subsection{Methodology and Experimental Setup}
 

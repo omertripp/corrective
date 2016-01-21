@@ -257,7 +257,7 @@ Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is s
 	\label{lemma:soundnessabstractsemantics}
 	The abstract semantics is a sound approximation of the concrete semantics. Formally, $\forall \statement{st}, (e, m) \in \astate: \gamma_\state(\csemantics{S}{\statement{st}, (e, m)}) \supseteq \csemantics{C}{\statement{st}, \gamma_\state(e, m)}$, where $\semanticanome{C}$ represents the pointwise application of the concrete semantics introduced in Section \ref{sec:concretemap} to a set of concrete states.
 \end{lemma}
-\begin{proof}
+\begin{proof}[Proof Sketch]
 Follows from case splitting on the statement, and by definition of the concrete and abstract semantics.
 \end{proof}
 
@@ -313,7 +313,7 @@ Note that in general the concretization of an abstract state is not computable. 
 	\label{lemma:singleconcretization}
 	$\forall (e, m) \in \Sigma : \isconcrete(e, m) \Rightarrow |\gamma_\state(e, m)|=1$
 \end{lemma}
-\begin{proof}
+\begin{proof}[Proof Sketch]
  By definition of $\isconcrete$, $\neg \isSummary(n)$ for all the nodes $n$ in $e$ or $n$. By definition of $\isSummary$ we have that $|\gamma_\reference(n)|=1$. Thanks to this result, combined with the definition of $\gamma_\astate$, we obtain that $|\gamma_\state(e, m)|=1$.
 \end{proof}
 
@@ -362,7 +362,7 @@ Finally, we can prove that the corrective targets computed by $\warpdestination$
 \begin{theorem}
 	Let $t=\warpdestination(\cset{T}, \cset{S})$ be the results computed by our system. Then $\forall \sigma_0 \in \gamma_\multistate(\phi_0), \sigma_n \in \gamma_\multistate(\phi_n) : \phi_0 \in \dom{t} \land \phi_n \in t(\phi_0)$ we have that $\sigma_0 \leadsto \sigma_n$.
 \end{theorem}
-\begin{proof}
+\begin{proof}[Proof Sketch]
 By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and $\isconcrete(\phi_n)$ hold. Therefore, by Lemma \ref{lemma:singleconcretization} we have that $\gamma_\state(\phi_0) = \{\sigma_0\}$ and $\gamma_\state(\phi_0) = \{\sigma_n\}$. In addition, by definition of $\warpdestination$ we have that $\phi_n \in \csemantics{S}{tc, \phi_0}$. Then, by lemma \ref{lemma:soundnessabstractsemantics} (soundness of the abstract semantics) we have that $\sigma_n$ is exactly what is computed by the concrete semantics on the given program starting from $\sigma_0$, that is, $\sigma_0 \leadsto \sigma_n$. 
 \end{proof}
 

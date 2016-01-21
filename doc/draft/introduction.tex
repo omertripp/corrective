@@ -89,6 +89,8 @@ Note that the corrective actions above are of a general form, which is not limit
 Two important challenges w.r.t. corrective synchronization that we investigate within this scope are (i) how to compute correct poststates; and (ii) given an incorrect poststate, how to efficiently recover the execution to a correct poststate. 
 We tackle these challenges via static analysis based on abstract interpretation. The analysis, equipped with a specialized abstraction for maps, is used to derive the correct poststates in relation to a given prestate. 
 
+\OmerAdded{We also discuss extensions, beyond this initial scope, to other data structures and concurrent execution configurations. These highlight directions for future research on corrective synchronization.} 
+
 To gain insight into the merit of corrective synchronization, we have created a prototype implementation for our scope of {\sf ConcurrentMap} clients. We compare our approach against both STM and lock-based synchronization across different concurrency levels and workload sizes. The results are encouraging: While both STM and corrective synchronization are significantly better than locks, the relative performance improvement thanks to the corrective approach is twice of that achieved by STM.
 %
 %We govern our discussion of these challenges by a formal framework with rigorous soundness guarantees, which extends beyond the limited scope of {\sf ConcurrentMap} objects. 

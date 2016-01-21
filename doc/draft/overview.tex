@@ -2,7 +2,7 @@
 
 In this section, we walk the reader through a high-level overview of corrective synchronization. We first describe the conceptual details at a technical level, and then the two main algorithmic steps and how our prototype implementation carries out these steps.
 
-\subsection{The Concept of Corrective Synchronization}
+\subsection{Conceptual Approach}
 
 By corrective synchronization we mean the ability to transform a concurrent run that, in its present state, may not be serializable into a run that is serializable. Stated formally, corrective synchronization is a relationship $h \leadsto h'$ between histories, such that (i) $h$ and $h'$ share the same initial state, and (ii) $h$ and $h'$ share the same commit log (i.e., they agree on the operations on the shared-state).
 
@@ -22,7 +22,7 @@ Both STM and corrective synchronization, allowing the problematic chain of inter
 
 We refer to corrective synchronization as \emph{sound} if $h'$ is the prefix of a serializable execution of the system. We refer to corrective synchronization as \emph{complete} if for any $h$, all the $h'$s that satisfy the conditions above are in the relation. Obviously a sound and complete corrective synchronization solution is undecidable. In the following, we describe our method of computing a sound yet incomplete set of corrective targets via static analysis of the concurrent library.
 
-A solution that is not complete faces the possibility of stuck runs: given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem: (i) \emph{manual specification}, whereby the user completes the set of corrective targets to ensure that there are no stuck runs (in our implementation, the targets are computed offline via static analysis, letting the user complete the specification ahead of deployment); and (ii) \emph{complementary techniques}, such as STM, which the system can default to in the absence of a corrective target.
+A solution that is not complete faces the possibility of stuck runs: Given a (potentially) nonserializable execution prefix, the system does not have a corresponding serializable prefix to transition to. In this paper, we do not present a solution to the completeness problem, which we leave as future work. In the meantime, there are two simple strategies to tackle this problem: (i) \emph{manual specification}, whereby the user completes the set of corrective targets to ensure that there are no stuck runs (in our implementation, the targets are computed offline via static analysis, letting the user complete the specification ahead of deployment); and (ii) \emph{complementary techniques}, such as STM, which the system can default to in the absence of a corrective target.
 %\begin{compactitem}
 %	\item Manual specification: The user completes the set of corrective targets computed automatically, such that there are no stuck runs. In our implementation of corrective synchronization, the corrective targets are computed offline via static analysis, which lets the user complete the specification prior to the deployment runs.
 %	\item Complementary techniques: In the absence of a corrective target, the system can default to another synchronization technique such as STM. This provides a general means to avoid stuck states without causing any overhead w.r.t. standard techniques.
@@ -47,6 +47,19 @@ The runtime system has two main responsibilities. First, it must track whether a
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then corrective synchronization is triggered in response. 
 
-The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a lookup table that, for a given bad state, stores good states that can be transitioned to efficiently (that is, by applying a bounded number of state changes).
+\OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) the set of good final states (in symbolic form). As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
 
 We expand on both of these challenges in Section \ref{Se:system}. Prior to that, in Sections \ref{se:instance} and \ref{sec:transactionsystemwarping}, we provide a formal statement of corrective synchronization.
+
+
+\subsection{Discussion}
+\OmerAdded{
+As outlined above, the concrete instance that we have developed of corrective synchronization is specific to loop parallelization (in that transactions begin at the same time) and map clients. This particular setup is already applicable to many real-world codes \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. Still, we emphasize that there are several natural extensions that widen this scope significantly and we intend to explore in the future.
+}
+
+\OmerAdded{
+	First, there is no need, in general, to focus on maps. Concrete-level transactional memory ranges over variable and field accesses, enabling computation of corrective targets in terms of nonconflicting accesses to shared fields. For this any sound abstraction of runtime objects (e.g. as allocation sites) would suffice.
+}
+
+\OmerAdded{The assumption regarding starting times can also be relaxed, albeit at the cost of more extensive offline analysis. While no change is needed to the analysis algorithm, there are more cases that should be accounted for, namely all (or some of) the possibilities for transaction $t$ to start when concurrent transaction $t’$ is at a control location in its CFG other than the entry location.}
+	
