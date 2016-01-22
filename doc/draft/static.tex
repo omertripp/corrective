@@ -44,8 +44,8 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 %	\caption{Fragment of the language}
 %	\label{fig:language}
 %\end{figure}
-We focus our formalization on the following language fragment:\\
-	\footnotesize
+We focus our formalization on the following language fragment:
+	\footnotesize\\\\
 	\begin{tabular}{l}
 		\statement{s ::= m.put(k, v)} \statement{|\ v=m.get(k)}
 		\statement{|\ m.remove(k)} \statement{|\ v=null}\\
@@ -101,6 +101,7 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 
 \begin{figure}
 	\footnotesize
+	\vspace{-5pt}
 	\[
 	\begin{array}{l}
 	\csemantics{C}{\statement{m.put(k, v)}, (e, m)} = 
@@ -126,6 +127,7 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 	\end{array}
 	\]
 	\caption{Concrete semantics}
+	\vspace{-5pt}
 	\label{fig:concretesemantics}
 \end{figure}
 
@@ -147,8 +149,9 @@ Consider the motivating example in Figure \ref{Fi:introMotivating}. Abstract sta
 \subsection{Concretization function.}
 We define the concretization function $\gamma_\state : \astate \to \wp(\state)$ that, given an abstract state, returns the set of concrete states it represents. First of all, we assume that a function concretizing abstract heap nodes to concrete references is given. Formally, $\gamma_\reference : \heapnode \to \wp(\reference)$. We assume that this concretization function concretizes \statement{null} into itself ($\gamma_\reference(\statement{null})=\{\statement{null}\}$), and that it is coherent w.r.t. the information provided by $\isSummary$ ($\neg \isSummary(n) \Leftrightarrow |\gamma_\reference(n)|=1$).
 
-The concretization function of abstract environments relates each variable in the environment to one of the references concretized from the node it is in relation with. Similarly, the concretization of abstract maps relate a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states is the pointwise application of the concretization of environments and maps. This is formalized as follows:
-$$\footnotesize
+The concretization of abstract environments relates each variable in the environment to a reference concretized from the node it is in relation with. Similarly, the concretization of abstract maps relates a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states applies pointwisely the concretization of environments and maps. This is formalized as follows:
+
+\[\footnotesize
 \begin{array}{l}
 \gamma_\env(e) = \{\lambda x . r : x \in \dom{e} \land \exists n \in e(x) : r \in \gamma_\reference(n)\}\\
 \gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land\\
@@ -156,18 +159,17 @@ $$\footnotesize
 \gamma_\state(e, m) = \{(e', m') : e' \in \gamma_\env(e) \land m' \in \gamma_\map(m)\}\\
 \gamma_\state(\bot) =\emptyset\\
 \end{array}
-$$
+\]
 \normalsize
 \begin{lemma}[Soundness of the domain]
 	The abstract domain is a sound approximation of the concrete domain, that is, they form a Galois connection \cite{CC77}. Formally, $\langle \wp(\state), \subseteq, \cup \rangle \galois{\alpha_\state}{\gamma_\state} \langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$ where $\alpha_\state = \lambda \cset{X} . \cap \{\cset{Y} : \cset{Y} \subseteq \gamma_\state(X)\}$.
-\end{lemma}
 \begin{proof}
 
 $\gamma_\astates$ is a complete meet-morphism since it produces all possible environments and maps starting from a given reference concretization. Then, $\alpha_\astates$ is well-defined since $\gamma_\astates$ is a complete $\cap$-morphism. The fact that it forms a Galois connection follows immediately from the definition of $\alpha_\astates$ (Proposition 7 of \cite{CC92}).
 \end{proof}
+\end{lemma}
 
-
-\noindent \textbf{Running example.} Consider again abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$).
+\noindent \textbf{Running example.} Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$).
 
 
 
@@ -256,10 +258,10 @@ Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is s
 \begin{lemma}[Soundness of the semantics]
 	\label{lemma:soundnessabstractsemantics}
 	The abstract semantics is a sound approximation of the concrete semantics. Formally, $\forall \statement{st}, (e, m) \in \astate: \gamma_\state(\csemantics{S}{\statement{st}, (e, m)}) \supseteq \csemantics{C}{\statement{st}, \gamma_\state(e, m)}$, where $\semanticanome{C}$ represents the pointwise application of the concrete semantics introduced in Section \ref{sec:concretemap} to a set of concrete states.
-\end{lemma}
 \begin{proof}[Proof Sketch]
 Follows from case splitting on the statement, and by definition of the concrete and abstract semantics.
 \end{proof}
+\end{lemma}
 
 \noindent \textbf{Running example.}
 Consider again the code of method {\sf getConvertor()} in Figure \ref{Fi:introMotivating}, and suppose that the Boolean flag \statement{create} is \statement{true}. When we start from the abstract state  $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{name} is not in the map), we obtain the abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{\statement{null}\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(get)}. 
@@ -297,7 +299,7 @@ We compute possible corrective targets on the serialized CFG $tc$ (as defined in
 
 However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a corrective target.
 
-Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,\\ 
+Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,\\\\
 \footnotesize
 \begin{tabular}{rl}
 	%\isconcrete(e, m)\\
@@ -306,16 +308,16 @@ Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ th
 	& $\forall \statement{x} \in \dom{e} \colon |e(\statement{x})|=1 \land e(\statement{x})=\{n_1\} \land \neg \isSummary(n_1)$ \\
 	$\bigwedge$ & $\forall n \in \dom{m} : |m(n)|=1 \land m(n)=\{n_2\} \land \neg \isSummary(n_2)$
 \end{tabular}
-\normalsize
+\normalsize\\\\
 Note that in general the concretization of an abstract state is not computable. Therefore, we rely on $\isconcrete$ to check if an abstract state represents one precise concrete state.
 
 \begin{lemma}
 	\label{lemma:singleconcretization}
 	$\forall (e, m) \in \Sigma : \isconcrete(e, m) \Rightarrow |\gamma_\state(e, m)|=1$
-\end{lemma}
 \begin{proof}[Proof Sketch]
  By definition of $\isconcrete$, $\neg \isSummary(n)$ for all the nodes $n$ in $e$ or $n$. By definition of $\isSummary$ we have that $|\gamma_\reference(n)|=1$. Thanks to this result, combined with the definition of $\gamma_\astate$, we obtain that $|\gamma_\state(e, m)|=1$.
 \end{proof}
+\end{lemma}
 
 The definition of $\isconcrete$ is extended to states $\phi \in \amultistate$ by checking if $\isconcrete$ holds for all the local states in $\phi$. 
 We build up a set of possible entry states $S \subseteq \amultistate$ such that $\forall \phi \in S : \isconcrete(\phi)$, and we compute the exit states on the serialized CFG $tc$ for all the possible entry states, filtering out only the ones that represents an exact concrete state. Note that since we have a finite number of abstract transactions, and each transaction has a finite number of parameters, we can build up a finite set of entry states representing all the possible concrete situations. Note that, while in general an abstract state rarely represents a precise single concrete state, this is the case for most of the cases we dealt with as shown by our experimental results. This happens since our static analysis targets a specific data structure (maps), and tracks very precise symbolic information on it.
@@ -338,7 +340,6 @@ $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \stat
 In our model, when we start the execution we have a finite number of concrete instances of each type of transaction. We denote by $\concretetransactions = \{s^i_j : j \in [0..m] \land i \in [1..k_j]\}$ the set of identifiers of concrete transactions, where $m$ is the number of different types of transactions, $k_j$ is the number of instances of transaction $j$, and $s^i_j$ represents the $j$-th instance of the $i$-th type of transaction.
 
 We can then bind abstract transaction identifiers to concrete ones. Since the set of abstract transactions is defined as $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$, we bind the first two concrete identifiers to the corresponding abstract identifiers, and all the others to the $n$ abstract instance. We formally define the concretization of transaction identifiers as follows:
-\footnotesize
 $
 \gamma_{\concretetransactions}(T) =
 [
@@ -348,16 +349,14 @@ s^{i'}_j : (i \in \{1, 2\} \Rightarrow i'=i) \lor 3\leq i' \leq k_j
 \} : t^i_j \in T
 ]
 $.
-\normalsize
 We can now formalize the concretization of abstract states in $\amultistate$ by relying on the concretization of local states and transaction identifiers.
 %
-\footnotesize
 $
 \gamma_\multistate(\phi) = \{t \mapsto \sigma : \exists t' \in \dom{\phi} : t \in \gamma_{\concretetransactions}(t) \land \sigma \in \gamma_{\state}(\phi(t))\}
 $.
 \normalsize
 
-Finally, we can prove that the corrective targets computed by $\warpdestination$ satisfies the {\sf ref} conditions as requested by the {\sf corr} rule.
+We can now prove that the corrective targets computed by $\warpdestination$ satisfies the {\sf ref} conditions as imposed by {\sf corr} rule.
 
 \begin{theorem}
 	Let $t=\warpdestination(\cset{T}, \cset{S})$ be the results computed by our system. Then $\forall \sigma_0 \in \gamma_\multistate(\phi_0), \sigma_n \in \gamma_\multistate(\phi_n) : \phi_0 \in \dom{t} \land \phi_n \in t(\phi_0)$ we have that $\sigma_0 \leadsto \sigma_n$.
