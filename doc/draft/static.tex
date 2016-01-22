@@ -167,8 +167,11 @@ The concretization of abstract environments relates each variable in the environ
 
 $\gamma_\astates$ is a complete meet-morphism since it produces all possible environments and maps starting from a given reference concretization. Then, $\alpha_\astates$ is well-defined since $\gamma_\astates$ is a complete $\cap$-morphism. The fact that it forms a Galois connection follows immediately from the definition of $\alpha_\astates$ (Proposition 7 of \cite{CC92}).
 \end{proof}
+<<<<<<< HEAD
 \end{lemma}
 
+=======
+>>>>>>> 71c35b088148b7cd3c7972cc77c76c6a4ca7cd2f
 \noindent \textbf{Running example.} Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$).
 
 
