@@ -61,5 +61,7 @@ As outlined above, the concrete instance that we have developed of corrective sy
 	First, there is no need, in general, to focus on maps. Concrete-level transactional memory ranges over variable and field accesses, enabling computation of corrective targets in terms of nonconflicting accesses to shared fields. For this any sound abstraction of runtime objects (e.g. as allocation sites) would suffice.
 }
 
+\OmerAdded{Another extension is to consider additional ADTs, beyond map, such as set and counter \cite{ppopp08}. Assuming encapsulation \cite{TYFS:OOPSLA11}, it becomes possible to compose handling of different ADTs both with each other and with concrete-level corrective synchronization.}
+
 \OmerAdded{The assumption regarding starting times can also be relaxed, albeit at the cost of more extensive offline analysis. While no change is needed to the analysis algorithm, there are more cases that should be accounted for, namely all (or some of) the possibilities for transaction $t$ to start when concurrent transaction $t’$ is at a control location in its CFG other than the entry location.}
 	
