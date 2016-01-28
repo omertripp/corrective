@@ -7,7 +7,6 @@ In this section, we introduce a generic transaction semantics supporting correct
 \label{sec:concretedomain}
 
 In our description of the transition system, we utilize the following semantic domains:
-\vspace{-4pt}
 \begin{center}
 \footnotesize
 \begin{tabular}{rcllrl}
@@ -19,7 +18,6 @@ In our description of the transition system, we utilize the following semantic d
 		$s = (T, [t \mapsto (c_t,\sigma_t,L_t)]_{t \in T}, \sigma, L) \in {\cal S}$} & $:=$ & system state \\
 \end{tabular}
 \end{center}
-\vspace{-4pt}
 \normalsize
 Following \cite{KoskinenP15}, our transaction semantics uses shared and local logs.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
@@ -120,7 +118,7 @@ $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 	Assume that the system performs corrective synchronization only on failed commits, and is complete w.r.t. corrective synchronization. Further assume that throughout any run of the system, only boundedly many transactions are created (via a {\sf bgn} event), and these transactions do not have infinite executions. Then termination is guaranteed. \vspace{3pt}
 	\begin{proof}[Proof Sketch]
 		The first two assumptions guarantee progress, as established above in 
-		Theorem \ref{Th:progress}. Since transactions are finite, each transactions may perform finitely many {\sf cmt} transitions before terminating via an {\sf end} transition. This implies that after finitely many transitions, some transaction $t$ will terminate. This argument applies to the resulting system until no transactions are left.
+		Theorem \ref{Th:progress}. Since transactions are finite, each transaction may perform finitely many {\sf cmt} transitions before terminating via an {\sf end} transition. This implies that after finitely many transitions, some transaction $t$ will terminate. This argument applies to the resulting system until no transactions are left.
 	\end{proof}
 \end{lemma}
 

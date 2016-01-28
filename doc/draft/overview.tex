@@ -47,21 +47,21 @@ The runtime system has two main responsibilities. First, it must track whether a
 
 In our implementation, the first challenge is addressed via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then corrective synchronization is triggered in response. 
 
-\OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) the set of good final states (in symbolic form). As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
+\OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) a set of good symbolic final states. As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
 
 We expand on both of these challenges in Section \ref{Se:system}. Prior to that, in Sections \ref{se:instance} and \ref{sec:transactionsystemwarping}, we provide a formal statement of corrective synchronization.
 
 
 \subsection{Discussion}
 \OmerAdded{
-As outlined above, the concrete instance that we have developed of corrective synchronization is specific to loop parallelization (in that transactions begin at the same time) and map clients. This particular setup is already applicable to many real-world codes \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. Still, we emphasize that there are several natural extensions that widen this scope significantly and we intend to explore in the future.
+As outlined above, the concrete instance that we have developed of corrective synchronization is specific to loop parallelization (in that transactions begin at the same time) and map clients. This particular setup is already applicable to many real-world codes \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. Still, we emphasize that there are various natural extensions that widen this scope significantly and we intend to explore in the future.
 }
 
-\OmerAdded{
-	First, there is no need, in general, to focus on maps. Concrete-level transactional memory ranges over variable and field accesses, enabling computation of corrective targets in terms of nonconflicting accesses to shared fields. For this any sound abstraction of runtime objects (e.g. as allocation sites) would suffice.
-}
+%\OmerAdded{
+%	First, there is no need, in general, to focus on maps. Concrete-level transactional memory ranges over variable and field accesses, enabling computation of corrective targets in terms of nonconflicting accesses to shared fields. For this any sound abstraction of runtime objects (e.g. as allocation sites) would suffice.
+%}
 
-\OmerAdded{Another extension is to consider additional ADTs, beyond map, such as set and counter \cite{ppopp08}. Assuming encapsulation \cite{TYFS:OOPSLA11}, it becomes possible to compose handling of different ADTs both with each other and with concrete-level corrective synchronization.}
+\OmerAdded{A first extension is to consider additional ADTs, beyond map, such as set and counter \cite{ppopp08}. Assuming encapsulation \cite{TYFS:OOPSLA11}, it becomes possible to compose handling of different ADTs both with each other and with concrete-level corrective synchronization.}
 
-\OmerAdded{The assumption regarding starting times can also be relaxed, albeit at the cost of more extensive offline analysis. While no change is needed to the analysis algorithm, there are more cases that should be accounted for, namely all (or some of) the possibilities for transaction $t$ to start when concurrent transaction $t’$ is at a control location in its CFG other than the entry location.}
+\OmerAdded{The assumption regarding starting times can also be relaxed, albeit at the cost of more expensive offline analysis. While no change is needed to the core analysis algorithm, there are more cases that should be accounted for, namely all (or at least some of) the possibilities for transaction $t$ to start when concurrent transaction $t’$ is at a control location in its CFG other than the entry location. In our experimental results, the core analysis algorithm took less then a second to converge. Therefore, it can easily scale up to support thousands of combinations converging in at most one hour.}
 	

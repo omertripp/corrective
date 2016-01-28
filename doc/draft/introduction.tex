@@ -44,7 +44,7 @@ Assume that different threads invoking this method are all attempting to simulta
 To illustrate our approach, we revisit the running example. Assume the following execution history: % in Figure \ref{Fi:motivatingInterleaving}.
 	\begin{center}
 		\footnotesize
-		\begin{tabular}{rlrcll}
+		\begin{tabular}{r@{}lrcl@{}l}
 			[ & & $T_1$: ${\sf get()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf get()}/{\sf null}$  & \\
 			& $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf if(\ldots)}$ & \\ 
 			& $\hookrightarrow$ & $T_1$: ${\sf new\ \ldots}/o_1$ & $\rightarrow$ & $T_2$: ${\sf new\ \ldots}/o_2$ & \\ 

@@ -38,7 +38,7 @@ We now instantiate the theoretical framework introduced in Section \ref{sec:conc
 %			%			\hspace{15pt} \statement{|\ while(b)\ s_1;}\\
 %			%			\hspace{15pt} \statement{|\ s_1;\ s_2}\\
 %			\statement{b ::= x\ ==\ null\ |\  x\ !=\ null}\\
-%			\hspace{15pt} \statement{|\ m.containsKey(k)\ |\ ! m.containsKey(k)}
+%			\hspace{15pt} \statement{|\ m.containsK(k)\ |\ ! m.containsK(k)}
 %		\end{tabular}
 %	\end{center}
 %	\caption{Fragment of the language}
@@ -54,7 +54,7 @@ We focus our formalization on the following language fragment:
 		%			\hspace{15pt} \statement{|\ while(b)\ s_1;}\\
 		%			\hspace{15pt} \statement{|\ s_1;\ s_2}\\
 		\statement{b ::= x==null\ |\  x!=null}
-		\statement{|\ m.containsKey(k)\ |\ ! m.containsKey(k)}
+		\statement{|\ m.containsK(k)\ |\ ! m.containsK(k)}
 	\end{tabular}
 	\\\\
 	\normalsize
@@ -67,7 +67,7 @@ This fragment captures a representative set of operations of the Java 7 \stateme
 %\begin{lstlisting}
 %Value removeAttribute(Key k) {
 %  Value result = null;
-%  if(map.containsKey(k)) {
+%  if(map.containsK(k)) {
 %    result = m.get(k);
 %    m.remove(k);
 %  }
@@ -101,7 +101,6 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 
 \begin{figure}
 	\footnotesize
-	\vspace{-5pt}
 	\[
 	\begin{array}{l}
 	\csemantics{C}{\statement{m.put(k, v)}, (e, m)} = 
@@ -122,12 +121,11 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 	\csemantics{C}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)\\
 	\csemantics{C}{\statement{assert(x==null)}, (e, m)} = (e,m) \textrm{ if } e(\statement{x})=\statement{null}\\
 	\csemantics{C}{\statement{assert(x!=null)}, (e, m)} = (e,m ) \textrm{ if } e(\statement{x})\neq\statement{null}\\
-	\csemantics{C}{\statement{assert(m.containsKey(k))}, (e, m)} = (e, m) \textrm{ if } m(e(\statement{k})) \neq \statement{null}\\
-	\csemantics{C}{\statement{assert(!m.containsKey(k))}, (e, m)} =(e, m) \textrm{ if } m(e(\statement{k})) = \statement{null}\\
+	\csemantics{C}{\statement{assert(m.containsK(k))}, (e, m)} = (e, m) \textrm{ if } m(e(\statement{k})) \neq \statement{null}\\
+	\csemantics{C}{\statement{assert(!m.containsK(k))}, (e, m)} =(e, m) \textrm{ if } m(e(\statement{k})) = \statement{null}\\
 	\end{array}
 	\]
 	\caption{Concrete semantics}
-	\vspace{-5pt}
 	\label{fig:concretesemantics}
 \end{figure}
 
@@ -167,11 +165,8 @@ The concretization of abstract environments relates each variable in the environ
 
 $\gamma_\astates$ is a complete meet-morphism since it produces all possible environments and maps starting from a given reference concretization. Then, $\alpha_\astates$ is well-defined since $\gamma_\astates$ is a complete $\cap$-morphism. The fact that it forms a Galois connection follows immediately from the definition of $\alpha_\astates$ (Proposition 7 of \cite{CC92}).
 \end{proof}
-<<<<<<< HEAD
 \end{lemma}
 
-=======
->>>>>>> 71c35b088148b7cd3c7972cc77c76c6a4ca7cd2f
 \noindent \textbf{Running example.} Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$).
 
 
@@ -228,7 +223,7 @@ m & \textrm{ otherwise}\\
 \end{array}
 \right. & (\mathtt{!null})\\
 %\\
-\csemantics{S}{\statement{assert(m.containsKey(k))}, (e, m)} = \left\{
+\csemantics{S}{\statement{assert(m.containsK(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
 (e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \\
@@ -237,7 +232,7 @@ m & \textrm{ otherwise}\\
 \end{array}
 \right. & (\mathtt{cntK})\\
 %\\
-\csemantics{S}{\statement{assert(!m.containsKey(k))}, (e, m)} = \left\{
+\csemantics{S}{\statement{assert(!m.containsK(k))}, (e, m)} = \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
 (e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \statement{null} \in m(n)\\
@@ -304,7 +299,7 @@ However, an abstract state in $\astate$ might represent multiple concrete states
 
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents and exact concrete state. Formally,\\\\
 \footnotesize
-\begin{tabular}{rl}
+\begin{tabular}{r@{}l@{}}
 	%\isconcrete(e, m)\\
 	%\Updownarrow\\
 	\multicolumn{2}{c}{$\isconcrete(e, m) \Longleftrightarrow$} \\
@@ -335,7 +330,7 @@ $
 $.
 \normalsize
 
-\noindent \textbf{Running example.} Starting from the entry state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
+\noindent \textbf{Running example.} Starting from the entry state $([\statement{name} \mapsto \{n_1\}],$ $[n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 	
 \subsection{Dynamic Corrective Synchronization}
