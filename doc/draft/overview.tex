@@ -8,7 +8,7 @@ By corrective synchronization we mean the ability to transform a concurrent run 
 
 The first condition ensures that corrective synchronization yields a feasible outcome. The second is effectively the requirement not to roll back updates to the shared state. These two conditions distinguish corrective synchronization from existing solutions: Unlike pessimistic approaches, bad behaviors may occur under corrective synchronization. That is, they are not avoided, but handled as they manifest. Unlike optimistic solutions, the core handling mechanism is not to retry the transaction (or parts thereof), which implies rolling back (either committed or uncommitted) updates to the shared log, but rather to ``jump'' to another state.
 
-\noindent \textbf{Running example.}
+\paragraph{Running example.}
 We illustrate the difference between corrective synchronization and classic optimistic and pessimistic synchronization in Figure \ref{Fi:motivatingOverview}, where we visually represent concurrent execution of two instances of the code listed in Figure \ref{Fi:introMotivating} using locks, STM and corrective synchronization (proceeding horizontally left-to-right). Locking serializes execution, and so there is no performance gain whatsoever. As for STM and corrective synchronization, we consider the interleaving scenario specified in Section \ref{Se:intro}. % from Figure \ref{Fi:motivatingInterleaving}. 
 
 \begin{figure*}
@@ -39,7 +39,7 @@ where $t$, $t'$, etc denote different transaction types (i.e., transactions exec
 
 We go into detail about this representation in Section \ref{Se:concabs}, but note now briefly that (i) this representation reflects the effects of serial execution of the transactions, and so the corrective targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 
-\noindent \textbf{Running example.} As an illustration of the third point, in our running example (Figure \ref{Fi:introMotivating}) the first transaction ( $t_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($t_{n+1}$) can be confirmed not to update the key/value mapping.
+\paragraph{Running example.} As an illustration of the third point, in our running example (Figure \ref{Fi:introMotivating}) the first transaction ( $t_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($t_{n+1}$) can be confirmed not to update the key/value mapping.
 
 \subsection{Runtime Synchronization} 
 
