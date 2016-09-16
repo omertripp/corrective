@@ -1,14 +1,16 @@
-\documentclass[preprint,nocopyrightspace]{sigplanconf}
+%\documentclass[preprint,nocopyrightspace]{sigplanconf}
+\documentclass{llncs}
+\pagestyle{headings}
 
 \usepackage{times}
 %\usepackage{mathptmx}
 %\usepackage[small, skip=0pt]{caption}
 %\setlength{\belowcaptionskip}{-10pt}
 \usepackage{microtype}
-\usepackage{amsmath,amsthm,amssymb,stmaryrd}
+\usepackage{amsmath,amssymb,stmaryrd}
 \usepackage{graphicx}
 \usepackage{epstopdf}
-\usepackage{MnSymbol}
+%\usepackage{MnSymbol}
 \usepackage{paralist}
 \usepackage{epsfig}
 \usepackage{wrapfig}
@@ -25,7 +27,7 @@
 %\usepackage[normalem]{ulem}
 \usepackage{harpoon}
 \usepackage{galois}
-\usepackage{titlesec}
+%\usepackage{titlesec}
 
 \newcommand\OmerAdded[1]{}%\textcolor{red}{{\bf Omer Says:} #1}}
 %\titlespacing\section{0pt}{2pt}{0pt}
@@ -49,25 +51,25 @@
 \newcommand{\cConcurrentSkipListMap}{\lstinline+ConcurrentSkipListMap+}
 
 
-\newtheoremstyle{exampstyle}
-{2pt} % Space above
-{2pt} % Space below
-{\itshape} % Body font
-{} % Indent amount
-{\bfseries} % Theorem head font
-{.} % Punctuation after theorem head
-{.5em} % Space after theorem head
-{} % Theorem head spec (can be left empty, meaning `normal')
+%% \newtheoremstyle{exampstyle}
+%% {2pt} % Space above
+%% {2pt} % Space below
+%% {\itshape} % Body font
+%% {} % Indent amount
+%% {\bfseries} % Theorem head font
+%% {.} % Punctuation after theorem head
+%% {.5em} % Space after theorem head
+%% {} % Theorem head spec (can be left empty, meaning `normal')
 
-\theoremstyle{exampstyle}\newtheorem{theorem}{Theorem}[section]
-\theoremstyle{exampstyle}\newtheorem{lemma}[theorem]{Lemma}
-\theoremstyle{exampstyle}\newtheorem{proposition}[theorem]{Proposition}
-\theoremstyle{exampstyle}\newtheorem{corollary}[theorem]{Corollary}
-\theoremstyle{exampstyle}\newtheorem{definition}{Definition}[section]
-\theoremstyle{exampstyle}\newtheorem{parameter}{Parameter}[section]
-\theoremstyle{exampstyle}\newtheorem{property}{Property}[section]
-\theoremstyle{exampstyle}\newtheorem{example}[equation]{Example}
-\theoremstyle{exampstyle}\newtheorem{algorithm}[theorem]{Algorithm}
+%% \theoremstyle{exampstyle}\newtheorem{theorem}{Theorem}[section]
+%% \theoremstyle{exampstyle}\newtheorem{lemma}[theorem]{Lemma}
+%% \theoremstyle{exampstyle}\newtheorem{proposition}[theorem]{Proposition}
+%% \theoremstyle{exampstyle}\newtheorem{corollary}[theorem]{Corollary}
+%% \theoremstyle{exampstyle}\newtheorem{definition}{Definition}[section]
+%% \theoremstyle{exampstyle}\newtheorem{parameter}{Parameter}[section]
+%% \theoremstyle{exampstyle}\newtheorem{property}{Property}[section]
+%% \theoremstyle{exampstyle}\newtheorem{example}[equation]{Example}
+%% \theoremstyle{exampstyle}\newtheorem{algorithm}[theorem]{Algorithm}
 
 
 %\newenvironment{itemize*}%
@@ -97,18 +99,18 @@
 \def\URL{\bgroup\URLprepare\realURL}%
 \def\realURL#1{\tt #1\egroup}%
 
-\renewenvironment{proof}[1][\proofname]{\par
-	\pushQED{\qed}%
-	\normalfont
-	\topsep0pt \partopsep5pt % no space before
-	\trivlist
-	\item[\hskip\labelsep
-	\itshape
-	#1\@addpunct{.}]\ignorespaces
-}{%
-\popQED\endtrivlist\@endpefalse
-\addvspace{0pt plus 0pt} % some space after
-}
+%% \renewenvironment{proof}[1][\proofname]{\par
+%% 	\pushQED{\qed}%
+%% 	\normalfont
+%% 	\topsep0pt \partopsep5pt % no space before
+%% 	\trivlist
+%% 	\item[\hskip\labelsep
+%% 	\itshape
+%% 	#1\@addpunct{.}]\ignorespaces
+%% }{%
+%% \popQED\endtrivlist\@endpefalse
+%% \addvspace{0pt plus 0pt} % some space after
+%% }
 
 
 \newcommand\figbox[1]{\noindent{\ \\\fbox{\begin{minipage}{3.2in}
@@ -133,7 +135,15 @@
 % \authorinfo{Peng Liu} {} {} 
 % \authorinfo{Eric Koskinen} {} {} 
 
-\authorinfo{}{}{}
+\author{
+  Pietro Ferrara \inst{1}
+  \and Omer Trip \inst{2}
+  \and Peng Liu \inst{3}
+  \and Eric Koskinen \inst{4}
+}
+\institute{
+  JuliaSoft \and Google \and IBM Research \and Yale University
+}
 \maketitle
 
 \begin{abstract}
