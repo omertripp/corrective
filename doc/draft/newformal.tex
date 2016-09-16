@@ -53,8 +53,7 @@ We define the semantics of these events in the following. For rules where a tran
 ${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state immediately preceding $t$'s start.
 
 The events are defined as follows:
-\\
-\footnotesize
+\begin{center}
 \begin{tabular}{lc}
 \\
 {\sf bgn}\ $t,c$ & $\infer{(T, \mu, \sigma, L) \rightarrow (T \cup \{ t \}, \mu \cdot [t \mapsto (c,\bot,\epsilon)], \sigma, L)}{t \notin T}$ \\
@@ -72,8 +71,7 @@ The events are defined as follows:
 %{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
 \\
 \end{tabular}
-\normalsize
-\\
+\end{center}
 Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations. The intuition is that {\sf corr} \emph{corrects} the execution by jumping transaction $t$ to a state that is reachable starting from the entry state through a serialized execution.
 In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations.
 
