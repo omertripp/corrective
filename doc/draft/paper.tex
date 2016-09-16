@@ -125,6 +125,9 @@
 
 \input{pietromacro}
 
+\newcommand\red[1]{\textcolor{red}{#1}}
+\newcommand\blue[1]{\textcolor{blue}{#1}}
+
 \begin{document}
 
 \title{Corrective Synchronization}
@@ -149,11 +152,11 @@
 \begin{abstract}
 Concurrency control is a challenging problem. While some thread interleavings are admissible, there are certain interleaving scenarios that lead to inadmissible program states. Broadly speaking, there are two main paradigms for avoiding such situations: \emph{pessimistic synchronization} reduces parallelism to mitigate interference between threads, while \emph{optimistic synchronization} detects when illegal interleavings have occurred and rolls execution (of one or more threads) back to an admissible point.
 
-We propose a novel synchronization paradigm. In our approach, dubbed \emph{corrective synchronization}, the correctness of multithreaded execution is enforced neither by reducing parallelism nor by rolling back illegal thread interleavings, but by correcting the inadmissible state after the fact. The system automatically compensates, if necessary, for the effects of inadmissible interleavings by modifying the program state as a transaction completes while accounting for the behavior of concurrent transactions. We have proven that corrective synchronization is serializable.
+We propose a novel synchronization paradigm. In our approach, dubbed \emph{corrective synchronization}, the correctness of multithreaded execution is enforced neither by reducing parallelism nor by rolling back illegal thread interleavings, but by correcting the inadmissible state after the fact. The system automatically compensates, if necessary, for the effects of inadmissible interleavings by modifying the program state as a transaction completes while accounting for the behavior of concurrent transactions. We have proved that corrective synchronization is serializable.
 
-Within the general scope of corrective synchronization, we explore the combination of (i) an offline static analysis to compute correct states w.r.t. the entry states with (ii) a runtime protocol that utilizes the artifacts computed statically to perform online state correction. We instantiate this setup to clients of the Java {\sf ConcurrentMap} abstract data type (ADT) to ensure safe composition of map operations.
+Within the general scope of corrective synchronization, we explore the combination of (i) a \blue{novel} abstract interpretation to compute correct post-states w.r.t. the entry states with (ii) an instrumentation that utilizes  artifacts computed statically to perform state correction dynamically. We instantiate this setup to clients of the Java {\sf ConcurrentMap} abstract data type (ADT) to ensure safe composition of map operations.
 
-We have created a prototype implementation of this system in Java, which we compare against two mainstream techniques: a lock-based approach boosted with abstract {\sf Map} semantics as well as a standard software transactional memory (STM). Our experimental evaluation on several real-world benchmarks indicates x2 speedup improvement compared to these techniques. Further, our technique incurs negligible overhead as compared to the original execution.
+%We have created a prototype implementation of this system in Java, which we compare against two mainstream techniques: a lock-based approach boosted with abstract {\sf Map} semantics as well as a standard software transactional memory (STM). Our experimental evaluation on several real-world benchmarks indicates x2 speedup improvement compared to these techniques. Further, our technique incurs negligible overhead as compared to the original execution.
 \end{abstract}
 
 \input{introduction}
@@ -186,7 +189,7 @@ We have created a prototype implementation of this system in Java, which we comp
 %\onecolumn
 
 
-\input{experimentalresults}
+%\input{experimentalresults}
 
 \input{relatedwork}
 

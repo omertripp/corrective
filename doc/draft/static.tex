@@ -176,24 +176,29 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 \begin{figure*}
 \[
 \begin{array}{ll}
-\csemantics{S}{\statement{m.put(k, v)}, (e, m)} = \left\{
+  \csemantics{S}{\statement{m.put(k, v)}, (e, m)}\\
+  \;\;\;=\left\{
 \begin{array}{ll}
 (e, m[n \mapsto e(\statement{v})]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
 (e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{put})\\
 %\\
-\csemantics{S}{\statement{v=m.get(k)}, (e, m)} = (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & (\mathtt{get})\\
-%\\
-\csemantics{S}{\statement{m.remove(k)}, (e, m)} =  \left\{
+\csemantics{S}{\statement{v=m.get(k)}, (e, m)}\\
+%%
+\;\;\;= (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & (\mathtt{get})\\
+%%
+\csemantics{S}{\statement{m.remove(k)}, (e, m)}\\
+\;\;\;=  \left\{
 \begin{array}{ll}
 (e, m[n \mapsto \{\statement{null}\}]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
 (e, m[n \mapsto m(n) \cup \{\statement{null}\} : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{rmv})\\ 
-%\\
-\csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} =  (\pi_1(\csemantics{S}{\statement{v = m.get(k)}, (e, m)}), m') : & \\
-\hspace{70pt} 
+%%
+\csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)}\\
+\;\;\;=  (\pi_1(\csemantics{S}{\statement{v = m.get(k)}, (e, m)}), m') : & \\
+\hspace{20pt} 
 m'=
 \left\{
 \begin{array}{ll}
@@ -202,35 +207,40 @@ m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})] & \textrm{ if }
 m & \textrm{ otherwise}\\
 \end{array}
 \right. & (\mathtt{pIA})\\
-%\\
-\csemantics{S}{\statement{v = new\ Value()}, (e, m)} =  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
-%\\
-\csemantics{S}{\statement{v = null}, (e, m)} =  (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{nlas})\\
-%\\
-\csemantics{S}{\statement{assert(x==null)}, (e, m)} = \left\{
+%%
+\csemantics{S}{\statement{v = new\ Value()}, (e, m)}\\
+\;\;\;=  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
+%%
+\csemantics{S}{\statement{v = null}, (e, m)}\\
+\;\;\;= (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{nlas})\\
+%%
+\csemantics{S}{\statement{assert(x==null)}, (e, m)}\\
+\;\;\;= \left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto \{\statement{null}\}], m) & \textrm{if } \statement{null} \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{null})\\
-%\\
-\csemantics{S}{\statement{assert(x!=null)}, (e, m)} = \left\{
+%%
+\csemantics{S}{\statement{assert(x!=null)}, (e, m)} \\
+\;\;\;=\left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto e(\statement{x}) \setminus \{\statement{null}\}], m) & \textrm{if } \exists n \in \heapnode : n \neq \statement{null} \land n \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{!null})\\
-%\\
-\csemantics{S}{\statement{assert(m.containsK(k))}, (e, m)} = \left\{
+%%
+\csemantics{S}{\statement{assert(m.containsK(k))}, (e, m)}\\
+\;\;\;= \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
-(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \\
-& \hspace{70pt} m(n) \neq \{\statement{null}\}\\
+(e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land  m(n) \neq \{\statement{null}\}\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
 \right. & (\mathtt{cntK})\\
-%\\
-\csemantics{S}{\statement{assert(!m.containsK(k))}, (e, m)} = \left\{
+%%
+\csemantics{S}{\statement{assert(!m.containsK(k))}, (e, m)}\\
+\;\;\;= \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
 (e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \statement{null} \in m(n)\\
