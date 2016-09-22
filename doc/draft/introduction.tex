@@ -1,6 +1,6 @@
 \section{Introduction}\label{Se:intro}
 
-Concurrency control is a hard problem. While some thread interleavings are admissible (in particular, if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability. The goal is to automatically detect with high precision and low overhead the inadmissible interleavings, and avoid them.  
+Concurrency control is a hard problem. While some thread interleavings are admissible (if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability. The goal is to automatically detect with high precision and low overhead the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
@@ -25,7 +25,8 @@ Beyond these cases, however, there are many other situations of practical intere
 %	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
 %\end{figure}
 
-\begin{figure}
+\begin{figure}[t]
+  \begin{quote}
 	\begin{lstlisting}[numbers=left]
 Convertor getConvertor(String name, boolean create) {
   Convertor conv = _convertors.get(name);
@@ -34,7 +35,8 @@ Convertor getConvertor(String name, boolean create) {
     _convertors.putIfAbsent(name, conv); }
   return conv; }
 	\end{lstlisting}
-	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
+        \end{quote}
+	\caption{\label{Fi:introMotivating} {\sf getConvertor()} from class {\sf StandardConvertorCache} in {\sf dyuproject}}
 \end{figure}
 
 Assume that different threads invoking this method are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
@@ -136,5 +138,9 @@ In summary, this paper makes the following principal contributions.
 (2) We provide a formal description of corrective synchronization. This includes a soundness proof as well as a clear statement of limitations.
 	(3) We have developed an abstract interpretation to derive the prestate/poststates specification for programs that encode the shared state as one or more concurrent maps. 
 %	\item \underline{Implementation and evaluation}: We have created an implementation of corrective synchronization assuming the shared state is represented as a collection of concurrent maps. We present experimental evidence in favor of corrective synchronization, where our subjects are real-world Java applications.
+(4) We have developed a runtime system that is able to use
+pre/post-state specifications to correct behaviors dynamically.
+%
+(5) We report encouraging preliminary experimental results on
+our prototype implementation.
 
-\red{what else?}
