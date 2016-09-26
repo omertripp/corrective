@@ -6,7 +6,7 @@ Concurrency control is a hard problem. While some thread interleavings are admis
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
 	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes, semaphores, and some transactional memory (TM) implementations~\cite{ppopp/HerlihyK08,nirpess} are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
-	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and abort-like remediation steps are taken. Many TM implementations operate this way~\cite{DBLP:conf/isca/HerlihyM93}, logging memory accesses by each of the threads, and reversesing the effects of a thread and abort/restart it.
+	\item \textit{Optimistic synchronization}: As an alternative to proactive (pessimistic) synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and abort-like remediation steps are taken. Many TM implementations operate this way~\cite{DBLP:conf/isca/HerlihyM93}, logging memory accesses by each of the threads, and reversesing the effects of a thread and abort/restart it.
 \end{itemize}
 
 \noindent
