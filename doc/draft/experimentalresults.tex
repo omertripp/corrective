@@ -1,8 +1,9 @@
-\section{Implementation and Evaluation}\label{Se:experiments}
+\section{Preliminary Implementation}\label{Se:experiments}
 
-In this section, we first describe our prototype implementation of the overall system (both the static analysis and the runtime synchronization algorithm), and then its experimental evaluation over a set of four real-world subjects. 
+In this section, we report encouraging results of our prototype implementation.
+We have implemented static analysis and the runtime synchronization algorithm, and an experimental evaluation over a set of four real-world subjects. 
 
-\smartpar{Prototype System}
+%\smartpar{Prototype System}
 %\label{Se:system}
 We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds a serialized CFG as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Section \ref{sect:language}. Running times are negligible compared to the rest the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
@@ -14,7 +15,7 @@ denotes that if we started from a prestate where ${\sf k}$ was not in the map an
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
 
-As discussed in Section \ref{sec:dynamicwarping}, in our current prototype all transactions are assumed to start simultaneously, which is useful for the common case of loop parallelization. Each concrete transaction is mapped to its abstract counterpart, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
+As discussed in Section \ref{sec:dynamicwarping}, in our current prototype all transactions are assumed to start simultaneously. This is useful, for example, in loop parallelization. Each concrete transaction is mapped to its abstract counterpart, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
 
 During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Corrective synchronization occurs only on failed commits (as discussed in Section \ref{Se:guarantees}), in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the corrective specification. 
 

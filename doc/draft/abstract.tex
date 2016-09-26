@@ -18,9 +18,14 @@ transactions.
 %necessary, for the effects of inadmissible interleavings by 
 %
 We have proved that corrective
-synchronization is serializable. Next, we describe an abstract
+synchronization is serializable and give conditions under which
+progress is ensured. Next, we describe an abstract
 interpretation that is able to compute these valid serializable
-post-states w.r.t. a transaction's entry state. These abstract states
+post-states w.r.t. a transaction's entry state, \blue{by computing
+an underapproximation of the serializable intermediate (or final) states
+as the fixpoint solution over an interprocedural control-flow graph}.
+%
+These abstract states
 inform a runtime system that is able to perform state correction
 dynamically. We have instantiated this setup to clients of a Java-like
 Concurrent Map data structure to ensure safe composition of map

@@ -79,7 +79,8 @@ $\mu[t \mapsto \mu'(t)]]$. Thread $t$ is permitted to do so,
 \red{Note that, for the purposes of this paper, the alternate path to $\mu'$
   must be under the same set of concurrent transactions $T$.}
 %
-We have proved that corrective synchronization is serializable (Section~\ref{sec:??}).
+We have proved that corrective synchronization is serializable (Section~\ref{sec:??})
+and provide simple conditions under which progress is guranteed.
 
 \smartpar{Challenges \& Contributions}
 %
@@ -94,12 +95,14 @@ For the sake of concreteness, we focus on concurrent Java-like
 programs whose shared state is encoded as one or more {\sf
   ConcurrentMap} instances.  We tackle the above challenges via a
 novel use of abstract interpretation, equipped with a specialized
-abstraction for maps, to derive the correct poststates in relation to
+abstraction for maps, to derive the correct poststates, or ``targets'', in relation to
 a given prestate.
 %
 Specifically, our abstract interpretation computes an
 underapproximation of the serializable intermediate (or final) states
 as the fixpoint solution over an interprocedural control-flow graph.
+%
+Moreover, we prove that the computed target states are progress-safe.
   
 %% In particular,
 %The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
