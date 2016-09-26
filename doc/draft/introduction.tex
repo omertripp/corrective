@@ -4,118 +4,100 @@ Concurrency control is a hard problem. While some thread interleavings are admis
 
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
-	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes and semaphores are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
-	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and appropriate remediation steps are taken. A notable instance of this paradigm is transactional memory (TM) \cite{DBLP:conf/isca/HerlihyM93}, where the system logs memory accesses by each of the threads, and is able to reverse the effects of a thread and abort/restart it.
+	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes, semaphores, and some transactional memory (TM) implementations~\cite{ppopp/HerlihyK08,nirpess} are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
+	\item \textit{Optimistic synchronization}: As an alternative to proactive, or pessimistic, synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and abort-like remediation steps are taken. Many TM implementations operate this way~\cite{DBLP:conf/isca/HerlihyM93}, logging memory accesses by each of the threads, and reversesing the effects of a thread and abort/restart it.
 \end{itemize}
 
 \paragraph{Motivation.} The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
+%
+\blue{In both of these cases, however, the concurrency paradigm is
+  designed to exploit domain-specific windows of opportunity where
+  there is a low amount of conflict.  These are, in a sense,
+  low-hanging fruit and there are many other situations of practical
+  interest where there is unavoidable contention. (We will give a
+  simple example in the next section.)  Neither of these existing
+  approaches offer a way to tackle contention head-on.}
 
-Beyond these cases, however, there are many other situations of practical interest. As an illustrative example, we refer to the code fragment in Figure \ref{Fi:introMotivating}, extracted from the {\sf dyuproject} project,\footnote{\url{https://code.google.com/archive/p/dyuproject/}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 
-%\begin{figure}
-%	\begin{lstlisting}[numbers=left]
-%public Convertor getConvertor(
-%      Class cls,boolean create,boolean add) {
-%  Convertor convertor = _convertors.get(cls.getName());
-%  if(convertor==null && create) {
-%    convertor = new Convertor(cls,add);
-%    _convertors.putIfAbsent(cls.getName(), convertor); }
-%    return convertor; }
-%	\end{lstlisting}
-%	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
-%\end{figure}
+\paragraph{Corrective Synchronization.}
+In this paper, we take a first step in formulating and exploring a novel synchronization paradigm that generalizes both the pessimistic and the optimistic approaches.
+%
+In our approach, dubbed \emph{corrective synchronization}, conflicting transactions may begin to execute concurrently (unlike pessimistic) yet, when conflict occurs, the remediation is not simply to abort (unlike optimistic). Instead, a thread resolves contention by dynamically \emph{altering} the inadmissible state into an acceptable one, accounting for the behavior of concurrent threads, so as to guarantee serializability.
 
-\begin{figure}[t]
-  \begin{quote}
-	\begin{lstlisting}[numbers=left]
-Convertor getConvertor(String name, boolean create) {
-  Convertor conv = _convertors.get(name);
-  if(conv==null && create) {
-    conv = new Convertor(name);
-    _convertors.putIfAbsent(name, conv); }
-  return conv; }
-	\end{lstlisting}
-        \end{quote}
-	\caption{\label{Fi:introMotivating} {\sf getConvertor()} from class {\sf StandardConvertorCache} in {\sf dyuproject}}
-\end{figure}
 
-Assume that different threads invoking this method are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Mutual exclusion, on the other hand, would block all threads but one until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
+%enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
 
-\paragraph{Corrective synchronization.} In this paper, we take a first step in formulating and exploring a novel synchronization paradigm, which is conceptually different from both the pessimistic and the optimistic approaches. In our approach, dubbed \emph{corrective synchronization}, the correctness of multi-threaded execution is enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
+%% Specifically, the correctness of multithreaded execution need not be
+%% enforced by previous methods that either reduce parallelism
+%% (pessimistic) or roll back illegal thread interleavings (optimistic);
+%% instead inadmissible states can be altered into admissible ones.
+%% %
+%% In this way, the effects of inadmissible interleavings can be
+%% compensated for by modifying the program state as a transaction
+%% completes while accounting for the behavior of concurrent
+%% transactions.
 
-To illustrate our approach, we revisit the running example. Consider the following execution history: % in Figure \ref{Fi:motivatingInterleaving}.
-	\begin{center}
-		\begin{tabular}{r@{}lrcl@{}l}
-			[ & & $T_1$: ${\sf get()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf get()}/{\sf null}$  & \\
-			& $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf if(\ldots)}$ & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf new\ \ldots}/o_1$ & $\rightarrow$ & $T_2$: ${\sf new\ \ldots}/o_2$ & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
-		\end{tabular}
-		\end{center}
-This history is clearly not serializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
-
-%\begin{figure}
-%	\begin{center}
-%		\footnotesize
-%		\begin{tabular}{rrll}
-%[ & $T_1$: ${\sf get()}/{\sf null}$, & $T_2$: ${\sf get()}/{\sf null}$,  & \\
-%& $T_1$: ${\sf if(\ldots)}$, & $T_2$: ${\sf if(\ldots)}$, & \\ 
-%& $T_1$: ${\sf new\ \ldots}/o_1$, & $T_2$: ${\sf new\ \ldots}/o_2$, & \\ 
-%& $T_1$: ${\sf putIfAbsent()}/{\sf null}$, & $T_2$: ${\sf putIfAbsent()}/o_1$,  & \\ 
-%& $T_1$: ${\sf return}\ o_1$, & $T_2$: ${\sf return}\ o_2$ & ]
-%		\end{tabular}
-%%		\begin{tabular}{c||c}
-%%			$T_1$ & $T_2$ \\
-%%			\hline
-%%			${\sf \_convertors.get()} / {\sf null}$ &  \\
-%%			& ${\sf \_convertors.get()} / {\sf null}$ \\
-%%			${\sf if (...)}$ 								   &							\\
-%%			& ${\sf if (...)}$ \\
-%%			${\sf new\ Convertor()} / o_1$		& \\
-%%			& ${\sf new\ Convertor()} / o_2$ \\
-%%			${\sf \_convertors.putIfAbsent()} / {\sf null}$ &  \\
-%%			& 		${\sf \_convertors.putIfAbsent()} / o_1$ \\
-%%			${\sf return}\ o_1$ & \\
-%%			& ${\sf return}\ o_2$ \\
-%%			\end{tabular}
-%			\end{center}
-%	\caption{\label{Fi:motivatingInterleaving}Interleaved execution of two instances of the code in Figure \ref{Fi:introMotivating}}
-%\end{figure}
-
-Note that the corrective actions above are of a general form, which is not limited to only two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}. In addition, our experiments suggest the corrective actions are --- relatively speaking --- inexpensive, especially compared to the alternatives of either blocking or aborting/restarting all threads but one.
 
 \paragraph{This paper.} Corrective synchronization, as a concept, opens up a vast space of possibilities for concrete synchronization protocols. In this paper, we take a first step in exploring this space.
 %
-\blue{We introduce the following proof rule:}
+\blue{The key idea can be illstrustrated with our ${\sf corr}\ t$ proof rule:}
 $$
-\infer{(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
-	t \in T, 
-	{\sf ref}\ t \leadsto (T,\mu', \sigma, L)}
+\infer[\text{{\sf corr }} t]{\Gamma, (t,C) \vdash (T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
+   \Gamma, (t,C) \vdash
+	C \rightarrow^{*} (T,\mu', \sigma, L)}
 $$
-Configurations consist of tuples $(T,\mu,\sigma,L)$ where
+As is typical~\cite{Koskinen15,others}, we model transactions as a transition system
+where a configuration $C$ consists of tuples $(T,\mu,\sigma,L)$ where
 $T$ is a set of transaction ids,  $\mu$ is a mapping from
-transcation id to thread-local state, $\sigma$ is the shared state and
+transcation id to thread-local state, $\sigma$ is the shared state
 and, following~\cite{Koskinen15}, we use a log of events $L$ to track the
 state of the system.
 %
-Finally, $\textsf{ ref}\ t$ is a helper function that remembers the
-system state before transaction $t$ began.
-%
-The key idea is a form of thread-local correction, whereby a single
-thread $t$ can apply a correction and suddenly behave as if it had
-internally taken a different path.
+For our purposes, we include a context $\Gamma$ which maps each transaction
+$t$ to the configuration just before $t$ began.
+
+The key idea here is thread-local correction, whereby a single
+thread $t$ can apply a correction by jumping from $\mu$ to
+$\mu[t \mapsto \mu'(t)]]$. Thread $t$ is permitted to do so,
+  provided that there was an \emph{alternate execution path}
+  $C \rightarrow^{*} (T,\mu',\sigma,L)$ from the configuration $C$
+  in which $t$ began to some other $(T,\mu',\sigma,L)$, having this
+  same shared state $\sigma$.
+%and suddenly behave as if it had
+%internally taken a different path \blue{that led to this same $\sigma$}.
 %
 \blue{This rule is surprisingly simple yet, to the best of our
-  knowledge, nothing like this exists in the literature.}
+  knowledge, nothing like this exists in the literature. One can think of
+  pessimistic synchronization as an almost trivial restriction in which
+  conflicting executions never occur and this rule is never needed. Meanwhile,
+  optimistic syncrhonzation permits only corrections back to
+  thread $t$'s initial configuration.}\red{is this accurate?}
+%
+\red{Note that, for the purposes of this paper, the alternate path to $\mu'$
+  must be under the same set of concurrent transactions $T$.}
+%
+We have proved that corrective synchronization is serializable (Section~\ref{sec:??}).
 
-For the sake of concreteness, 
+\smartpar{Challenges \& Contributions}
+%
+With definitions and serializability established, we move on to two key challenges
+that pertain to corrective syncrhonization:
+\begin{itemize}
+\item How do we compute each thread's alternative post-states?
+\item Given an incorrect state, how do we efficiently recover to a correct post-state?
+\end{itemize}
+%
+For the sake of concreteness, we focus on concurrent Java-like
+programs whose shared state is encoded as one or more {\sf
+  ConcurrentMap} instances.  We tackle the above challenges via a
+novel use of abstract interpretation, equipped with a specialized
+abstraction for maps, to derive the correct poststates in relation to
+a given prestate.
+
+  
 %% In particular,
-we focus on concurrent Java-like programs whose shared state is encoded as one or more {\sf ConcurrentMap} instances.
 %The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
 %
-Two important challenges w.r.t. corrective synchronization that we investigate  are (i) for each thread how to compute these alternative poststates; and (ii) given an incorrect poststate, how to efficiently recover the execution to a correct poststate. 
-We tackle these challenges via a novel abstract interpretation, equipped with a specialized abstraction for maps, to derive the correct poststates in relation to a given prestate. 
 
 \red{add explanation of Section 5 here}
 
