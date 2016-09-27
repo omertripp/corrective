@@ -1,7 +1,20 @@
 \section{Conclusion and Future Work}
 
-We have presented an alternative to the lock- and retry-based synchronization methods, which we dub \emph{corrective synchronization}. The key insight is to correct a bad execution, rather than aborting/retrying the transaction or conservatively avoiding the bad execution in the first place. We have explored an instantiation of corrective synchronization for composed operations over ${\sf ConcurrentMap}$s, where correct states are computed via offline static analysis.
+We have presented an alternative to the lock- and retry-based synchronization methods that we dub \emph{corrective synchronization}. The key insight is to correct a bad execution, rather than aborting/retrying the transaction or conservatively avoiding the bad execution in the first place. We have explored an instantiation of corrective synchronization for composed operations over ${\sf ConcurrentMap}$s, where correct states are computed via offline static analysis.
 %Our initial results show promise.
+%
+Experimental results with a prototype implementation are encouraging.
 
-In the future, we intend to define, implement and experiment with, variants of corrective synchronization. As part of that, we plan to develop compositional synchronization methods that integrate corrective synchronization with lock- and STM-based synchronization.
+There are several directions for future work.
+%
+First, one can define, implement and experiment with, other variants
+of corrective synchronization.  For example, one may want to allow
+multiple threads to decide together corrective target states.  One
+could also improve the abstract domain beyond maps, perhaps using
+existing domains.
+%
+Another direction is to integrate corrective synchronization into larger-scale
+software systems and perform a deep experimental evaluation over the spectrum
+of synchronization techniques.
+As part of such an effort, one could develop compositional synchronization methods that integrate corrective synchronization with lock- and STM-based synchronization.
 

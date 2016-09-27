@@ -1,6 +1,5 @@
 \section{Introduction}\label{Se:intro}
 
-\red{todo: sprinkle more abstract interp details into this section}
 Concurrency control is a hard problem. While some thread interleavings are admissible (if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability. The goal is to automatically detect with high precision and low overhead the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
@@ -49,11 +48,11 @@ $$
    \Gamma, (t,s) \vdash
 	s \rightarrow^{*} (T,\mu', \sigma, L)}
 $$
-As is typical~\cite{Koskinen15,others}, we model transactions as a transition system
+As is typical, we model transactions as a transition system
 where a state configuration $s$ consists of tuples $(T,\mu,\sigma,L)$.
 $T$ is a set of transaction identifiers,  $\mu$ is a mapping from
 transcation id to thread-local state, $\sigma$ is the shared state
-and, following~\cite{Koskinen15}, we use a log of events $L$ to track the
+and, following~\cite{KoskinenP15}, we use a log of events $L$ to track the
 state of the system.
 %
 For our purposes, we include a context $\Gamma$ which maps each transaction
@@ -79,7 +78,7 @@ $\mu[t \mapsto \mu'(t)]]$. Thread $t$ is permitted to do so,
 \red{Note that, for the purposes of this paper, the alternate path to $\mu'$
   must be under the same set of concurrent transactions $T$.}
 %
-We have proved that corrective synchronization is serializable (Section~\ref{sec:??})
+We have proved that corrective synchronization is serializable (Section~\ref{sec:concretesemantics})
 and provide simple conditions under which progress is guranteed.
 
 \smartpar{Challenges \& Contributions}

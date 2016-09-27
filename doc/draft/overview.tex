@@ -24,7 +24,7 @@ getConvertor(String name, bool create) {
 %
 %Figure \ref{Fi:introMotivating},
 right,
-extracted from the {\sf dyuproject} project\footnote{\url{https://code.google.com/archive/p/dyuproject/}}, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in Figure \ref{Fi:introMotivating} is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
+extracted from the {\sf dyuproject} project\footnote{\url{https://code.google.com/archive/p/dyuproject/}}, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a slight variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 
 %\begin{figure}
 %	\begin{lstlisting}[numbers=left]
@@ -101,7 +101,7 @@ We illustrate the difference between corrective synchronization and classic opti
 	\begin{center}
 	\includegraphics[width=\textwidth]{OverviewSlide.pdf}
 	\end{center}
-	\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of the method in Figure \ref{Fi:introMotivating} using pessimistic, optimistic, and corrective synchronization.}
+	\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of \textsf{getConvertors} using pessimistic, optimistic, and corrective synchronization.}
 \end{figure*}
 
 Both optimistic and corrective synchronization, allowing the problematic chain of interleavings, reach a nonserializable state. Optimism resolves this by retrying the entire transaction executed by, say, thread $t_2$. This yields serial execution, similar to the pessimistic run, where $t_2$ runs after $t_1$. Corrective synchronization, instead, ``fixes'' the final state, allowing $t_2$ to complete without rerunning any or all of its code.
@@ -115,7 +115,7 @@ A solution that is not complete faces the possibility of stuck runs: Given a (po
 %\end{compactitem}
 
 
-\smartpar{Computing Corrective Targets (Section~\ref{sec:transactionsystemwarping})}
+\smartpar{Computing Corrective Targets}
 %
 A simpler and more abstract specification to work with, compared to complete execution prefixes, is triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the corresponding runtime instrumentation is minimal compared to tracking the entire execution history. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
 
@@ -123,11 +123,11 @@ Mapping back from pairs of states to prefixes requires an oracle. In our prototy
 	$t_1 \rightarrow t^\star_{2 \ldots n} \rightarrow t_{n+1} \rightarrow t'_1 \rightarrow t'^\star_{2 \ldots n} \rightarrow t'_{n+1} \rightarrow \ldots$,
 where $t$, $t'$, etc denote different transaction types (i.e., transactions executing different code), and $n$ is unbounded, simulating a nondeterministic loop. This representation simulates an unbounded number of instances of transactions that are executed sequentially.
 
-We go into detail about this representation in Section \ref{Se:concabs}, but here note that (i) this representation reflects the effects of serial execution of the transactions, and so the corrective targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
+We go into detail about this representation in Section \ref{sec:transactionsystemwarping}, but here note that (i) this representation reflects the effects of serial execution of the transactions, and so the corrective targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 %
 As an illustration of the third point, in our running example the first transaction ( $t_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($t_{n+1}$) can be confirmed not to update the key/value mapping.
 
-\smartpar{Runtime Synchronization (Section~\ref{sec:dynamicwarping})} 
+\smartpar{Runtime Synchronization} 
 %
 The runtime system has two main responsibilities. First, it must track whether an execution has reached a (potentially) bad state. Second, if such a state arises, then the runtime system must map the current state onto a state that shares the same initial state and is known, by the oracle, to have a serializable continuation. 
 %

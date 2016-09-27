@@ -101,79 +101,10 @@ void internalSerialize(PofWriter out, Object o) {
 \end{figure}
 
 
-\begin{figure*}
-	\begin{minipage}{0.50 \textwidth}
-		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case1it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case1th.pdf}
-		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext} (l: workload; r: conc)\vspace{10pt}}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.5 \textwidth}
-		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case2it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case2th.pdf}
-		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache} 
-			(l: workload; r: conc)\vspace{10pt}}
-	\end{minipage}
-	\begin{minipage}{0.5 \textwidth}
-		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case3it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case3th.pdf}
-		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory} 
-			(l: workload; r: conc)}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.5 \textwidth}
-		\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case4it.pdf}\includegraphics[width=0.5 \textwidth]{../../eval/32threads/case4th.pdf}
-		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}
-			(l: workload; r: conc)}
-	\end{minipage}
-%	
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case1it.pdf}
-%		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: workload}
-%	\end{minipage}
-%	\hspace{0.05 \textwidth}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case1th.pdf}
-%		\caption{\label{Fi:case1th}Apache Tomcat {\sf ApplicationContext}: concurrency}
-%	\end{minipage}
-%	\hspace{0.05 \textwidth}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case2it.pdf}
-%		\caption{\label{Fi:case2it}dyuproject {\sf StandardConvertorCache}: workload}
-%	\end{minipage}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case2th.pdf}
-%		\caption{\label{Fi:case2th}dyuproject {\sf StandardConvertorCache}: concurrency}
-%	\end{minipage}
-%	\hspace{0.05 \textwidth}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case3it.pdf}
-%		\caption{\label{Fi:case3it}Flexive {\sf FxValueRendererFactory}: workload}
-%	\end{minipage}
-%	\hspace{0.05 \textwidth}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case3th.pdf}
-%		\caption{\label{Fi:case3th}Flexive {\sf FxValueRendererFactory}: concurrency}
-%	\end{minipage}
-%	\begin{minipage}{0.15 \textwidth}
-%		\ 
-%	\end{minipage}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case4it.pdf}
-%		\caption{\label{Fi:case4it}Gridkit {\sf ReflectionPofSerializer}: workload}
-%	\end{minipage}
-%	\hspace{0.1 \textwidth}
-%	\begin{minipage}{0.3 \textwidth}
-%		\includegraphics[width=\textwidth]{../../eval/32threads/case4th.pdf}
-%		\caption{\label{Fi:case4th}Gridkit {\sf ReflectionPofSerializer}: concurrency}
-%	\end{minipage}
-\end{figure*}
-
-\smartpar{Performance Results} 
-%
-We depict the performance results in Figures \ref{Fi:case1th}-\ref{Fi:case4th}, where for each benchmark we plot the results when increasing the size of the workload while fixing the number of threads (on the left), and when varying the number of threads (on the right).
-Each plot presents a two column diagram, corresponding to STM and corrective synchronization (left/black and right/gray, respectively), which indicates the relative gain thanks to these approaches in comparison with lock-based synchronization. Indeed, the lock-based solution is overly conservative, yielding roughly a linear trend line of decrease in performance as either workload size or the number of threads increases.
 
 %The left-hand-side charts correspond to the first measurement, where we increase the size of the workload while fixing the number of threads. The right-hand-side graphs correspond to a fixed-size workload executed by each of the transactions, where the number of threads is variable.
 
-The aggregate performance results, averaging across all workloads and concurrency
+For lack of space, the detailed results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. Here we simply report aggregate performance results, averaging across all workloads and concurrency
 \begin{wrapfigure}[10]{r}{0.50\textwidth}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
