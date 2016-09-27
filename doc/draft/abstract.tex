@@ -4,7 +4,7 @@ failures. To this end, we first introduce a novel synchronization paradigm,
 dubbed \emph{corrective synchronization},
 that is a generalization of existing approaches to ensuring serializability.
 %
-Specifically, the correctness of multithreaded execution need not be
+Specifically, the correctness of multi-threaded execution need not be
 enforced by previous methods that either reduce parallelism
 (pessimistic) or roll back illegal thread interleavings (optimistic);
 instead inadmissible states can be altered into admissible ones.
@@ -21,8 +21,8 @@ synchronization is serializable and give conditions under which
 progress is ensured. Next, we describe an abstract
 interpretation that is able to compute these valid serializable
 post-states w.r.t. a transaction's entry state by computing
-an underapproximation of the serializable intermediate (or final) states
-as the fixpoint solution over an interprocedural control-flow graph.
+an under-approximation of the serializable intermediate (or final) states
+as the fixpoint solution over an inter-procedural control-flow graph.
 %
 These abstract states
 inform a runtime system that is able to perform state correction

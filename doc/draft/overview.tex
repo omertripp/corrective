@@ -62,7 +62,7 @@ To illustrate our approach, consider the following  history: % in Figure \ref{Fi
 			& $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
 		\end{tabular}
 	\end{center}
-Each step in this history is labeled wth the transaction identifier ($T_1$ or $T_2$) and the code that the transaction is executing.
+Each step in this history is labeled with the transaction identifier ($T_1$ or $T_2$) and the code that the transaction is executing.
 This history is clearly not serializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. However, we can warp to such a serializabile history by applying a correction.
 %
 Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.

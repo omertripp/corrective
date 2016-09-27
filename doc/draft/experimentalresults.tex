@@ -7,11 +7,11 @@ We now report encouraging results of our preliminary implementation.
 %\label{Se:system}
 We have created a Java implementation of our static analysis for composed {\sf Map} operations (see Section \ref{sec:transactionsystemwarping}). Given $n$ types of transactions, our implementation builds a serialized CFG (Section \ref{sec:transactionsystemwarping}) and then computes a fixpoint over it relying on the abstract semantics (Section \ref{se:instance}). We support all the operations listed in Section \ref{se:instance}. Static analysis running times are negligible compared to the rest of the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
-As explained earlier, the interface with the runtime system is a relational corrective specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
+As explained earlier, the interface with the runtime system is a relational corrective specification mapping pre-states to sets of post-states that are obtainable via serializable execution of the transactions from the pre-state. As a partial example, 
 %\begin{center}
 $[ {\sf k} \mapsto \bot , {\sf v} \mapsto v ] \leadsto \{ [ {\sf k} \mapsto v , {\sf v} \mapsto v ] \}$
 %\end{center}
-denotes that if we started from a prestate where ${\sf k}$ was not in the map and the value passed to the function was $v$, then in the poststate the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
+denotes that if we started from a pre-state where ${\sf k}$ was not in the map and the value passed to the function was $v$, then in the post-state the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the pre-state.
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
 %

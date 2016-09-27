@@ -1,7 +1,7 @@
 \section{Transaction Semantics}
 \label{sec:concretesemantics}
 
-We now introduce a generic transaction semantics for corrective synchronization. We prove soundness (serializability), and give conditions under which progres is ensured.
+We now introduce a generic transaction semantics for corrective synchronization. We prove soundness (serializability), and give conditions under which progress is ensured.
 
 %\subsection{Transition System}
 %\label{sec:transitionsystem}
@@ -59,7 +59,7 @@ transaction identifier $t$ with the state configuration $s$
 %${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state
 that immediately preceded $t$'s start, captured in the {\sf bgn} event.
 %
-Durings its execution, a transaction modifies only its local state and local log $L_t$, as seen in the {\sf local} event rule.
+During its execution, a transaction modifies only its local state and local log $L_t$, as seen in the {\sf local} event rule.
 Here $t$'s corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$
 and $\semanticanome{C}$ represents the transition relation for local operations.
 %
