@@ -1,11 +1,11 @@
 \section{Preliminary Implementation}\label{Se:experiments}
 
 We now report encouraging results of our preliminary implementation.
-We have implemented the static analysis and the runtime synchronization algorithms, and performed an experimental evaluation over a set of four subjects taken from real-world code bases. 
-\red{blend below withabove}
+%We have implemented the static analysis and runtime synchronization algorithms, and performed an experimental evaluation over a set of four subjects taken from real-world code bases. 
+%\red{blend below withabove}
 %\smartpar{Prototype System}
 %\label{Se:system}
-We have created a Java implementation of our static analysis for composed {\sf Map} operations, as described  in Section \ref{se:instance}. Given $n$ types of transactions, our implementation builds a serialized CFG as described in Section \ref{Se:concabs}, and then it computes a fixpoint over it relying on the abstract semantics formalized in Section \ref{sect:abstractsemantics}. We support all the operations listed in Section \ref{sect:language}. Static analysis running times are negligible compared to the rest of the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
+We have created a Java implementation of our static analysis for composed {\sf Map} operations (see Section \ref{sec:transactionsystemwarping}). Given $n$ types of transactions, our implementation builds a serialized CFG (Section \ref{sec:transactionsystemwarping}) and then computes a fixpoint over it relying on the abstract semantics (Section \ref{se:instance}). We support all the operations listed in Section \ref{se:instance}. Static analysis running times are negligible compared to the rest of the process, and the analysis converges always in less than a second. Therefore, we do not report the running times of the static analysis.
 
 As explained earlier, the interface with the runtime system is a relational corrective specification mapping prestates to sets of poststates that are obtainable via serializable execution of the transactions from the prestate. As a partial example, 
 %\begin{center}
@@ -14,10 +14,10 @@ $[ {\sf k} \mapsto \bot , {\sf v} \mapsto v ] \leadsto \{ [ {\sf k} \mapsto v , 
 denotes that if we started from a prestate where ${\sf k}$ was not in the map and the value passed to the function was $v$, then in the poststate the key ${\sf k}$ is made to point to the value $v$ pointed-to by the second argument ${\sf v}$ in the prestate.
 %
 The runtime system $S$ is parameterized by the specification, which it loads at the beginning of the concurrent run. 
+%
+As discussed in Section \ref{sec:transactionsystemwarping}, in our current prototype all transactions are assumed to start simultaneously. This scenario is useful, for example, in loop parallelization. Each concrete transaction is mapped to its abstract counterpart. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
 
-As discussed in Section \ref{sec:dynamicwarping}, in our current prototype all transactions are assumed to start simultaneously. This scenario is useful, for example, in loop parallelization. Each concrete transaction is mapped to its abstract counterpart, as explained in Section \ref{Se:concabs}. The mapping process also binds the concrete arguments of the transaction (i.e., the concrete object references) to their symbolic counterparts (e.g., the {\sf k} and {\sf v} symbols above). 
-
-During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Corrective synchronization occurs only on failed commits (as discussed in Section \ref{Se:guarantees}), in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the corrective specification. 
+During execution, the runtime system monitors commit events. In our current prototype, we limit transactions to a single commit point before completion. Corrective synchronization occurs only on failed commits, in which case the transaction's shared log, local state and return value (if it exists) are all (potentially) modified according to the corrective specification. 
 
 \OmerAdded{Analogously to the pruning technique used to map between states and their corrective counterparts, the decision whether a commit has failed is based on incremental pruning of the good global states $G$ according to the final states of committed transactions. If the final state of a transaction is not consistent with state $g \in G$, then $g$ is pruned out. If $G$ at any point becomes empty, then the system has reached a bad state.}
 
@@ -33,9 +33,9 @@ In each case,we compared against (i) a pessimistic concrete-level variant of STM
 %
 We ran our experiments on two Intel Xeon 2.90GHz (16 cores) CPUs with 132GB of RAM.
 
-For lack of space, the detailed results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. Here we simply report aggregate performance results, averaging across all workloads and concurrency
 \begin{wrapfigure}[10]{r}{0.50\textwidth}
-\begin{tabular}{|l|c|c|c|c|}
+\vspace{-0.8cm}
+  \begin{tabular}{|l|c|c|c|c|}
 \hline
   & \multicolumn{2}{c|}{STM} & \multicolumn{2}{c|}{corrective sync.} \\
 					\cline{2-5} 
@@ -51,6 +51,9 @@ Gridkit 		&	20\% 	&		16\%		& 32\% & 31\%	\\
 \end{tabular}
 %\end{center}
 \end{wrapfigure}
+For lack of space, the detailed
+results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. Here we simply
+report aggregate performance results, averaging across all workloads and concurrency
 levels, are summarized to the right.
 For completeness, we also note the absolute running times, as min/max intervals in seconds, for the lock-based solution for the workload and concurrency configurations respectively: Tomcat -- [6,10], [7,12]; dyuproject -- [6,9], [7,11]; Flexive -- [6,10], [7,11]; and Gridkit -- [6,9], [7,11]. 
 The numbers are encouraging, indicating improvement over both locks and STM. More careful engineering, beyond our current prototype implementation, is likely to make the improvement more significant.

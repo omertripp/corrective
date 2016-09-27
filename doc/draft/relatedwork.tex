@@ -2,11 +2,11 @@
 To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. We focus our survey of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
 
 %\paragraph{Rollback optimizations.}
-There are two main optimizations to \emph{decrease rollback overhead},
+There are two main optimizations to \emph{decrease rollback overhead}:
 reducing either abort rate or the extent to which a conflicted
 transaction rolls back. Different solutions have been proposed in
-each of these directions~\cite{ppopp/HerlihyK08,Galois,TYFS:OOPSLA11}
-and still others leverage available nondeterminism
+each direction~\cite{ppopp/HerlihyK08,Galois,TYFS:OOPSLA11}.
+Others leverage available nondeterminism
 \cite{TKS:OOPSLA13}. None of these approaches perform corrective
 synchronization.
 %
@@ -29,7 +29,7 @@ Elastic transactions~\cite{FGG:DISC09} avoid wasted work by splitting into multi
 The Push/Pull model \cite{KoskinenP15} also uses local/shared logs, and is flexible enough to express rollback-based transactions but nor corrective synchronization.
 %. However, corrective synchronization is not expressible in Push/Pull. We introduce a new rule, {\sf corr}, and treat {\sf cmt} differently with the {\sf serpref} function.
 
-In our solution, static analysis is used to identify admissible shared-state configurations to correct to from a given input state. Multiple past works on synchronization synthesis have also \emph{relied on static analysis}, albeit for the extraction of other types of information. We survey some of these works in the following.
+In our solution, static analysis is used to identify admissible shared-state configurations to correct to from a given input state. Multiple past works on synchronization synthesis have also \emph{relied on static analysis}, albeit for the extraction of other types of information. 
 %
 Golan-Gueta et al.~\cite{GRSY:PLDI13} utilize static analysis to compute a conservative approximation of the possible actions that a transaction may perform in its future from a given intermediate point. This still pessimistic approach enables more granular synchronization compared to the worst-case assumption that the transaction may perform any action in its future.
 %
