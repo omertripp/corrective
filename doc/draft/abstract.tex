@@ -1,9 +1,8 @@
-We describe a novel use of abstract interpretation, in which the
+We describe a novel use of abstract interpretation in which the
 abstract domain informs a runtime system to correct synchronization
-failures. We first introduce a novel synchronization paradigm. Our
-approach, dubbed \emph{corrective synchronization},
-is a generalization of existing approaches to ensuring serializability.
-%notions of transctional memory.
+failures. To this end, we first introduce a novel synchronization paradigm,
+dubbed \emph{corrective synchronization},
+that is a generalization of existing approaches to ensuring serializability.
 %
 Specifically, the correctness of multithreaded execution need not be
 enforced by previous methods that either reduce parallelism
@@ -12,7 +11,7 @@ instead inadmissible states can be altered into admissible ones.
 %
 In this way, the effects of inadmissible interleavings can be
 compensated for by modifying the program state as a transaction
-completes while accounting for the behavior of concurrent
+completes, while accounting for the behavior of concurrent
 transactions.
 %The system automatically compensates, if
 %necessary, for the effects of inadmissible interleavings by 
@@ -21,9 +20,9 @@ We have proved that corrective
 synchronization is serializable and give conditions under which
 progress is ensured. Next, we describe an abstract
 interpretation that is able to compute these valid serializable
-post-states w.r.t. a transaction's entry state, \blue{by computing
+post-states w.r.t. a transaction's entry state, by computing
 an underapproximation of the serializable intermediate (or final) states
-as the fixpoint solution over an interprocedural control-flow graph}.
+as the fixpoint solution over an interprocedural control-flow graph.
 %
 These abstract states
 inform a runtime system that is able to perform state correction
@@ -32,26 +31,3 @@ Concurrent Map data structure to ensure safe composition of map
 operations. Finally, we report early encouraging results that the
 approach competes with or out-performs previous pessimistic or
 optimistic approaches.
-
-
-
-\ignore{
-Concurrency control is a challenging problem. While some thread interleavings are admissible, there are certain interleaving scenarios that lead to inadmissible program states. Broadly speaking, there are two main paradigms for avoiding such situations: \emph{pessimistic synchronization} reduces parallelism to mitigate interference between threads, while \emph{optimistic synchronization} detects when illegal interleavings have occurred and rolls execution (of one or more threads) back to an admissible point.
-
-We propose a novel synchronization paradigm. In our approach, dubbed \emph{corrective synchronization}, the correctness of multithreaded execution is enforced neither by reducing parallelism nor by rolling back illegal thread interleavings, but by correcting the inadmissible state after the fact. The system automatically compensates, if necessary, for the effects of inadmissible interleavings by modifying the program state as a transaction completes while accounting for the behavior of concurrent transactions. We have proved that corrective synchronization is serializable.
-
-Next, we describe an abstract interpretation that is able to compute 
-serializable post-states w.r.t. a transaction's entry state.
-%
-These abstract states can inform a runtime system which is able
-to perform state correction dynamically. 
-%
-We have instantiated this setup to clients of the Java {\sf ConcurrentMap} abstract data type (ADT) to ensure safe composition of map operations.
-%
-Finally, we provide encouraging experimental
-results on our prototype implementation.
-}
-
-%Within the general scope of corrective synchronization, we explore the combination of (i) a \blue{novel} abstract interpretation to compute serializable post-states w.r.t. the entry states.  with (ii) an instrumentation that utilizes artifacts computed statically to perform state correction dynamically. 
-
-%We have created a prototype implementation of this system in Java, which we compare against two mainstream techniques: a lock-based approach boosted with abstract {\sf Map} semantics as well as a standard software transactional memory (STM). Our experimental evaluation on several real-world benchmarks indicates x2 speedup improvement compared to these techniques. Further, our technique incurs negligible overhead as compared to the original execution.

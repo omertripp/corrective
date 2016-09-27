@@ -5,7 +5,7 @@ Concurrency control is a hard problem. While some thread interleavings are admis
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
 	\item \textit{Pessimistic synchronization}: In this approach, illegal interleaving scenarios are avoided conservatively by blocking the execution of one or more of the concurrent threads until the threat of incorrect executions has gone away. Locks, mutexes, semaphores, and some transactional memory (TM) implementations~\cite{ppopp/HerlihyK08,nirpess} are all examples of how to enforce mutual exclusion, or pessimistic synchronization.
-	\item \textit{Optimistic synchronization}: As an alternative to proactive (pessimistic) synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and abort-like remediation steps are taken. Many TM implementations operate this way~\cite{DBLP:conf/isca/HerlihyM93}, logging memory accesses by each of the threads, and reversesing the effects of a thread and abort/restart it.
+	\item \textit{Optimistic synchronization}: As an alternative to proactive (pessimistic) synchronization, optimistic synchronization is essentially a reactive approach. The concurrency control system monitors execution, such that when an illegal interleaving scenario arises, it is detected as such and abort-like remediation steps are taken. Many TM implementations operate this way~\cite{DBLP:conf/isca/HerlihyM93}, logging memory accesses, aborting transactions, and reversing the effects.
 \end{itemize}
 
 \noindent
@@ -22,7 +22,7 @@ The pessimistic approach is useful if critical sections are short, there is litt
 
 \smartpar{Corrective Synchronization}
 %
-In this paper, we take a first step in formulating and exploring a novel synchronization paradigm that generalizes both the pessimistic and the optimistic approaches.
+In this paper, we take a first step in formulating and exploring a novel synchronization paradigm that generalizes both the pessimistic and optimistic approaches.
 %
 In our approach, dubbed \emph{corrective synchronization}, conflicting transactions may begin to execute concurrently (unlike pessimism) yet, when conflict occurs, the remediation is not simply to abort (unlike optimism). Instead, a thread resolves contention by dynamically \emph{altering} the inadmissible state into an acceptable one, accounting for the behavior of concurrent threads, so as to guarantee serializability.
 
@@ -40,9 +40,9 @@ In our approach, dubbed \emph{corrective synchronization}, conflicting transacti
 %% transactions.
 
 
-\paragraph{This paper.} Corrective synchronization, as a concept, opens up a vast space of possibilities for concrete synchronization protocols. In this paper, we take a first step in exploring this space.
+\paragraph{This paper.} Corrective synchronization, as a concept, opens up a vast space of possibilities for concrete synchronization protocols. In this paper, we take a first step in exploring this space with a formalism, proof of serializability, and a novel use of abstract interpretation and dynamic instrumentation.
 %
-\blue{The key idea can be illstrustrated with our ${\sf corr}\ t$ proof rule:}
+The key idea can be illstrustrated with our ${\sf corr}\ t$ proof rule:
 $$
 \infer[\text{{\sf corr }} t]{\Gamma, (t,s) \vdash (T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
    \Gamma, (t,s) \vdash
@@ -50,43 +50,47 @@ $$
 $$
 As is typical, we model transactions as a transition system
 where a state configuration $s$ consists of tuples $(T,\mu,\sigma,L)$.
-$T$ is a set of transaction identifiers,  $\mu$ is a mapping from
+Here $T$ is a set of transaction identifiers,  $\mu$ is a mapping from
 transcation id to thread-local state, $\sigma$ is the shared state
-and, following~\cite{KoskinenP15}, we use a log of events $L$ to track the
-state of the system.
+and, following~\cite{KoskinenP15}, we use a shared log of events $L$ to track the
+effects of committed transactions.
 %
 For our purposes, we include a context $\Gamma$ which maps each transaction
 id $t$ to the configuration just before the corresponding transction began.
 
 The key idea here is thread-local correction, whereby a single
 thread $t$ can apply a correction by jumping from $\mu$ to
-$\mu[t \mapsto \mu'(t)]]$. Thread $t$ is permitted to do so,
+$\mu[t \mapsto \mu'(t)]$. Thread $t$ is permitted to do so,
   provided that there was an \emph{alternate execution path}
-  $C \rightarrow^{*} (T,\mu',\sigma,L)$ from the configuration $s$
+  $s \rightarrow^{*} (T,\mu',\sigma,L)$ from the configuration $s$
   in which $t$ began to some other $(T,\mu',\sigma,L)$, having this
   same shared state $\sigma$.
 %and suddenly behave as if it had
 %internally taken a different path \blue{that led to this same $\sigma$}.
 %
-\blue{This rule is surprisingly simple yet, to the best of our
-  knowledge, nothing like this exists in the literature. One can think of
-  pessimistic synchronization as an almost trivial restriction in which
-  conflicting executions never occur and this rule is never needed. Meanwhile,
-  optimistic syncrhonzation permits only corrections back to
-  thread $t$'s initial configuration.}\red{is this accurate?}
+This rule is fairly simple yet has significant consequences and, to
+the best of our knowledge, nothing like this exists in the
+literature. One can think of pessimistic synchronization as an almost
+trivial restriction in which conflicting executions never occur and
+this rule is never needed. Meanwhile, optimistic syncrhonzation
+permits only corrections back to thread $t$'s initial
+configuration.
 %
-\red{Note that, for the purposes of this paper, the alternate path to $\mu'$
-  must be under the same set of concurrent transactions $T$.}
+For the purposes of this paper, the alternate path to
+$\mu'$ must be under the same set of concurrent transactions $T$,
+but one could imagine more complex forms of correction, which we
+leave to future work.
 %
-We have proved that corrective synchronization is serializable (Section~\ref{sec:concretesemantics})
-and provide simple conditions under which progress is guranteed.
+We have proved that our definition of corrective synchronization is serializable
+(Section~\ref{sec:concretesemantics}) and provide conditions
+under which progress is guranteed.
 
 \smartpar{Challenges \& Contributions}
 %
 With definitions and serializability established, we move on to two key challenges
-that pertain to corrective synchronization:
+that pertain to realizing corrective synchronization:
 \begin{itemize}
-\item How do we compute each thread's alternative post-states?
+\item How do we compute each thread's alternative (serializable) post-states?
 \item Given an incorrect state, how do we efficiently recover to a correct post-state?
 \end{itemize}
 %
@@ -97,12 +101,13 @@ novel use of abstract interpretation, equipped with a specialized
 abstraction for maps, to derive the correct poststates, or ``targets'', in relation to
 a given prestate.
 %
-Specifically, our abstract interpretation computes an
+Our abstract interpretation computes an
 underapproximation of the serializable intermediate (or final) states
 as the fixpoint solution over an interprocedural control-flow graph.
 %
-Moreover, we prove that the computed target states are progress-safe.
-  
+We prove that the computed target states are progress-safe.
+%
+
 %% In particular,
 %The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
 %
@@ -125,12 +130,12 @@ Moreover, we prove that the computed target states are progress-safe.
 In summary, this paper makes the following principal contributions.
 %\begin{enumerate}
   (1) We present an alternative to both the pessimistic and optimistic synchronization paradigms, dubbed \emph{corrective synchronization}, whereby serializability is achieved neither via mutual exclusion nor via rollbacks, but through correction of the poststate according to a relational prestate/poststates specification.
-(2) We provide a formal description of corrective synchronization. This includes a soundness proof as well as a clear statement of limitations.
+(2) We provide a formal description of corrective synchronization. This includes soundness and progress proofs as well as a clear statement of limitations.
 	(3) We have developed an abstract interpretation to derive the prestate/poststates specification for programs that encode the shared state as one or more concurrent maps. 
 %	\item \underline{Implementation and evaluation}: We have created an implementation of corrective synchronization assuming the shared state is represented as a collection of concurrent maps. We present experimental evidence in favor of corrective synchronization, where our subjects are real-world Java applications.
 (4) We have developed a runtime system that is able to use
 pre/post-state specifications to correct behaviors dynamically.
 %
 (5) We report encouraging preliminary experimental results on
-our prototype implementation.
+a prototype implementation.
 
