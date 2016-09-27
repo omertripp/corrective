@@ -1,7 +1,7 @@
 \section{Transaction Semantics}
 \label{sec:concretesemantics}
 
-We now introduce a generic transaction semantics for corrective synchronization. We prove soundness (serializability) and give conditions under which progres is ensured.
+We now introduce a generic transaction semantics for corrective synchronization. We prove soundness (serializability), and give conditions under which progres is ensured.
 
 %\subsection{Transition System}
 %\label{sec:transitionsystem}
@@ -22,8 +22,8 @@ We use the following semantic domains:
 \end{tabular}
 \end{center}
 \normalsize
-Following \cite{KoskinenP15}, our semantics uses shared logs to
-track local operations and shared logs to track committed operations.
+Following \cite{KoskinenP15}, our semantics uses local logs to
+track local operations, and shared logs to track committed operations.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
 $\forall \sigma,\sigma' \in \Sigma.\ \sigma \cdot \sigma' \in \Sigma$. Hence, we can decompose a given shared state into (disjoint) substates (the standard decomposition being into memory locations), such that we can easily refer to the read/write effects of a given operation.
 For that, we additionally define two helper functions,
@@ -59,7 +59,7 @@ transaction identifier $t$ with the state configuration $s$
 %${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state
 that immediately preceded $t$'s start, captured in the {\sf bgn} event.
 %
-Durings its execution, a transaction modifies only its local state and local log $L_t$ as seen in the {\sf local} event rule.
+Durings its execution, a transaction modifies only its local state and local log $L_t$, as seen in the {\sf local} event rule.
 Here $t$'s corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$
 and $\semanticanome{C}$ represents the transition relation for local operations.
 %
@@ -87,7 +87,7 @@ starting from the entry state through a serialized execution.
 
 \begin{theorem}[Soundness] A terminating execution of the transition system yields a serializable shared log (history).
 \begin{proof}
-	The {\sf cmt} event acts as a gatekeeper, demanding that the log prefix including the outstanding events about to be committed $L\cdot L_t$ is serializable. The check executes atomically together with the log update. Hence the system is guaranteed to terminate with a serializable shared log.	
+	The {\sf cmt} event acts as a gatekeeper, demanding that the log prefix $L\cdot L_t$ including the outstanding events about to be committed is serializable. The check executes atomically together with the log update. Hence the system is guaranteed to terminate with a serializable shared log.	
 \end{proof}
 \end{theorem}
 
@@ -123,7 +123,7 @@ Given transaction $t$ with local state $(\sigma_t,c_t,L_t)$, we refer to target
 \end{definition}
 
 \begin{lemma}[Termination]
-	Assume that the system performs corrective synchronization only on failed commits, and is complete w.r.t. corrective synchronization. Further assume that throughout any run of the system, only boundedly many transactions are created (via a {\sf bgn} event), and these transactions do not have infinite executions. Then termination is guaranteed. \vspace{3pt}
+	Assume that the system performs corrective synchronization only on failed commits, and is complete w.r.t. corrective synchronization. Then for any run of the system where finitely many transactions are created, each having only finite serial execution traces, termination is guaranteed. \vspace{3pt}
 	\begin{proof}
 		The first two assumptions guarantee progress, as established above in 
 		Theorem \ref{Th:progress}. Since transactions are finite, each transaction may perform finitely many {\sf cmt} transitions before terminating via an {\sf end} transition. This implies that after finitely many transitions, some transaction $t$ will terminate. This argument applies to the resulting system until no transactions are left.
