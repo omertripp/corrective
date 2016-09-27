@@ -21,7 +21,7 @@
 
 \section{Thread Local Semantics}
 \label{se:instance}
-We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. In this Section, we define the thread-local concrete semantics of this language instantiating $\semanticanome{C}$ of the {\sf local} rule introduced in Section \ref{sec:transitionsystem}. Following the abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe corrective targets.
+We now instantiate the theoretical framework introduced in Section \ref{sec:concretesemantics} to a language supporting some standard operations on concurrent shared maps. We define the thread-local concrete semantics of this language instantiating $\semanticanome{C}$ of the {\sf local} rule. Following standard abstract interpretation theory, we then introduce an abstract domain and semantics that computes an approximation of the concrete semantics. This thread-local abstract semantics will be used in Section \ref{sec:transactionsystemwarping} to compute progress-safe corrective ``targets''.
 
 
 \smartpar{Language}
@@ -55,7 +55,7 @@ We focus our formalization on the following language fragment:
 		\statement{b ::= x==null\ |\  x!=null}
 		\statement{|\ m.containsK(k)\ |\ ! m.containsK(k)}
 \end{array}\]
-This fragment captures a representative set of operations found in the Java 7 class \statement{java.util.concurrent.ConcurrentMap}.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the semantics of the Java library, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that let the execution go through iff the given Boolean condition holds. In particular, the language supports checking if a variable is \statement{null}, and if the map contains a key. This statement is necessary to support conditional and loop statements.
+The above fragment captures some representative operations from the Java 7 class \statement{java.util.concurrent.ConcurrentMap}.\footnote{\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentMap.html}} We represent by \statement{m} the map shared among all the transactions, and \statement{k} a shared key. The values inserted or read from the map might be a parameter of the transaction, or created through a \statement{new} statement. Following the Java library semantics, our language supports (i) \statement{v=m.get(k)} that returns the value \statement{v} related with key \statement{k}, or \statement{null} if \statement{k} is not in the map, (ii) \statement{m.remove(k)} removes \statement{k} from the map, (iii) \statement{v=m.putIfAbsent(k, v)} relates \statement{k} to \statement{v} in \statement{m} if \statement{k} is already in \statement{m} and returns the previous value it was related to, (iv) \statement{v=new\ Value(...)} creates a new value, and (v) \statement{v=null} assigns \statement{null} to variable \statement{v}. In addition, our language supports a standard \statement{assert(b)} statement that lets the execution continue iff the given Boolean condition holds. In particular, the language supports checking whether a variable is \statement{null}, and if the map contains a key. This is necessary to support conditional and loop statements.
 
 
 %\subsubsection{Running Example}
@@ -90,9 +90,9 @@ This fragment captures a representative set of operations found in the Java 7 cl
 
 \smartpar{Concrete Domain and Semantics}
 %\label{sec:concretemap}
-We begin by instantiating the state of a transaction $t$ introduced in \ref{sec:concretedomain} to the language of Section \ref{sect:language}.
+We begin by instantiating the state of a transaction $t$ to the language above.
 %
-Let $\variable$ and $\reference$ be the set of variables and references, respectively. Keys and values are identified by concrete references, and we assume $\statement{null}$ is in $\reference$. We define by $\env : \variable \to \reference$ the environments relating local variables to references. A map is then represented as a function $\map : \reference \to \reference$, relating keys to values. The value $\statement{null}$ represents that the related key is not in the map. A single concrete state
+Let $\variable$ and $\reference$ be the sets of variables and references, 
 \begin{wrapfigure}[15]{r}{0.7\textwidth}
 \vspace{-1cm}
   \[
@@ -124,6 +124,7 @@ Let $\variable$ and $\reference$ be the set of variables and references, respect
 	%% \caption{Concrete semantics}
 	%% \label{fig:concretesemantics}
 \end{wrapfigure}
+respectively. Keys and values are identified by concrete references, and we assume $\statement{null}$ is in $\reference$. We define by $\env : \variable \to \reference$ the environments relating local variables to references. A map is then represented as a function $\map : \reference \to \reference$, relating keys to values. The value $\statement{null}$ represents that the related key is not in the map. A single concrete state
 is a pair made by an environment and a map. Formally, $\state = \env \times \map$. As usual in abstract interpretation, we collect a set of states per program point. Therefore, our concrete domain is made by elements in $\wp(\state)$, and the lattice relies on standard set operators. Formally, $\langle \wp(\state), \subseteq, \cup \rangle$.The concrete semantics are given
 to the right.
 %Figure \ref{fig:concretesemantics} defines
@@ -133,28 +134,27 @@ to the right.
 %\label{sect:abstractate}
 %
 Let $\heapnode$ be the set of abstract heap nodes with $\statement{null} \in \heapnode$. Both keys and values are abstracted as heap nodes. As usual with heap abstractions, each heap node might represent one or many concrete references. Therefore, we suppose that a function $\isSummary : \heapnode \to \{\true, \false\}$ is provided; $\isSummary(n)$ returns $\true$ if $n$ might represent many concrete nodes (that is, it is a summary node). We define by $\aenv : \variable \to \wp(\heapnode)$ the set of (abstract) environments relating each variable to the set of heap nodes it might point to. A map is represented as a function $\amap : \heapnode \to \wp(\heapnode)$, connecting each key to the set of possible values it might be related to in the map. The value $\statement{null}$ represents that the key is not in the map. For instance, $[n_1 \mapsto \{\statement{null}, n_2\}]$ represents that the key $n_1$ might not be in the map, or it is in the map, and it is related to value $n_2$. An abstract state is a pair made by an abstract environment and an abstract map. We augment this set with a special bottom value $\bot$ to will be used to represent that a statement is unreachable. Formally, $\astate = (\aenv \times \amap) \cup \{\bot\}$.
-
+%
 The lattice structure is obtained by the point-wise application of set operators to elements in the codomain of abstract environments and functions. Therefore, the abstract lattice is defined as $\langle \astate, \dot{\subseteq}, \dot{\cup} \rangle$, where $\dot{\subseteq}$ and$\dot{\cup}$ represents the point-wise application of set operators $\subseteq$ and $\cup$, respectively.
 
 %For the sake of simplicity, we omit in the formalization the local log in the abstract domain. The only difference w.r.t. the concrete local log is that the entries refer to abstract heap nodes in $\heapnode$ instead of concrete references in $\reference$, and the presences of the entry \statement{?put} representing a possible \statement{put} action. This will be used in the definition of the abstract semantics of statement \statement{putIfAbsent}. XXX We can formalize the log. However, the problem is that the sequence might be infinite, so we need some kind of regular expressions - not sure I'm willing to go into this direction XXX 
 
-\paragraph{Running example.} 
+\newcommand\runex{\noindent \emph{Running example. }}
+\runex
 %Consider the motivating example in Figure \ref{Fi:introMotivating}.
-Abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that the key \statement{name} is not in the map, while $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to some value $n_2$. Finally, $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents that \statement{name} (i) might not be in the map, \emph{or} (ii) is in the map related to value $n_2$.
+Abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ represents that key \statement{name} is not in the map, while $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{n_2\}])$ represents that it is in the map, and it is related to some value $n_2$. Finally, $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents that \statement{name} (i) might not be in the map, \emph{or} (ii) is in the map related to value $n_2$.
 
 \smartpar{Concretization function}
 %
 We define the concretization function $\gamma_\state : \astate \to \wp(\state)$ that, given an abstract state, returns the set of concrete states it represents. First of all, we assume that a function concretizing abstract heap nodes to concrete references is given. Formally, $\gamma_\reference : \heapnode \to \wp(\reference)$. We assume that this concretization function concretizes \statement{null} into itself ($\gamma_\reference(\statement{null})=\{\statement{null}\}$), and that it is coherent w.r.t. the information provided by $\isSummary$ ($\neg \isSummary(n) \Leftrightarrow |\gamma_\reference(n)|=1$).
 
-The concretization of abstract environments relates each variable in the environment to a reference concretized from the node it is in relation with. Similarly, the concretization of abstract maps relates a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states applies pointwisely the concretization of environments and maps. This is formalized as follows:
+The concretization of abstract environments relates each variable in the environment to a reference concretized from the node it is in relation with. Similarly, the concretization of abstract maps relates a reference concretized from a heap node representing a key with a reference concretized from a node representing a value. Finally, the concretization of abstract states applies pointwisely the concretization of environments and maps, formalized as:
 
 \[
 \begin{array}{l}
-\gamma_\env(e) = \{\lambda x . r : x \in \dom{e} \land \exists n \in e(x) : r \in \gamma_\reference(n)\}\\
-\gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land\\
-\hspace{100pt} \exists n_2 \in m(n_1) : r_2 \in \gamma_\reference(n_2) \}\\
+\gamma_\env(e) = \{\lambda x . r : x \in \dom{e} \land \exists n \in e(x) : r \in \gamma_\reference(n)\}\hspace{50pt}\gamma_\state(\bot) =\emptyset\\
+\gamma_\map(m) = \{\lambda r_1 . r_2 : \exists n_1 \in \dom{m} : r_1 \in \gamma_\reference(n_1) \land \exists n_2 \in m(n_1) : r_2 \in \gamma_\reference(n_2) \}\\
 \gamma_\state(e, m) = \{(e', m') : e' \in \gamma_\env(e) \land m' \in \gamma_\map(m)\}\\
-\gamma_\state(\bot) =\emptyset\\
 \end{array}
 \]
 \begin{lemma}[Soundness of the domain]
@@ -165,7 +165,8 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 \end{proof}
 \end{lemma}
 
-\paragraph{Running example.} Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ (representing that \statement{name} is not in the map) and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ (representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$).
+\runex
+Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ representing that \statement{name} is not in the map and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$.
 
 
 
@@ -251,7 +252,7 @@ m & \textrm{ otherwise}\\
 
 \smartpar{Abstract Semantics}
 %\label{sect:abstractsemantics}
-Figure \ref{fig:abstractsemantics} formalizes the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state.
+Figure \ref{fig:abstractsemantics} is the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state.
 As usual in abstract interpretation-based static analysis \cite{CC77}, this operational abstract semantics is the basis for computing a fixpoint over a CFG representing loops and conditional statements.
 We focus the formalization on abstract states in $\aenv \times \amap$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
 
@@ -272,12 +273,12 @@ Follows from case splitting on the statement, and by definition of the concrete 
 \end{proof}
 \end{lemma}
 
-\paragraph{Running example.}
+\runex
 Consider again the code of method {\sf getConvertor}, and suppose that the Boolean flag \statement{create} is \statement{true}. When we start from the abstract state  $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$ (representing that \statement{name} is not in the map), we obtain the abstract state $\sigma = ([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{\statement{null}\}], [n_1 \mapsto \{\statement{null}\}])$ after the first statement by rule \statement{(get)}. 
-
+%
 Then the semantics of the Boolean condition of the \statement{if} statements at line 3 applies rule \statement{(null)} (that does not modify the abstract state) since \statement{conv} is \statement{null}, and we assumed \statement{create} is \statement{true}. 
 Lines 4 and 5 applies rules \statement{(new)} and \statement{(pIA)}, respectively. Supposing that $\freshNode(t)$ returns $n_2$, we obtain $\sigma'=([\statement{name} \mapsto \{n_1\}, \statement{conv} \mapsto \{n_2\}], [n_1 \mapsto n_2])$. We then join this state with the one obtained by applying rule \statement{(!null)} to $\sigma$ (that is, $\bot$) obtaining $\sigma'$ itself.
-
+%
 The result of this example represents that, when you start the computation passing a key \statement{name} that is not in the map and \statement{true} for the Boolean flag \statement{create}, after executing method \statement{getConvertor} in isolation you obtain a map relating \statement{name} to the new object instantiated at line 4.
 
 \section{Inferring Corrective Targets}
@@ -296,7 +297,7 @@ Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each tran
 Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstracttransactions = \{t^i_j : i \in [1..k], j \in \{1, 2, n\}\}$. Then our semantics on a serialized CFG returns a function in $\amultistate : \abstracttransactions \to \astate$.
 
 
-\paragraph{Running example.}
+\runex
 Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized CFG where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $t_1; t_n^\star; t_2$ where $t_n^\star$ represents that the code of $t_n$ is inside a loop.
 
 Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
@@ -341,7 +342,8 @@ $
 $.
 \normalsize
 
-\paragraph{Running example.} Starting from the entry state $([\statement{name} \mapsto \{n_1\}],$ $[n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
+\runex
+Starting from the entry state $([\statement{name} \mapsto \{n_1\}],$ $[n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 	
 \smartpar{Dynamic Corrective Synchronization}
