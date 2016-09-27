@@ -8,7 +8,7 @@ As an illustrative example, we refer to the code fragment
 on the
 %Figure \ref{Fi:introMotivating},
 right,
-extracted from the {\sf dyuproject}\footnote{\url{https://code.google.com/archive/p/dyuproject/}}, where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
+extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archive/p/dyuproject/}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 %
 %\begin{figure}
 %	\begin{lstlisting}[numbers=left]
@@ -48,7 +48,7 @@ getConvertor(String name, bool create) {
 \newcommand\hrel{\sim}
 \smartpar{Conceptual Approach}
 %
-By \emph{corrective synchronization} we mean the ability to transform a concurrent run that, in its present condition, may not be serializable into a run that is serializable. Stated formally, corrective synchronization is a relationship $h \hrel h'$ between histories, such that (i) $h$ and $h'$ share the same initial state, and (ii) $h$ and $h'$ share the same log of committed operations (i.e., they agree on the operations on the shared-state). One can think of $h'$ as some kind of alternate parallel reality to $h$.
+By \emph{corrective synchronization} we mean the ability to transform a concurrent run that, in its present condition, may not be serializable into a run that is serializable. Stated formally, corrective synchronization is a relationship $h \hrel h'$ between histories, such that (i) $h$ and $h'$ share the same initial state, and (ii) $h$ and $h'$ share the same log of committed operations (i.e., they agree on the operations on the shared-state). One can think of $h'$ as an alternate parallel reality to $h$.
 
 The first condition ensures that corrective synchronization yields a feasible outcome. The second is the requirement not to roll back updates to the shared state. These two conditions distinguish corrective synchronization from existing solutions: Unlike pessimistic approaches, bad behaviors may occur under corrective synchronization. That is, they are not avoided, but handled as they manifest. Unlike optimistic solutions, the core handling mechanism is not to retry the transaction (or parts thereof), which implies rolling back (either committed or uncommitted) updates to the shared log, but rather to ``warp'' to another state.
 %
@@ -69,7 +69,7 @@ Correcting this execution involves the application of two actions to the exit st
 %
 Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}.
 
-How does this corrective approach compare to how pessimistic or optimistic approaches would handle this situation?
+How does this corrective approach compare to handling of the situation by pessimistic or optimistic approaches?
 %
 We illustrate the difference between corrective synchronization and classic optimistic and pessimistic synchronization in Figure \ref{Fi:motivatingOverview}. We visually represent concurrent execution of two instances of the \textsf{getConvertor} code using pessimistic locks, optimistic TM and corrective synchronization (proceeding horizontally left-to-right). Pessimism serializes execution, and so there is no performance gain whatsoever. As for optimistic and corrective synchronization, we consider the interleaving scenario specified above. % from Figure \ref{Fi:motivatingInterleaving}. 
 %
@@ -96,7 +96,8 @@ A solution that is not complete faces the possibility of stuck runs: Given a (po
 
 \smartpar{Computing Corrective Targets}
 %
-A simpler and more abstract specification to work with, compared to complete execution prefixes, is triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the corresponding runtime instrumentation is minimal compared to tracking traces. At the same time, however, merely recording initial and current states at runtime does not point back to prefixes $h$ and $h'$.
+A simpler and more abstract specification to work with, compared to complete execution prefixes, is triplets $(s,s',s'')$ of states, such that there exist prefixes $h$ and $h'$ as above with respective initial and current states $(s,s')$ and $(s,s'')$, respectively. This form of specification is advantageous, because the corresponding runtime instrumentation is minimal compared to tracking traces. At the same time, however, initial and current states are a strict abstraction of complete traces, and so they do not 
+point back to prefixes $h$ and $h'$.
 
 Mapping back from pairs of states to prefixes requires an oracle. In our work we compute the oracle as a relational abstract interpretation solution over the program that is sound yet incomplete. Specifically, an underapproximation of the serializable intermediate (or final) states is computed as the fixpoint solution over an interprocedural control-flow graph (CFG) of the form: 
 	$t_1 \rightarrow t^\star_{2 \ldots n} \rightarrow t_{n+1} \rightarrow t'_1 \rightarrow t'^\star_{2 \ldots n} \rightarrow t'_{n+1} \rightarrow \ldots$,
@@ -114,7 +115,7 @@ We address the first challenge via a coarse conflict-detection algorithm that tr
 
 \OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) a set of good symbolic final states. As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
 
-We expand on both of these challenges in Section \ref{sec:transactionsystemwarping} and provide encouraging experimental results on a simple prototype in Section~\ref{Se:experiments}. Prior to that, in Section \ref{se:instance}, we provide a formal statement of corrective synchronization.
+We expand on both of these challenges in Section \ref{sec:transactionsystemwarping}, and provide encouraging experimental results on a simple prototype in Section~\ref{Se:experiments}. Prior to that, in Section \ref{se:instance}, we provide a formal statement of corrective synchronization.
 
 
 \OmerAdded{
