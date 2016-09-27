@@ -124,7 +124,7 @@ Gridkit 		&	20\% 	&		16\%		& 32\% & 31\%	\\
 \end{wrapfigure}
 levels, are summarized to the right.
 For completeness, we also note the absolute running times, as min/max intervals in seconds, for the lock-based solution for the workload and concurrency configurations respectively: Tomcat -- [6,10], [7,12]; dyuproject -- [6,9], [7,11]; Flexive -- [6,10], [7,11]; and Gridkit -- [6,9], [7,11]. 
-As the numbers indicate, corrective synchronization achieves better performance than STM with relative improvement on locks that is more than x2 better than STM.
+The numbers are encouraging, indicating improvement over both locks and STM. More careful engineering, beyond our current prototype implementation, is likely to make the improvement more significant.
 
 \smartpar{Discussion}
 %
