@@ -252,7 +252,7 @@ m & \textrm{ otherwise}\\
 
 \smartpar{Abstract Semantics}
 %\label{sect:abstractsemantics}
-Figure \ref{fig:abstractsemantics} is the abstract semantics of statements and Boolean conditions, that, given an abstract state (as defined in Section \ref{sect:abstractate}) and a statement or Boolean condition of the language introduced in Section \ref{sect:language}, returns the abstract state resulting from the evaluation of the given statement on the given abstract state.
+Figure \ref{fig:abstractsemantics} is the abstract semantics of statements and Boolean conditions, that, given an abstract state and a statement or Boolean condition of the language introduced above, returns the abstract state resulting from the evaluation of the given statement on the given abstract state.
 As usual in abstract interpretation-based static analysis \cite{CC77}, this operational abstract semantics is the basis for computing a fixpoint over a CFG representing loops and conditional statements.
 We focus the formalization on abstract states in $\aenv \times \amap$, since in case of $\bot$ the abstract semantics always returns $\bot$ itself.
 
@@ -267,7 +267,7 @@ Similarly, \statement{(cntK)} returns $\bot$ if the given key \statement{k} is s
 
 \begin{lemma}[Soundness of the semantics]
 	\label{lemma:soundnessabstractsemantics}
-	The abstract semantics is a sound approximation of the concrete semantics. Formally, $\forall \statement{st}, (e, m) \in \astate: \gamma_\state(\csemantics{S}{\statement{st}, (e, m)}) \supseteq \csemantics{C}{\statement{st}, \gamma_\state(e, m)}$, where $\semanticanome{C}$ represents the pointwise application of the concrete semantics introduced in Section \ref{sec:concretemap} to a set of concrete states.
+	The abstract semantics is a sound approximation of the concrete semantics. Formally, $\forall \statement{st}, (e, m) \in \astate: \gamma_\state(\csemantics{S}{\statement{st}, (e, m)}) \supseteq \csemantics{C}{\statement{st}, \gamma_\state(e, m)}$, where $\semanticanome{C}$ represents the pointwise application of the concrete semantics to a set of concrete states.
 \begin{proof}
 Follows from case splitting on the statement, and by definition of the concrete and abstract semantics.
 \end{proof}
@@ -283,14 +283,14 @@ The result of this example represents that, when you start the computation passi
 
 \section{Inferring Corrective Targets}
 \label{sec:transactionsystemwarping}
-In this Section, we apply the abstract semantics $\semanticanome{S}$ defined in Section \ref{sect:abstractsemantics} to infer corrective targets.
+We now apply the abstract semantics $\semanticanome{S}$ to infer corrective targets.
 %
-In our approach, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commit only once, and all the transactions commit together at the end of the execution. Thanks to these assumptions, we can define a system that perform a \emph{global} corrective synchronization at the end of the execution.
+For this paper, we support a restricted transactional model. In particular, we assume that there are $n$ transactions that start the execution together, each transaction commits only once, and all the transactions commit together at the end of the execution. With these assumptions, we can define a system that perform a \emph{global} corrective synchronization at the end of the execution. We leave more expressive inference for future work.
 
 
 \smartpar{Serialized CFG}
 %\label{Se:concabs}
-We apply the abstract semantics defined in Section \ref{sect:abstractsemantics} to compute suitable corrective targets. In particular, we need that these targets are reachable from the same \emph{entry state} through a \emph{serializable execution}. Therefore, we build a CFG that represents some specific \emph{serialized} executions. In particular, we assume that we have $k$ distinct types of transactions, and we build up a serialized CFG that represents a serialized execution of \emph{at least} 2 instances of each type of transactions.
+We apply the abstract semantics defined in Section \ref{se:instance} to compute suitable corrective targets. In particular, we need that these targets are reachable from the same \emph{entry state} through a \emph{serializable execution}. Therefore, we build a CFG that represents some specific \emph{serialized} executions. In particular, we assume that we have $k$ distinct types of transactions, and we build up a serialized CFG that represents a serialized execution of \emph{at least} 2 instances of each type of transactions.
 
 Let $\{c^1, ..., c^k\}$ be the code of $k$ different transactions. For each transaction type $i$, we create three static transaction identifiers $t^i_1$, $t^i_2$, and $t^i_n$. $t^i_1$ and $t^i_2$ represent precisely two concrete instances of $c^i$, while $t^i_n$ is a \emph{summary} abstract instance representing many concrete instances of $c^i$. We then build a CFG representing a serialized execution of all these abstract transactions. In particular, each transaction type $c^i$ leads to a CFG $tc^i$ that executes (i) first $t^i_1$, (ii) then $t^i_n$ inside a non-deterministic loop (to overapproximate many instances of $c^i$)), and (iii) finally $t^i_2$. While the choice of having the two concrete transaction instances before and after the summary instance is arbitrary and other solutions are possible, we found this solution particularly effective in practice as we will show in Section \ref{Se:experiments}. The overall serialized CFG $tc$ is then built by concatenating the CFGs of all these transactions.
 
@@ -298,18 +298,18 @@ Let $\abstracttransactions$ be the set of abstract transactions, that is $\abstr
 
 
 \runex
-Starting from the code in Figure \ref{Fi:introMotivating}, we build up a serialized CFG where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $t_1; t_n^\star; t_2$ where $t_n^\star$ represents that the code of $t_n$ is inside a loop.
+Starting from the \textsf{getConvertor} code, we build a serialized CFG where all the transactions share the same key \statement{name} (and in this way we target a scenario where conflicts might arise), and have \statement{create} sets to \statement{true} for the sake of presentation. This serialized CFG is made by the sequence of transactions $t_1; t_n^\star; t_2$ where $t_n^\star$ represents that the code of $t_n$ is inside a loop.
 
-Suppose now to analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics defined in Section \ref{sect:abstractsemantics} computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
+Suppose now we analyze this serialized CFG starting from the abstract state $([\statement{name} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}\}])$. The abstract semantics computes the following abstract poststate: $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$ (where $n^a_b$ represents the $a$-th node instantiated by transaction \statement{t_b}, and $\statement{conv}_c$ represents the local variable \statement{conv} of transaction \statement{t_c}). Intuitively, this result means that, if we run a sequence of transactions executing the code of method \statement{getConvertor} with a map that does not contain key \statement{name}, then at the end of the execution of all transactions we will obtain a map relating \statement{name} to the value generated by the first transactions, and all the transactions will return this value.
 
 \smartpar{Extracting Possible Corrective Targets}
 %
-First notice that, given a transaction $t$, the {\sf corr} rule of the transition system introduced in Section \ref{sec:transitionsystem} requires that the state the system corrects to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by $\Gamma(t) =s$) producing the same shared log (formally, $s \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : \Gamma(t)=\sigma_0$) . In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we correct the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that $\Gamma(t) \leadsto (T,\mu', \sigma_0, \epsilon)$.
+First notice that, given a transaction $t$, the {\sf corr} rule of the transition system introduced in Section \ref{sec:concretesemantics} requires that the state the system corrects to is reachable starting from the state at the beginning of the execution of $t$ (retrieved by $\Gamma(t) =s$ [n.b. abuse of notation]) producing the same shared log (formally, $s \leadsto (T,\mu', \sigma, L)$). Since in our specific instance of the transition system we suppose that all the transactions start together, we assume that there is a unique entry state $\sigma_0$ (formally, $\forall t \in T : \Gamma(t)=\sigma_0$). In addition, since all the transactions commit together at the end, we have complete control over the shared log, and when we correct the shared log is always empty, and the shared state is identical to the initial shared state. Therefore, given these restrictions, we only need to compute a $\mu'$ such that $\Gamma(t) \leadsto (T,\mu', \sigma_0, \epsilon)$.
 
-We compute possible corrective targets on the serialized CFG $tc$ (as defined in \ref{Se:concabs}) using the abstract semantics $\semanticanome{S}$. In particular, we need to compute corrective targets that, given an entry state representing a precise observable entry state, are reachable through a serialized execution. 
-
+We compute possible corrective targets on the serialized CFG $tc$ using the abstract semantics $\semanticanome{S}$. In particular, we need to compute corrective targets that, given an entry state representing a precise observable entry state, are reachable through a serialized execution. 
+%
 However, an abstract state in $\astate$ might represent multiple concrete states. For instance $([\statement{k} \mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$ represents both that  \statement{k} is (if $n_1$ is related to $n_2$ in the abstract map) or is not (when $n_1$ is related to $\statement{null}$). This abstract state therefore might concretize to states belonging, and it cannot be used to define a corrective target.
-
+%
 Therefore, we define a predicate $\isconcrete : \state \to \{\true, \false\}$ that, given an abstract state, holds iff it represents an exact concrete state. Formally,
 \[
 \isconcrete(e, m)
@@ -343,7 +343,7 @@ $.
 \normalsize
 
 \runex
-Starting from the entry state $([\statement{name} \mapsto \{n_1\}],$ $[n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics (as described in Section \ref{Se:concabs}) is
+Starting from the entry state $([\statement{name} \mapsto \{n_1\}],$ $[n_1 \mapsto \{\statement{null}\}])$, the exit state computed by the abstract semantics is
 $([\statement{name} \mapsto \{n_1\}, \statement{conv}_1 \mapsto \{n^1_1\}, \statement{conv}_n \mapsto \{n^1_1\}, \statement{conv}_2 \mapsto \{n^1_1\}], [n_1 \mapsto \{n^1_1\}])$. This state satisfies the predicate $\isconcrete$ since it represents a precise concrete state. Therefore, the relation between this entry and exit state is part of $\warpdestination$.
 	
 \smartpar{Dynamic Corrective Synchronization}

@@ -1,6 +1,6 @@
 \section{Conclusion and Future Work}
 
-We have presented an alternative to the lock- and retry-based synchronization methods that we dub \emph{corrective synchronization}. The key insight is to correct a bad execution, rather than aborting/retrying the transaction or conservatively avoiding the bad execution in the first place. We have explored an instantiation of corrective synchronization for composed operations over ${\sf ConcurrentMap}$s, where correct states are computed via offline static analysis.
+We have presented an alternative to the lock- and retry-based synchronization methods that we dub \emph{corrective synchronization}. The key insight is to correct a bad execution, rather than aborting/retrying the transaction or conservatively avoiding the bad execution in the first place. We have explored an instantiation of corrective synchronization for composed operations over ${\sf ConcurrentMap}$s, where correct states are computed via abstract interpretation.
 %Our initial results show promise.
 %
 Experimental results with a prototype implementation are encouraging.

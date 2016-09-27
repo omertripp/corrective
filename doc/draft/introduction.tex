@@ -11,13 +11,13 @@ Toward this end, there are currently two main synchronization paradigms:
 \noindent
 The pessimistic approach is useful if critical sections are short, there is little available concurrency, and the involved memory locations are well known \cite{AndiKleen}. Optimistic synchronization is most effective when there is a high level of available concurrency. An example is graph algorithms, such as Boruvka, over graphs that are sparse and irregular \cite{KulkarniGalois}.
 %
-\blue{In both of these cases, however, the concurrency paradigm is
+In both of these cases, however, the concurrency paradigm is
   designed to exploit domain-specific windows of opportunity where
   there is a low amount of conflict.  These are, in a sense,
   low-hanging fruit, and there are many other situations of practical
   interest where there is unavoidable contention. (We will give a
   simple example in the next section.)  Neither of these existing
-  approaches offer a way to tackle contention head-on.}
+  approaches offer a way to tackle contention head-on.
 
 
 \smartpar{Corrective Synchronization}
@@ -106,12 +106,14 @@ as the fixpoint solution over an interprocedural control-flow graph.
 %
 We prove that the computed target states are progress-safe, i.e. the system is not in a stuck state after correction has been applied.
 %
+We then show how these target states can be used by a runtime system to
+dynamically correct an execution and jump to a target state. 
+
 
 %% In particular,
 %The motivation for this initial scope is a series of past studies, which indicate that {\sf ConcurrentMap} is commonly used in concurrent applications, but often without sufficient synchronization \cite{oopsla/ShachamBASVY11,issta/ShachamYGABSV14}. We study several such examples from popular open-source code bases, including Tomcat and Gridkit.
 %
 
-\red{add explanation of Section 5 here}
 
 \OmerAdded{We also discuss extensions, beyond this initial scope, to other data structures and concurrent execution configurations. These highlight directions for future research on corrective synchronization.} 
 
