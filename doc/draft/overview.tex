@@ -5,7 +5,7 @@ We now walk the reader through a high-level overview of corrective synchronizati
 \smartpar{Running Example}
 %
 As an illustrative example, we refer to the code fragment
-on the
+below on the
 %Figure \ref{Fi:introMotivating},
 right,
 extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archive/p/dyuproject/}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
@@ -78,6 +78,7 @@ We illustrate the difference between corrective synchronization and classic opti
 	\includegraphics[width=\textwidth]{OverviewSlide.pdf}
 	\end{center}
 	\vspace{-0.6cm}\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of \textsf{getConvertors} using pessimistic, optimistic, and corrective synchronization.}
+        \vspace{-0.4cm}
 \end{figure*}
 %
 Both optimistic and corrective synchronization, allowing the problematic chain of interleavings, reach a nonserializable state. Optimism resolves this by retrying the entire transaction executed by, say, thread $t_2$. This yields serial execution, similar to the pessimistic run, where $t_2$ runs after $t_1$. Corrective synchronization, instead, ``fixes'' the final state, allowing $t_2$ to complete without rerunning any or all of its code.
@@ -105,7 +106,7 @@ where $t$, $t'$, etc denote different transaction types (i.e., transactions exec
 
 We go into detail about this representation in Section \ref{sec:transactionsystemwarping}, but here note that (i) this representation reflects the effects of serial execution of the transactions, and so the corrective targets are guaranteed to be sound; (ii) the nondeterministic loop captures an unbounded number of transactions; and (iii) the first and last transactions of a given type are purposely disambiguated to boost the precision of static analysis over the simulated execution.
 %
-As an illustration of the third point, in our running example the first transaction ( $t_1$) is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction ($t_{n+1}$) can be confirmed not to update the key/value mapping.
+As an illustration of the third point, in our running example the first transaction $t_1$ is modeled precisely in inserting the key/value pair into the {\sf Map} object. Analogously, the last transaction $t_{n+1}$ can be confirmed not to update the key/value mapping.
 
 \smartpar{Runtime Synchronization} 
 %
@@ -115,7 +116,7 @@ We address the first challenge via a coarse conflict-detection algorithm that tr
 
 \OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) a set of good symbolic final states. As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
 
-We expand on both of these challenges in Section \ref{sec:transactionsystemwarping}, and provide encouraging experimental results on a simple prototype in Section~\ref{Se:experiments}. Prior to that, in Section \ref{se:instance}, we provide a formal statement of corrective synchronization.
+We expand on the above challenges in Section \ref{sec:transactionsystemwarping}, and provide encouraging experimental results on a simple prototype in Section~\ref{Se:experiments}. Prior to that, in Section \ref{se:instance}, we provide a formal statement of corrective synchronization.
 
 
 \OmerAdded{
