@@ -1,7 +1,7 @@
 \section{Transaction Semantics}
 \label{sec:concretesemantics}
 
-In this section, we introduce a generic transaction semantics supporting corrective synchronization. We prove soundness (serializability) and give a simple condition which, we prove, ensures progress.
+We now introduce a generic transaction semantics for corrective synchronization. We prove soundness (serializability) and give conditions under which progres is ensured.
 
 %\subsection{Transition System}
 %\label{sec:transitionsystem}
@@ -9,12 +9,12 @@ In this section, we introduce a generic transaction semantics supporting correct
 \smartpar{Notation}
 %\label{sec:concretedomain}
 %
-In our description of the transition system, we utilize the following semantic domains:
+We use the following semantic domains:
 \begin{center}
 \footnotesize
 \begin{tabular}{rclrrl}
 	$c \in {\cal C}$ & $:=$ & command & $t \in T \subset {\cal T}$ & $:=$ & transaction IDs \\
-	$\sigma \in \Sigma$ & $:=$ & shared state $\;\;\;\;\;\;$ & ${\sigma_t}$ & $:=$ & local state of $t$ \\
+	$\sigma \in \Sigma$ & $:=$ & shared state $\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;$ & ${\sigma_t}$ & $:=$ & local state of $t$ \\
 	$L \in {\cal L}$ & $:=$ & shared log &
 	$L_t$ & $:=$ & local log of $t$ \\
 	\multicolumn{4}{r}{
@@ -22,7 +22,8 @@ In our description of the transition system, we utilize the following semantic d
 \end{tabular}
 \end{center}
 \normalsize
-Following \cite{KoskinenP15}, our transaction semantics uses shared and local logs.
+Following \cite{KoskinenP15}, our semantics uses shared logs to
+track local operations and shared logs to track committed operations.
 We assume that the set $\Sigma$ of shared states is closed under composition, denoted $\cdot$. That is,
 $\forall \sigma,\sigma' \in \Sigma.\ \sigma \cdot \sigma' \in \Sigma$. Hence, we can decompose a given shared state into (disjoint) substates (the standard decomposition being into memory locations), such that we can easily refer to the read/write effects of a given operation.
 For that, we additionally define two helper functions,
@@ -32,33 +33,14 @@ The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. T
 
 \smartpar{Transition System}
 %
-Execution of the transition system is represented by five events.
-%\begin{itemize}
-%\item 
-The {\sf bgn} event marks the beginning of a transaction.
-%\item 
-Durings its execution, a transaction modifies only its local state and local log $L_t$.
-%
-The {\sf cmt} event fires when a transaction publishes its outstanding log of operations that affect the shared state to the shared state and log.
-%\item 
-The {\sf end} event marks the termination of a transaction.
-%\item 
-The {\sf corr} event enables a transaction to modify its local state and log, under certain restrictions, as a means to recover from potentially inadmissible thread interleavings.
-%\item 
-The {\sf local} event executes a local action.
-%\end{itemize}
-
-We define the semantics of these events in the following. For rules where a transaction $t$ is defined in the prestate, its corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$. We utilize
-helper function ${\sf serpref} \colon\ {\cal L} \rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively) determine whether a given shared log is the prefix of some serializable execution log. Finally, we work with a context $\Gamma$, consisting of pairs $(t,s)$ that correlate
-transaction identifier $t$ with the state configuration $s$
-%${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state
-that immediately preceded $t$'s start.
-%
-The events are defined as follows:
+Execution of the transition system is represented by five events:
 \begin{center}
 \begin{tabular}{lc}
+{\sf bgn}\ $t$ & $\infer{\Gamma\cup(t,(T,\mu,\sigma,L))\vdash(T, \mu, \sigma, L) \rightarrow (T \cup \{ t \}, \mu \cdot [t \mapsto (c,\bot,\epsilon)], \sigma, L)}{t \notin T}$ \\
 \\
-{\sf bgn}\ $t,c$ & $\infer{\Gamma\cup(t,(T,\mu,\sigma,L))\vdash(T, \mu, \sigma, L) \rightarrow (T \cup \{ t \}, \mu \cdot [t \mapsto (c,\bot,\epsilon)], \sigma, L)}{t \notin T}$ \\
+{\sf local}\ $t$ & $\infer{\Gamma\vdash(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L_t)], \sigma, L)}
+{t \in T, \csemantics{C}{c_t, \sigma_t} = (c'_t, \sigma'_t)}$\\
+%{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
 \\
 {\sf cmt}\ $t$ & $\infer{\Gamma\vdash(T, \mu, \sigma, L) \rightarrow (T, \mu[t \mapsto (c_t,\sigma_t,\epsilon)], \llbracket L_t \rrbracket(\sigma), L \cdot L_t)}{t \in T, L_t \neq \epsilon, {\textnormal{\sf serpref}\ L \cdot L_t}}$ \\
 \\
@@ -67,15 +49,38 @@ The events are defined as follows:
 {\sf corr}\ $t$ & $\infer{\Gamma,(t,s)\vdash(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto \mu'(t)], \sigma, L)}{
 	t \in T, 
 	s \leadsto (T,\mu', \sigma, L)}$\\
-\\
-{\sf local}\ $t$ & $\infer{\Gamma\vdash(T, \mu, \sigma, L) \rightarrow (T,\mu[t \mapsto (c'_t,\sigma'_t,L_t)], \sigma, L)}
-{t \in T, \csemantics{C}{c_t, \sigma_t} = (c'_t, \sigma'_t)}$\\
-%{t \in T, \langle c_t,\sigma_t \rangle \to_l \langle c'_t,\sigma'_t \rangle}$\\
-\\
 \end{tabular}
 \end{center}
-Note that the {\sf corr} rule only applies changes to the local configuration corresponding to the given transaction $t$. All other transactions retain their original local configurations. The intuition is that {\sf corr} \emph{corrects} the execution by jumping transaction $t$ to a state that is reachable starting from the entry state through a serialized execution.
-In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation for local operations. \red{instead of $\Gamma$, should we have another tuple element?}
+%
+The {\sf bgn} event marks the beginning of a transaction.
+%\item 
+In this and all rules, we work with a context $\Gamma$, consisting of pairs $(t,s)$ that correlate
+transaction identifier $t$ with the state configuration $s$
+%${\sf ref} \colon\ {\cal T} \rightarrow {\cal S}$ that --- given a transaction $t$ --- retrieves the system state
+that immediately preceded $t$'s start, captured in the {\sf bgn} event.
+%
+Durings its execution, a transaction modifies only its local state and local log $L_t$ as seen in the {\sf local} event rule.
+Here $t$'s corresponding local configuration is denoted $(c_t,\sigma_t,L_t)$
+and $\semanticanome{C}$ represents the transition relation for local operations.
+%
+The {\sf cmt} event fires when a transaction publishes its outstanding
+log of operations that affect the shared state to the shared state and
+log.  We use helper function ${\sf serpref} \colon\ {\cal L}
+\rightarrow \{ {\sf true},{\sf false} \}$ to (conservatively)
+determine whether a given shared log is the prefix of some
+serializable execution log.
+%
+The {\sf end} event marks the termination of a transaction.
+
+Corrective action occurs in the {\sf corr} event. This event enables a
+transaction to modify its local state and log, under certain
+restrictions, as a means to recover from potentially inadmissible
+thread interleavings.  Note that the {\sf corr} rule only applies
+changes to $t$'s local configuration. All other transactions retain their original local
+configurations. The intuition is that {\sf corr} \emph{corrects} the
+execution by jumping transaction $t$ to a state that is reachable
+starting from the entry state through a serialized execution.
+
 
 %\subsection{Formal Guarantees}\label{Se:guarantees}
 %\smartpar{Formal Guarantees}
@@ -97,15 +102,17 @@ In the {\sf local} rule, $\semanticanome{C}$ represents the transition relation 
 	at system state $s''=(T,\mu[t \mapsto (\sigma'_t,c'_t,L'_t)],\sigma,L)$ either (i)  ${\sf cmt}\ t$ is enabled or (ii) ${\sf end}\ t$ is enabled. Then we refer to ${\sf corr}\ t$ at $s$ with target $(\sigma_t,c_t,L_t)$ as \emph{progress safe}.
 \end{definition}
 
-Note that from the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
+\noindent
+From the perspective of transaction $t$, the local states of other transactions are irrelevant to whether a commit (or end) transition is enabled for $t$. The only cause of a failed commit is if other threads have committed. We can therefore relax the definition above to refer to any system state $s''=(T',\mu',\sigma,L)$, such that $t \in T'$ and 
 $[t \mapsto  (\sigma'_t,c'_t,L'_t)] \in \mu'$.
 
-\begin{example}[Self corrective synchronization]\label{Ex:selfwarp}
-	Given transaction $t$ with local state $(\sigma_t,c_t,L_t)$, we refer to target
-	$(\sigma'_t,c_t,L'_t)$ as a \emph{self-corrective target}. Post corrective synchronization, the transaction has the same command left to reduce, but its state and outstanding log of operations are modified. A specific instance is $(\sigma_t,{\sf skip},L_t) \rightarrow (\sigma'_t,{\sf skip},L'_t)$. This pattern of corrective synchronization is progress safe if commits are attempted at join points, which enables simulation of alternative control-flow paths (and therefore also logged effects) via corrective synchronization.
-\end{example}
+%\begin{example}[Self corrective synchronization]\label{Ex:selfwarp}
+%Here is an example of a kind of correction.
+Given transaction $t$ with local state $(\sigma_t,c_t,L_t)$, we refer to target
+	$(\sigma'_t,c_t,L'_t)$ as a \emph{self-corrective target}. After corrective synchronization, the transaction has the same command left to reduce, but its state and outstanding log of operations are modified. A specific instance is $(\sigma_t,{\sf skip},L_t) \rightarrow (\sigma'_t,{\sf skip},L'_t)$. This pattern of corrective synchronization is progress safe if commits are attempted at join points, which enables simulation of alternative control-flow paths (and therefore also logged effects) via corrective synchronization.
+%\end{example}
 
-\begin{theorem}[Progress]\label{Th:progress} Assume that (i) a ${\sf corr}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) corrective synchronization instances are progress safe. Then progress is guaranteed.
+\begin{theorem}[Progress]\label{Th:progress} If (i) a ${\sf corr}\ t$ event only fires when a transaction $t$ reaches a commit point but fails to commit, and (ii) corrective synchronization instances are progress safe, then progress is guaranteed.
 	\begin{proof}
 	Given system state $s$, if there exists a transaction $t$ that is able to either commit or complete then the proof is done. Otherwise, there is a transaction $t$ that reaches a commit point at some state $s'$ and fails. At this point, ${\sf corr}\ t$ is the only enabled transition for $t$, and by assumption (ii), the corrective synchronization instance is progress safe. At this point, there are two possibilities. Either $t$ proceeds without other threads modifying the shared state, such that a commit or completion point is reached by $t$ (without corrective synchronization prior to reaching such a point according to assumption (i)), in which case progress has been achieved, or one or more threads interfere with $t$ by committing their effects, in which case too progress has been achieved.
 	\end{proof}
