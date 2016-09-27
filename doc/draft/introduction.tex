@@ -1,6 +1,6 @@
 \section{Introduction}\label{Se:intro}
 
-Concurrency control is a hard problem. While some thread interleavings are admissible (if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability. The goal is to automatically detect with high precision and low overhead the inadmissible interleavings, and avoid them.  
+Concurrency control is a hard problem. While some thread interleavings are admissible (if they involve disjoint memory accesses), there are certain interleaving scenarios that must be inhibited to ensure serializability. The goal is to automatically detect, with high precision and low overhead, the inadmissible interleavings, and avoid them.  
 
 Toward this end, there are currently two main synchronization paradigms:
 \begin{itemize}
@@ -14,7 +14,7 @@ The pessimistic approach is useful if critical sections are short, there is litt
 \blue{In both of these cases, however, the concurrency paradigm is
   designed to exploit domain-specific windows of opportunity where
   there is a low amount of conflict.  These are, in a sense,
-  low-hanging fruit and there are many other situations of practical
+  low-hanging fruit, and there are many other situations of practical
   interest where there is unavoidable contention. (We will give a
   simple example in the next section.)  Neither of these existing
   approaches offer a way to tackle contention head-on.}
@@ -24,7 +24,7 @@ The pessimistic approach is useful if critical sections are short, there is litt
 %
 In this paper, we take a first step in formulating and exploring a novel synchronization paradigm that generalizes both the pessimistic and optimistic approaches.
 %
-In our approach, dubbed \emph{corrective synchronization}, conflicting transactions may begin to execute concurrently (unlike pessimism) yet, when conflict occurs, the remediation is not simply to abort (unlike optimism). Instead, a thread resolves contention by dynamically \emph{altering} the inadmissible state into an acceptable one, accounting for the behavior of concurrent threads, so as to guarantee serializability.
+In our approach, dubbed \emph{corrective synchronization}, conflicting transactions may begin to execute concurrently (unlike pessimism), yet when conflict occurs, the remediation is not simply to abort (unlike optimism). Instead, a thread resolves contention by dynamically \emph{altering} the inadmissible state into an acceptable one, accounting for the behavior of concurrent threads, so as to guarantee serializability.
 
 
 %enforced after the fact, similarly to optimistic synchronization, though without rollbacks. Instead, the system automatically compensates, if necessary, for the effects of inadmissible interleavings by rewriting the program state as a transaction completes. This is done while accounting for the behavior of concurrent transactions, so as to guarantee serializability.
@@ -78,8 +78,7 @@ configuration.
 %
 For the purposes of this paper, the alternate path to
 $\mu'$ must be under the same set of concurrent transactions $T$,
-but one could imagine more complex forms of correction, which we
-leave to future work.
+though this restriction can be relaxed, which we leave for future work.
 %
 We have proved that our definition of corrective synchronization is serializable
 (Section~\ref{sec:concretesemantics}) and provide conditions
@@ -105,7 +104,7 @@ Our abstract interpretation computes an
 underapproximation of the serializable intermediate (or final) states
 as the fixpoint solution over an interprocedural control-flow graph.
 %
-We prove that the computed target states are progress-safe.
+We prove that the computed target states are progress-safe, i.e. the system is not in a stuck state after correction has been applied.
 %
 
 %% In particular,
