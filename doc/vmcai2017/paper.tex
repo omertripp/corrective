@@ -1,0 +1,189 @@
+%\documentclass[preprint,nocopyrightspace]{sigplanconf}
+\documentclass{llncs}
+\pagestyle{headings}
+
+\usepackage{times}
+%\usepackage{mathptmx}
+%\usepackage[small, skip=0pt]{caption}
+%\setlength{\belowcaptionskip}{-10pt}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,stmaryrd}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+%\usepackage{MnSymbol}
+\usepackage{paralist}
+\usepackage{epsfig}
+\usepackage{wrapfig}
+\usepackage{color}
+\usepackage{program}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{subfig} 
+\usepackage{proof}
+\usepackage{paralist}
+\renewcommand*{\proofname}{Proof Sketch}
+\usepackage{hyperref}
+%\usepackage[normalem]{ulem}
+\usepackage{harpoon}
+\usepackage{galois}
+%\usepackage{titlesec}
+
+\newcommand\OmerAdded[1]{}%\textcolor{red}{{\bf Omer Says:} #1}}
+%\titlespacing\section{0pt}{2pt}{0pt}
+%\titlespacing\subsection{0pt}{2pt}{0pt}
+%\titlespacing\subsubsection{0pt}{2pt}{0pt}
+
+
+
+
+\input{defs}
+%\input{defs-pmpy}
+
+% program listings
+\usepackage{listings}
+\lstset{language=java,columns=flexible,numberstyle=\tiny,showstringspaces=false,basicstyle=\footnotesize\sffamily} %,frame=single
+\lstset{escapechar=`}
+\lstset{morekeywords={
+        bool, var, val}}
+
+\newcommand{\juc}{\lstinline+java+.\!\lstinline+util+.\lstinline+concurrent+}
+\newcommand{\cConcurrentSkipListMap}{\lstinline+ConcurrentSkipListMap+}
+\newcommand\smartpar[1]{\smallskip\noindent {\bf #1}. \hspace{0.1in}}
+
+%% \newtheoremstyle{exampstyle}
+%% {2pt} % Space above
+%% {2pt} % Space below
+%% {\itshape} % Body font
+%% {} % Indent amount
+%% {\bfseries} % Theorem head font
+%% {.} % Punctuation after theorem head
+%% {.5em} % Space after theorem head
+%% {} % Theorem head spec (can be left empty, meaning `normal')
+
+%% \theoremstyle{exampstyle}\newtheorem{theorem}{Theorem}[section]
+%% \theoremstyle{exampstyle}\newtheorem{lemma}[theorem]{Lemma}
+%% \theoremstyle{exampstyle}\newtheorem{proposition}[theorem]{Proposition}
+%% \theoremstyle{exampstyle}\newtheorem{corollary}[theorem]{Corollary}
+%% \theoremstyle{exampstyle}\newtheorem{definition}{Definition}[section]
+%% \theoremstyle{exampstyle}\newtheorem{parameter}{Parameter}[section]
+%% \theoremstyle{exampstyle}\newtheorem{property}{Property}[section]
+%% \theoremstyle{exampstyle}\newtheorem{example}[equation]{Example}
+%% \theoremstyle{exampstyle}\newtheorem{algorithm}[theorem]{Algorithm}
+
+
+%\newenvironment{itemize*}%
+%  {\begin{itemize}%
+%    \setlength{\itemsep}{0.0in}%
+%    \setlength{\topsep}{0.0in}%
+%    \setlength{\parskip}{0.0in}}%
+%  {\end{itemize}}
+%\newenvironment{enumerate*}%
+%  {\begin{enumerate}%
+%    \setlength{\itemsep}{0.0in}%
+%    \setlength{\topsep}{0.0in}%
+%    \setlength{\parskip}{0.0in}}%
+%  {\end{enumerate}}
+
+
+
+
+% URL macro allows linebreaks on slash
+\makeatletter
+{\catcode`\/\active\catcode`\_\active\catcode`\.\active
+\gdef\URLslash{\futurelet\next\@@URLslash}%
+\gdef\@@URLslash{\ifx\next\URLslash\char`\/\else\slash\fi}%
+\gdef\URLdot{\char`\.\penalty\exhyphenpenalty}%
+\gdef\URLprepare{\catcode`\/\active\catcode`\_\active\catcode`\.\active
+        \let/\URLslash\let.\URLdot\def~{\char`\~}\def_{\char`\_}}}%
+\def\URL{\bgroup\URLprepare\realURL}%
+\def\realURL#1{\tt #1\egroup}%
+
+%% \renewenvironment{proof}[1][\proofname]{\par
+%% 	\pushQED{\qed}%
+%% 	\normalfont
+%% 	\topsep0pt \partopsep5pt % no space before
+%% 	\trivlist
+%% 	\item[\hskip\labelsep
+%% 	\itshape
+%% 	#1\@addpunct{.}]\ignorespaces
+%% }{%
+%% \popQED\endtrivlist\@endpefalse
+%% \addvspace{0pt plus 0pt} % some space after
+%% }
+
+
+\newcommand\figbox[1]{\noindent{\ \\\fbox{\begin{minipage}{3.2in}
+#1
+\end{minipage}
+}}}
+
+\newcommand\figboxB[1]{\noindent{\ \\\fbox{\begin{minipage}{6.5in}
+#1
+\end{minipage}
+}}}
+
+\input{pietromacro}
+
+\newcommand\red[1]{\textcolor{red}{#1}}
+\newcommand\blue[1]{\textcolor{blue}{#1}}
+
+\begin{document}
+
+\title{Using Abstract Interpretation\\
+  to Correct Synchronization Faults}
+%Corrective Synchronization and the \textsf{isSerializable} Abstract Domain}
+
+
+% \authorinfo{Pietro Ferrara} {} {} 
+%\authorinfo{Omer Tripp} {} {}
+% \authorinfo{Peng Liu} {} {} 
+% \authorinfo{Eric Koskinen} {} {} 
+
+\author{
+  Pietro Ferrara \inst{1}
+  \and Omer Trip \inst{2}
+  \and Peng Liu \inst{3}
+  \and Eric Koskinen \inst{4}
+}
+\institute{
+  JuliaSoft \and Google \and IBM Research \and Yale University
+}
+\maketitle
+
+\newcommand\ignore[1]{}
+\newcommand{\pengtodo}[1]{{\bf #1}}
+\newcommand{\pietrotodo}[1]{{\bf #1}}
+
+\begin{abstract}
+  \input{abstract}
+\end{abstract}
+
+\input{introduction}
+\input{overview}
+\input{formal}
+\input{static}
+\input{experimentalresults}
+\input{relatedwork}
+\input{conclusion}
+\textcolor{red}{at most 17 pages, not counting references}
+\vfill
+\pagebreak
+{%\footnotesize\linespread{0.9}
+\bibliographystyle{plain}
+%\bibliography{nopages}
+\bibliography{biblio}
+}
+
+
+\vfill
+\newpage
+\appendix
+\input{perf}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
