@@ -28,7 +28,7 @@ We assume that the set $\Sigma$ of shared states is closed under composition, de
 $\forall \sigma,\sigma' \in \Sigma.\ \sigma \cdot \sigma' \in \Sigma$. Hence, we can decompose a given shared state into (disjoint) substates (the standard decomposition being into memory locations), such that we can easily refer to the read/write effects of a given operation.
 For that, we additionally define two helper functions,
 $r,w \colon\ {\cal C} \times {\cal S} \rightharpoonup \Sigma$, such that $r$ (\textit{resp.} $w$) computes the portion of the shared state read (\textit{resp.} written) by a given atomic operation.
-The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. The shared log $L$ consists of pairs $\left\langle t,o \right\rangle$, where $t$ is a transaction identifier and $w(c) \neq \bot$.
+The notation $\rightharpoonup$ denotes that $w$ and $r$ are partial functions. The shared log $L$ consists of pairs $\left\langle t,o \right\rangle$, where $t$ is a transaction identifier\newpietro{, $o$ is the operation executed by $t$}, and $w(c) \neq \bot$.
 
 
 \smartpar{Transition System}

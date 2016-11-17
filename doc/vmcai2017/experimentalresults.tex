@@ -52,9 +52,10 @@ Gridkit 		&	20\% 	&		16\%		& 32\% & 31\%	\\
 %\end{center}
 \end{wrapfigure}
 For lack of space, the detailed
-results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. Here we simply
-report aggregate performance results, averaging across all workloads and concurrency
-levels, are summarized to the right.
+results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. 
+\newpietro{On the right we report the relative gain of STM and corrective synchronization w.r.t. lock-based synchronization. We aggregate performance results, averaging across all workloads and concurrency levels. These results show that, on average, corrective synchronization leads to a gain that is twice the one obtained by STM.}
+
+%Here we simply report aggregate performance results, averaging across all workloads and concurrency levels, are summarized to the right.
 For completeness, we also note the absolute running times, as min/max intervals in seconds, for the lock-based solution for the workload and concurrency configurations respectively: Tomcat -- [6,10], [7,12]; dyuproject -- [6,9], [7,11]; Flexive -- [6,10], [7,11]; and Gridkit -- [6,9], [7,11]. 
 The numbers are encouraging, indicating improvement over both locks and STM. More careful engineering, beyond our current prototype implementation, is likely to make the improvement more significant.
 

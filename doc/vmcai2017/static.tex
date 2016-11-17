@@ -128,7 +128,7 @@ respectively. Keys and values are identified by concrete references, and we assu
 is a pair made by an environment and a map. Formally, $\state = \env \times \map$. As usual in abstract interpretation, we collect a set of states per program point. Therefore, our concrete domain is made by elements in $\wp(\state)$, and the lattice relies on standard set operators. Formally, $\langle \wp(\state), \subseteq, \cup \rangle$.The concrete semantics are given
 to the right.
 %Figure \ref{fig:concretesemantics} defines
- For the most part, the concrete semantics formalizes the API specification of the corresponding Java method. Note that \statement{assert} is defined only on the states that satisfy the given Boolean conditions. In this way, the concrete semantics filters out only the states that might execute a branch of an \statement{if} or \statement{while} statement.
+For the most part, the concrete semantics formalizes the API specification of the corresponding Java method. Note that \statement{assert} is defined only on the states that satisfy the given Boolean conditions. \newpietro{$n$ represents a fresh concrete node in the semantics of \statement{putIfAbsent}}. In this way, the concrete semantics filters out only the states that might execute a branch of an \statement{if} or \statement{while} statement.
 
 \smartpar{Abstract Domain}
 %\label{sect:abstractate}
@@ -373,7 +373,7 @@ We can now prove that the corrective targets computed by $\warpdestination$ sati
 	Let $t=\warpdestination(\cset{T}, \cset{S})$ be the results computed by our system. Then $\forall \sigma_0 \in \gamma_\multistate(\phi_0), \sigma_n \in \gamma_\multistate(\phi_n) : \phi_0 \in \dom{t} \land \phi_n \in t(\phi_0)$ we have that $\sigma_0 \leadsto \sigma_n$.
 \end{theorem}
 \begin{proof}
-By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and $\isconcrete(\phi_n)$ hold. Therefore, by Lemma \ref{lemma:singleconcretization} we have that $\gamma_\state(\phi_0) = \{\sigma_0\}$ and $\gamma_\state(\phi_0) = \{\sigma_n\}$. In addition, by definition of $\warpdestination$ we have that $\phi_n \in \csemantics{S}{tc, \phi_0}$. Then, by lemma \ref{lemma:soundnessabstractsemantics} (soundness of the abstract semantics) we have that $\sigma_n$ is exactly what is computed by the concrete semantics on the given program starting from $\sigma_0$, that is, $\sigma_0 \leadsto \sigma_n$. 
+By definition of $\warpdestination$, we have that both $\isconcrete(\phi_0)$ and $\isconcrete(\phi_n)$ hold. Therefore, by Lemma \ref{lemma:singleconcretization} we have that $\gamma_\state(\phi_0) = \{\sigma_0\}$ and $\gamma_\state(\phi_n) = \{\sigma_n\}$. In addition, by definition of $\warpdestination$ we have that $\phi_n \in \csemantics{S}{tc, \phi_0}$. Then, by lemma \ref{lemma:soundnessabstractsemantics} (soundness of the abstract semantics) we have that $\sigma_n$ is exactly what is computed by the concrete semantics on the given program starting from $\sigma_0$, that is, $\sigma_0 \leadsto \sigma_n$. 
 \end{proof}
 
 
