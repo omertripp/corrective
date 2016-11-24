@@ -128,6 +128,22 @@
 \newcommand\red[1]{\textcolor{red}{#1}}
 \newcommand\blue[1]{\textcolor{blue}{#1}}
 
+\usepackage{etoolbox}
+
+\newcommand{\repthanks}[1]{\textsuperscript{\ref{#1}}}
+\makeatletter
+\patchcmd{\maketitle}
+{\def\thanks}
+{\let\repthanks\repthanksunskip\def\thanks}
+{}{}
+\patchcmd{\@maketitle}
+{\def\thanks}
+{\let\repthanks\@gobble\def\thanks}
+{}{}
+\newcommand\repthanksunskip[1]{\unskip{}}
+\makeatother
+
+
 \begin{document}
 
 \title{Using Abstract Interpretation\\
@@ -140,16 +156,17 @@
 % \authorinfo{Peng Liu} {} {} 
 % \authorinfo{Eric Koskinen} {} {} 
 
+
 \author{
-  Pietro Ferrara \inst{1}
-  \and Omer Trip \inst{2}
+  Pietro Ferrara \inst{1}\thanks{The research leading to this paper was conducted while the author was at IBM Research.\protect\label{X}}
+  \and Omer Trip \inst{2}\repthanks{X}
   \and Peng Liu \inst{3}
   \and Eric Koskinen \inst{4}
 }
 \institute{
-Julia Srl, Verona, Italy \\
+Julia Srl, Italy \\
 \email{pietro.ferrara@juliasoft.com} \and
-Google\footnote{The research leading to this paper was conducted while the author was at IBM Research.} \and IBM Research \and Yale University
+Google Inc., U.S.A. \\ \email{trippo@google.com} \and IBM T.J. Watson Research Center, U.S.A.\\ \email{liup@us.ibm.com} \and Yale University, U.S.A.\\ \email{eric.koskinen@yale.edu}
 }
 \maketitle
 
@@ -168,13 +185,9 @@ Google\footnote{The research leading to this paper was conducted while the autho
 \input{experimentalresults}
 \input{relatedwork}
 \input{conclusion}
-\vfill
-\pagebreak
-{%\footnotesize\linespread{0.9}
+
 \bibliographystyle{plain}
-%\bibliography{nopages}
 \bibliography{biblio}
-}
 
 
 \vfill

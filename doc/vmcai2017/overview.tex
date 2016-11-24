@@ -5,9 +5,7 @@ We now walk the reader through a high-level overview of corrective synchronizati
 \smartpar{Running Example}
 %
 As an illustrative example, we refer to the code fragment
-below on the
-%Figure \ref{Fi:introMotivating},
-right,
+on Figure \ref{Fi:introMotivating},
 extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archive/p/dyuproject/}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 %
 %\begin{figure}
@@ -23,10 +21,9 @@ extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archi
 %	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
 %\end{figure}
 %
-Let us assume that different threads invoking this method
-are all attempting to simultaneously obtain the
-\begin{wrapfigure}[8]{r}{0.55\textwidth}
+\begin{figure}
 %\vspace{-1cm}
+\centering
   \begin{quote}
 	\begin{lstlisting}[numbers=left]
 getConvertor(String name, bool create) {
@@ -37,10 +34,11 @@ getConvertor(String name, bool create) {
   return conv; }
 	\end{lstlisting}
         \end{quote}
-%	\caption{\label{Fi:introMotivating} {\sf getConvertor()} from class {\sf StandardConvertorCache} in {\sf dyuproject}}
-\end{wrapfigure}
+        \caption{\label{Fi:introMotivating} {\sf getConvertor()} from class {\sf StandardConvertorCache} in {\sf dyuproject}}
+\end{figure}
 %
-{\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Pessimistic mutual exclusion, on the other hand, would block all but one thread until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
+Let us assume that different threads invoking this method
+are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Pessimistic mutual exclusion, on the other hand, would block all but one thread until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
 
 
 %%%%%%%%%%%%%%%%
