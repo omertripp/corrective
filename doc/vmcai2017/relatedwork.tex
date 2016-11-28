@@ -1,5 +1,5 @@
 \section{Related work}
-To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. We focus our survey of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis based on static program analysis.
+To our knowledge, existing solutions to the problem of correct synchronization assume either the ability to prevent bad interleavings or the ability to roll back execution. We focus our survey of related research on solutions for optimizing the rollback mechanism, and also discuss works on synchronization synthesis backed by static program analysis and on merging state mutations by concurrent threads.
 
 %\paragraph{Rollback optimizations.}
 There are two main optimizations to \emph{decrease rollback overhead}:
@@ -43,6 +43,9 @@ ensure correct synchronization by construction.
 %
 Prountzos et al. \cite{PrountzosMPM11} optimize the Galois system \cite{Galois} via static shape analysis \cite{MoolyToplas}.
 %They apply the TVLA system to identify fail-safe points during the transaction's execution, beyond which neither backup nor conflict detection are necessary. 
+
+Finally, we note solutions based on merging, or combining, the effects of concurrent threads. Burckhardt and Leijen propose a novel programming model, dubbed \emph{concurrent revisions} \cite{ConcRevisionsSPAA}, which takes its inspiration from version control systems. The key idea is to specify a (custom) merge function, based on a revision calculus defined by the authors, such that concurrent state mutations by different threads can be reconciled in a deterministic manner. Somewhat similarly, Henlder et al. introduce \emph{flat combining} \cite{FlatCombiningSPAA}. The idea is to synchronize concurrent accesses to a shared data structure $D$ by having threads post their updates to $D$ into a common list as thead-local records, where a single thread at a time acquires the (coarse-grained) lock on $D$, combines and applies the updates, and writes the results back to the threads' request fields in the associated publication records. Contrary to these two paradigms, our approach builds on thread-level state correction. This bypasses the need for a coarse-grained lock, as in flat combining, and --- unlike concurrent revisions --- ensures serializability. 
+
 
 %This gives rise to two optimizations: (i) the transaction does not need to back up modified data, and (ii) redundant conflict checking can be eliminated. In Proznos et al.'s solution, the shape analysis, which is parametric in essence, is instantiated via a predicate discovery algorithm that exploits common patterns of data-structure usage.
 
