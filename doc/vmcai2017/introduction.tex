@@ -35,11 +35,10 @@ $$
    \Gamma, (t,s) \vdash
 	s \rightarrow^{*} (T,\mu', \sigma, L)}
 $$
-\red{e says: why no correction to $\sigma$?}
 As is typical, we model transactions as a transition system
 where a state configuration $s$ consists of tuples $(T,\mu,\sigma,L)$.
 Here $T$ is a set of transaction identifiers,  $\mu$ is a mapping from
-transaction id to thread-local state, $\sigma$ is the shared state
+transaction id to thread-local \textcolor{green}{replica of the} state, $\sigma$ is the shared state
 and, following~\cite{KoskinenP15}, we use a shared log of events $L$ to track the
 effects of committed transactions.
 %
@@ -51,8 +50,10 @@ thread $t$ can apply a correction by jumping from $\mu$ to
 $\mu[t \mapsto \mu'(t)]$. Thread $t$ is permitted to do so,
   provided that there was an \emph{alternate execution path}
   $s \rightarrow^{*} (T,\mu',\sigma,L)$ from the configuration $s$
-  in which $t$ began to some other $(T,\mu',\sigma,L)$, having this
-  same shared state $\sigma$.
+  in which $t$ began to some other $(T,\mu',\sigma,L)$.
+  %, having this same shared state $\sigma$.
+  \textcolor{green}{After a correction, the thread may be able to perform a
+    commit, which involves mutating the shared state.}
 %
 This rule is fairly simple yet has significant consequences and, to
 the best of our knowledge, nothing like this exists in the

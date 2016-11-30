@@ -75,7 +75,7 @@ However, we can warp to such a serializable history by applying a correction.
   the \textsf{map} as well as the return values of $t_1$ and $t_2$.}
 %  Correcting this execution involves the application of two actions to the exit state of $t_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
 %
-\blue{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf clobbered}) for all threads as well as what $\elevenoclock$ should be associated with in the \textsf{map}.}
+\blue{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf clobbered}) for all threads as well as what $\elevenoclock$ should be associated with in the \textsf{map}.} \textcolor{green}{Also note that the correction does \emph{not} directly modify the shared state; rather, the correction is made to a thread-local replica of the state. After the correction, if the thread is able to commit, then shared-state mutations are applied at commit time.} 
 
 How does this corrective approach compare to handling of the situation by pessimistic or optimistic approaches?
 %
