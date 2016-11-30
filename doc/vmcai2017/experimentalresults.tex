@@ -33,13 +33,13 @@ In each case,we compared against (i) a pessimistic concrete-level variant of STM
 %
 We ran our experiments on two Intel Xeon 2.90GHz (16 cores) CPUs with 132GB of RAM.
 
-\begin{figure}
+\begin{wrapfigure}[10]{r}{2.25in}
 \centering
   \begin{tabular}{|l|c|c|c|c|}
 \hline
-  & \multicolumn{2}{c|}{STM} & \multicolumn{2}{c|}{corrective sync.} \\
+  & \multicolumn{2}{c|}{Pessimistic} & \multicolumn{2}{c|}{Corrective} \\
 					\cline{2-5} 
-					& workload & conc. & workload & conc. \\
+					& wload. & conc. & wload. & conc. \\
 \hline
 Tomcat	  	 &	1.5\%		&	3\% & 29\%		& 30\% \\			   
 dyuproject	 & 	18\%		& 	24\%	    & 30\% &	29\%	\\
@@ -49,12 +49,13 @@ Gridkit 		&	20\% 	&		16\%		& 32\% & 31\%	\\
 {\bf average} & {\bf 14\%} 	&   {\bf 14\%}    & {\bf 30\%}   & {\bf 30\%} \\
 \hline
 \end{tabular}
-\caption{Gain of STM and corrective synchronization w.r.t. lock-based synchronization}
+%\caption{Gain of pessimistic and corrective w.r.t. lock-based synchronization}
 \label{fi:experimentalresults}
-\end{figure}
-For lack of space, the detailed
-results of the experiments can be found in Appendix~\ref{Se:perf}, considering factors such as number of threads and size of the workload. 
-\newpietro{Figure \ref{fi:experimentalresults} reports the relative gain of STM and corrective synchronization w.r.t. lock-based synchronization. We aggregate performance results, averaging across all workloads and concurrency levels. These results show that, on average, corrective synchronization leads to a gain that is twice the one obtained by STM.}
+\end{wrapfigure}
+For lack of space, detailed
+experimental results, considering factors such as number of threads and size of the workload, are omitted.
+%Appendix~\ref{Se:perf}
+\newpietro{The table on the right reports the relative gain of STM and corrective synchronization w.r.t. lock-based synchronization. We aggregate performance results, averaging across all workloads and concurrency levels. These results show that, on average, corrective synchronization leads to a gain that is twice the one obtained by STM.}
 
 %Here we simply report aggregate performance results, averaging across all workloads and concurrency levels, are summarized to the right.
 For completeness, we also note the absolute running times, as min/max intervals in seconds, for the lock-based solution for the workload and concurrency configurations respectively: Tomcat -- [6,10], [7,12]; dyuproject -- [6,9], [7,11]; Flexive -- [6,10], [7,11]; and Gridkit -- [6,9], [7,11]. 
