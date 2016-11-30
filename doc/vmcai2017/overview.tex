@@ -6,39 +6,30 @@ We now walk the reader through a high-level overview of corrective synchronizati
 %
 As an illustrative example, we refer to the code fragment
 on Figure \ref{Fi:introMotivating},
-extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archive/p/dyuproject/}} where a shared {\sf Map} object, (pointed-to by) {\sf \_convertors}, is manipulated by method {\sf getConvertor}.\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
-%
-%\begin{figure}
-%	\begin{lstlisting}[numbers=left]
-%public Convertor getConvertor(
-%      Class cls,boolean create,boolean add) {
-%  Convertor convertor = _convertors.get(cls.getName());
-%  if(convertor==null && create) {
-%    convertor = new Convertor(cls,add);
-%    _convertors.putIfAbsent(cls.getName(), convertor); }
-%    return convertor; }
-%	\end{lstlisting}
-%	\caption{\label{Fi:introMotivating}Method {\sf getConvertor()} from class {\sf StandardConvertorCache} in project {\sf dyuproject}}
-%\end{figure}
+%extracted from the {\sf dyuproject},\footnote{\url{https://code.google.com/archive/p/dyuproject/}}
+where a shared {\sf Map} object, (pointed-to by) {\sf map}, is manipulated by method {\sf updateReservation}.
+%\footnote{The code in is a variation of the original code of {\sf dyuproject} where we simplified the syntax for the sake of clarity}
 %
 \begin{figure}
 %\vspace{-1cm}
 \centering
   \begin{quote}
 	\begin{lstlisting}[numbers=left]
-getConvertor(String name, bool create) {
-  Convertor conv = _convertors.get(name);
-  if(conv==null && create) {
-    conv = new Convertor(name);
-    _convertors.putIfAbsent(name, conv); }
-  return conv; }
+updateReservation(Slot old_slot, Slot new_slot) : Reservation = {
+  var r = map.remove(old_slot) // remove if exists
+  if (r == null)  r = new Res()
+  val clobbered = map.replace(new_slot, r)
+  return clobbered
+}
 	\end{lstlisting}
         \end{quote}
-        \caption{\label{Fi:introMotivating} {\sf getConvertor()} from class {\sf StandardConvertorCache} in {\sf dyuproject}}
+        \caption{\label{Fi:introMotivating} Example code that updates a customer's reservation, moving it from one date/time slot to another.}
 \end{figure}
 %
 Let us assume that different threads invoking this method
-are all attempting to simultaneously obtain the {\sf Convertor} object related to the same key, which is not yet part of the map. Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Pessimistic mutual exclusion, on the other hand, would block all but one thread until the operation completes, which is far from optimal if {\sf new Convertor()} is an expensive operation.
+are all attempting to simultaneously move reservations into the same \lstinline$new_slot$.
+%obtain the {\sf Convertor} object related to the same key, which is not yet part of the map.
+Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Pessimistic mutual exclusion, on the other hand, would block all but one thread until the operation completes, which is far from optimal if {\sf new Res()} is an expensive operation.
 
 
 %%%%%%%%%%%%%%%%
@@ -53,29 +44,33 @@ The first condition ensures that corrective synchronization yields a feasible ou
 To illustrate our approach, consider the following  history: % in Figure \ref{Fi:motivatingInterleaving}.
 	\begin{center}
 		\begin{tabular}{r@{}lrcl@{}l}
-			[ & & $T_1$: ${\sf get()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf get()}/{\sf null}$  & \\
-			& $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf if(\ldots)}$ & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf new\ \ldots}/o_1$ & $\rightarrow$ & $T_2$: ${\sf new\ \ldots}/o_2$ & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
-			& $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
+   [ & & $T_1$: ${\sf remove(10:00)}/\alpha$ & $\rightarrow$ & $T_2$: ${\sf remove(13:00)}/{\sf null}$  & \\
+     & $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf new\ Res}()/\delta$ & \\
+     & $\hookrightarrow$ &                           &                & $T_2$: ${\sf replace(11:00)}/\beta$ & \\
+     & $\hookrightarrow$ & $T_1$: ${\sf replace(11:00)}/\delta$ &  & \\
+     & $\hookrightarrow$ & $T_1$: ${\sf return}\ \delta$ & $\rightarrow$ & $T_2$: ${\sf return}\ \beta$ & ] \\
+%     & $\hookrightarrow$ & $T_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
+%     & $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
 		\end{tabular}
 	\end{center}
 Each step in this history is labeled with the transaction identifier ($T_1$ or $T_2$) and the code that the transaction is executing.
-This history is clearly not serializable. In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance. However, we can warp to such a serializabile history by applying a correction.
+This history is clearly not serializable. \blue{$T_1$ cannot start first, yet return the effect ($\delta$) of a concurrent transation.}
+%In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance.
+However, we can warp to such a serializabile history by applying a correction.
 %
-Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
+\red{Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
 %
-Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}.
+\red{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}.}}
 
 How does this corrective approach compare to handling of the situation by pessimistic or optimistic approaches?
 %
-We illustrate the difference between corrective synchronization and classic optimistic and pessimistic synchronization in Figure \ref{Fi:motivatingOverview}. We visually represent concurrent execution of two instances of the \textsf{getConvertor} code using pessimistic locks, optimistic TM and corrective synchronization (proceeding horizontally left-to-right). Pessimism serializes execution, and so there is no performance gain whatsoever. As for optimistic and corrective synchronization, we consider the interleaving scenario specified above. % from Figure \ref{Fi:motivatingInterleaving}. 
+We illustrate the difference between corrective synchronization and classic optimistic and pessimistic synchronization in Figure \ref{Fi:motivatingOverview}. We visually represent concurrent execution of two instances of the \textsf{updateReservation} code using pessimistic locks, optimistic TM and corrective synchronization (proceeding horizontally left-to-right). Pessimism serializes execution, and so there is no performance gain whatsoever. As for optimistic and corrective synchronization, we consider the interleaving scenario specified above. % from Figure \ref{Fi:motivatingInterleaving}. 
 %
 \begin{figure*}[t]
 	\begin{center}
-	\includegraphics[width=\textwidth]{OverviewSlide.pdf}
+	\includegraphics[width=\textwidth]{diagram.eps}
 	\end{center}
-	\vspace{-0.6cm}\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of \textsf{getConvertors} using pessimistic, optimistic, and corrective synchronization.}
+	\vspace{-0.6cm}\caption{\label{Fi:motivatingOverview}Interleaved execution of two instances of \textsf{updateReservation} using pessimistic, optimistic, and corrective synchronization.}
         \vspace{-0.4cm}
 \end{figure*}
 %

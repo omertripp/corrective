@@ -1,0 +1,4 @@
+paper.dvi
+paper.ps
+*.{aux,bbl,blg,log}
+*eps-converted-to*
