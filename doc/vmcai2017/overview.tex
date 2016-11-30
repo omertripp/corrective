@@ -13,21 +13,19 @@ where a shared {\sf Map} object, (pointed-to by) {\sf map}, is manipulated by me
 \begin{figure}[t]
 %\vspace{-1cm}
 \centering
-  \begin{quote}
-	\begin{lstlisting}[numbers=left]
-updateReservation(Slot old_slot, Slot new_slot) : Reservation = {
-  var r = map.remove(old_slot) // remove if exists
+	\begin{lstlisting}[numbers=left,xleftmargin=15pt]
+updateReservation(TimeSlot slot, TimeSlot slot') : Reservation = {
+  var r = map.remove(slot) // remove if exists
   if (r == null)  r = new Res()
-  val clobbered = map.replace(new_slot, r)
+  val clobbered = map.replace(slot', r)
   return clobbered
 }
 	\end{lstlisting}
-        \end{quote}
-        \caption{\label{Fi:introMotivating} Example code that updates a customer's reservation, moving it from one date/time slot to another.}
+        \caption{\label{Fi:introMotivating} Example code that updates reservation information for customers, moving an entry from one date/time slot to another.}
 \end{figure}
 %
 Let us assume that different threads invoking this method
-are all attempting to simultaneously move reservations into the same \lstinline$new_slot$.
+are all attempting to simultaneously move reservations into the same \lstinline$slot'$.
 %obtain the {\sf Convertor} object related to the same key, which is not yet part of the map.
 Doing so optimistically would lead to multiple rollbacks (even under boosted conflict detection \cite{ppopp08}, since the operations due to different threads do not commute), and thus poor performance. Pessimistic mutual exclusion, on the other hand, would block all but one thread until the operation completes, which is far from optimal if {\sf new Res()} is an expensive operation.
 
@@ -42,25 +40,42 @@ By \emph{corrective synchronization} we mean the ability to transform a concurre
 The first condition ensures that corrective synchronization yields a feasible outcome. The second is the requirement not to roll back updates to the shared state. These two conditions distinguish corrective synchronization from existing solutions: Unlike pessimistic approaches, bad behaviors may occur under corrective synchronization. That is, they are not avoided, but handled as they manifest. Unlike optimistic solutions, the core handling mechanism is not to retry the transaction (or parts thereof), which implies rolling back (either committed or uncommitted) updates to the shared log, but rather to ``warp'' to another state.
 %
 To illustrate our approach, consider the following  history: % in Figure \ref{Fi:motivatingInterleaving}.
-	\begin{center}
+\newcommand\tenoclock{10\!:\!00}
+\newcommand\elevenoclock{11\!:\!00}
+\newcommand\thirteenoclock{13\!:\!00}
+\begin{center}
 		\begin{tabular}{r@{}lrcl@{}l}
-   [ & & $T_1$: ${\sf remove(10:00)}/\alpha$ & $\rightarrow$ & $T_2$: ${\sf remove(13:00)}/{\sf null}$  & \\
-     & $\hookrightarrow$ & $T_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $T_2$: ${\sf new\ Res}()/\delta$ & \\
-     & $\hookrightarrow$ &                           &                & $T_2$: ${\sf replace(11:00)}/\beta$ & \\
-     & $\hookrightarrow$ & $T_1$: ${\sf replace(11:00)}/\delta$ &  & \\
-     & $\hookrightarrow$ & $T_1$: ${\sf return}\ \delta$ & $\rightarrow$ & $T_2$: ${\sf return}\ \beta$ & ] \\
-%     & $\hookrightarrow$ & $T_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $T_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
-%     & $\hookrightarrow$ & $T_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $T_2$: ${\sf return}\ o_2$ & ]
+   [ & & $t_1$: ${\sf remove(\tenoclock)}/\alpha$ & $\rightarrow$ & $t_2$: ${\sf remove(\thirteenoclock)}/{\sf null}$  & \\
+     & $\hookrightarrow$ & $t_1$: ${\sf if(\ldots)}$ & $\rightarrow$  & $t_2$: ${\sf new\ Res}()/\delta$ & \\
+     & $\hookrightarrow$ &                           &                & $t_2$: ${\sf replace(\elevenoclock)}/\beta$ & \\
+     & $\hookrightarrow$ & $t_1$: ${\sf replace(\elevenoclock)}/\delta$ &  & \\
+     & $\hookrightarrow$ & $t_1$: ${\sf return}\ \delta$ & $\rightarrow$ & $t_2$: ${\sf return}\ \beta$ & ] \\
+%     & $\hookrightarrow$ & $t_1$: ${\sf putIfAbsent()}/{\sf null}$ & $\rightarrow$ & $t_2$: ${\sf putIfAbsent()}/o_1$  & \\ 
+%     & $\hookrightarrow$ & $t_1$: ${\sf return}\ o_1$ & $\rightarrow$ & $t_2$: ${\sf return}\ o_2$ & ]
 		\end{tabular}
 	\end{center}
-Each step in this history is labeled with the transaction identifier ($T_1$ or $T_2$) and the code that the transaction is executing.
-This history is clearly not serializable. \blue{$T_1$ cannot start first, yet return the effect ($\delta$) of a concurrent transation.}
-%In any serializable history, $T_1$ and $T_2$ would return the same {\sf Convertor} instance.
-However, we can warp to such a serializabile history by applying a correction.
+Each step in this history is labeled with the transaction identifier ($t_1$ or $t_2$) and the code that the transaction is executing.
+This history is clearly not serializable. \blue{$t_1$ cannot start first, yet return the effect ($\delta$) of a concurrent transation.}
+%In any serializable history, $t_1$ and $t_2$ would return the same {\sf Convertor} instance.
+However, we can warp to such a serializable history by applying a correction.
 %
-\red{Correcting this execution involves the application of two actions to the exit state of $T_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
+\blue{In this case, note that there are two possible serializable histories:
+  (i) $t_1$ goes first and returns $\beta$,
+  $t_2$ goes second and returns $\alpha$,
+  and in the final state $\elevenoclock$ is mapped to $\delta$;
+  (ii) $t_2$ goes first and returns $\beta$,
+  $t_1$ goes second and returns $\delta$,
+  and in the final state $\elevenoclock$ is mapped to $\alpha$.
+  %
+  For the safe of efficiency, we can correct the above execution by chosing serial history (ii) as
+  the target state and the correction is quick and easy: update the map so that $\elevenoclock$ is
+  associated with $\alpha$.
+  %
+  Using (i) as a target is also possible, but would have required a correction to
+  the \textsf{map} as well as the return values of $t_1$ and $t_2$.}
+%  Correcting this execution involves the application of two actions to the exit state of $t_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
 %
-\red{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf conv}) for all threads, which would also be the value linked by the key under {\sf \_convertors}.}}
+\blue{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf clobbered}) for all threads as well as what $\elevenoclock$ should be associated with in the \textsf{map}.}
 
 How does this corrective approach compare to handling of the situation by pessimistic or optimistic approaches?
 %
