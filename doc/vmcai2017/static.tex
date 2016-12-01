@@ -127,7 +127,7 @@ Let $\variable$ and $\reference$ be the sets of variables and references, respec
 is a pair made by an environment and a map. Formally, $\state = \env \times \map$. As usual in abstract interpretation, we collect a set of states per program point. Therefore, our concrete domain is made by elements in $\wp(\state)$, and the lattice relies on standard set operators. Formally, $\langle \wp(\state), \subseteq, \cup \rangle$.The concrete semantics are given
 to the right.
 Figure \ref{fig:concretesemantics} defines the concrete semantics.
-For the most part, it formalizes the API specification of the corresponding Java method. Note that \statement{assert} is defined only on the states that satisfy the given Boolean conditions. \newpietro{$n$ represents a fresh concrete node in the semantics of \statement{putIfAbsent}}. In this way, the concrete semantics filters out only the states that might execute a branch of an \statement{if} or \statement{while} statement.
+For the most part, it formalizes the API specification of the corresponding Java method. Note that \statement{assert} is defined only on the states that satisfy the given Boolean conditions. \txred{$n$ represents a fresh concrete node in the semantics of \statement{putIfAbsent}}. In this way, the concrete semantics filters out only the states that might execute a branch of an \statement{if} or \statement{while} statement.
 
 \smartpar{Abstract Domain}
 %\label{sect:abstractate}

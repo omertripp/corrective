@@ -57,11 +57,11 @@ To illustrate our approach, consider the following  history: % in Figure \ref{Fi
 		\end{tabular}
 	\end{center}
 Each step in this history is labeled with the transaction identifier ($t_1$ or $t_2$) and the code that the transaction is executing.
-This history is clearly not serializable. \blue{$t_1$ cannot start first, yet return the effect ($\delta$) of a concurrent transation.}
+This history is clearly not serializable. \txblue{$t_1$ cannot start first, yet return the effect ($\delta$) of a concurrent transation.}
 %In any serializable history, $t_1$ and $t_2$ would return the same {\sf Convertor} instance.
 However, we can warp to such a serializable history by applying a correction.
 %
-\blue{In this case, note that there are two possible serializable histories:
+\txblue{In this case, note that there are two possible serializable histories:
   (i) $t_1$ goes first and returns $\beta$,
   $t_2$ goes second and returns $\alpha$,
   and in the final state $\elevenoclock$ is mapped to $\delta$;
@@ -77,7 +77,7 @@ However, we can warp to such a serializable history by applying a correction.
   the \textsf{map} as well as the return values of $t_1$ and $t_2$.}
 %  Correcting this execution involves the application of two actions to the exit state of $t_2$. First, we point the local variable ${\sf conv}$ to $o_1$, rather than $o_2$. Second, we fix the mapping under ${\sf \_convertors}$ for key {\sf name} in the same way.
 %
-\blue{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf dead}) for all threads as well as what $\elevenoclock$ should be associated with in the \textsf{map}.} \textcolor{green}{Also note that the correction does \emph{not} directly modify the shared state; rather, the correction is made to a thread-local replica of the state. After the correction, if the thread is able to commit, then shared-state mutations are applied at commit time.} 
+\txblue{Note that the corrective actions above are of a general form, which is not limited to two threads. For any number of threads, the corrected state would have one privileged thread deciding the return value (i.e., the value of {\sf dead}) for all threads as well as what $\elevenoclock$ should be associated with in the \textsf{map}.} \txgreen{Also note that the correction does \emph{not} directly modify the shared state; rather, the correction is made to a thread-local replica of the state. After the correction, if the thread is able to commit, then shared-state mutations are applied at commit time.} 
 
 How does this corrective approach compare to handling of the situation by pessimistic or optimistic approaches?
 %
@@ -124,7 +124,7 @@ The runtime system has two main responsibilities. First, it must track whether a
 %
 We address the first challenge via a coarse conflict-detection algorithm that tracks API-level read/write behaviors (at the level of {\sf Map} operations). If read/write or write/write conflicts arise, then corrective synchronization is triggered in response. 
 %
-\newpietro{If the oracle was not able to compute a target for the correction (e.g., because of a loss of precision of the static analysis), then our approach can apply optimistic synchronization}
+\txred{If the oracle was not able to compute a target for the correction (e.g., because of a loss of precision of the static analysis), then our approach can apply optimistic synchronization}
 
 \OmerAdded{The second challenge, of deciding the target ``good'' state for a given ``bad'' state, is tackled via a pruning algorithm. During execution, the system maintains (as shadow state) a set of good symbolic final states. As individual transactions complete, incompatible final states (i.e., states that cannot be reached via any of the computed corrective actions) are pruned out. The remaining states are all guaranteed to be admissible targets. The decision which state to transition to is based on a heuristic measure of the cost of the corrective action (which simply counts the number of basic operations needed).}
 
