@@ -53,7 +53,7 @@ $\mu[t \mapsto \mu'(t)]$. Thread $t$ is permitted to do so,
   in which $t$ began to some other $(T,\mu',\sigma,L)$.
   %, having this same shared state $\sigma$.
   \textcolor{green}{After a correction, the thread may be able to perform a
-    commit, which involves mutating the shared state.}
+    commit, which (logically) involves replaying the mutation on the shared state.}
 %
 This rule is fairly simple yet has significant consequences and, to
 the best of our knowledge, nothing like this exists in the

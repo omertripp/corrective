@@ -168,37 +168,37 @@ $\gamma_\astates$ is a complete meet-morphism since it produces all possible env
 Consider again abstract state $\sigma = ([\statement{name}$ $\mapsto \{n_1\}], [n_1 \mapsto \{\statement{null}, n_2\}])$. Suppose $\gamma_\reference$ concretizes $n_1$ and $n_2$ into $\{\#1\}$ and $\{\#2\}$, respectively. Then $\sigma$ is concretized into states $([\statement{name} \mapsto \#1], [\#1 \mapsto \statement{null}])$ representing that \statement{name} is not in the map and $([\statement{name} \mapsto \#1], [\#1 \mapsto \#2])$ representing that \statement{name} is in the map is related to the value pointed-to by reference $\#2$.
 
 
-
+\newcommand\fixup{\hspace{-0.25in}}
 
 \begin{figure*}[t]
 \[
-\begin{array}{ll}
+\begin{array}{lr}
 \csemantics{S}{\statement{v = new\ Value()}, (e, m)}
-=  (e[v \mapsto \freshNode(\statement{t})], m)& (\mathtt{new})\\
+=  (e[v \mapsto \freshNode(\statement{t})], m)& \fixup (\mathtt{new})\\
 %%
 \csemantics{S}{\statement{v = null}, (e, m)}
-= (e[v \mapsto \{\statement{null}\}], m)& (\mathtt{nlas})\\
+= (e[v \mapsto \{\statement{null}\}], m)& \fixup (\mathtt{nlas})\\
 %%
 \csemantics{S}{\statement{v=m.get(k)}, (e, m)}
-= (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & (\mathtt{get})\\
+= (e[\statement{v} \mapsto \bigcup_{n \in e(k)} m(n)], m) & \fixup (\mathtt{get})\\
 %%
-  \csemantics{S}{\statement{m.put(k, v)}, (e, m)}\\
+  \csemantics{S}{\statement{m.put(k, v)}, (e, m)} & \fixup (\mathtt{put})\\
   \;\;\;=\left\{
 \begin{array}{ll}
 (e, m[n \mapsto e(\statement{v})]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
 (e, m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{put})\\
+\right. & \\
 %%
-\csemantics{S}{\statement{m.remove(k)}, (e, m)}\\
+\csemantics{S}{\statement{m.remove(k)}, (e, m)} & \fixup (\mathtt{rmv})\\ 
 \;\;\;=  \left\{
 \begin{array}{ll}
 (e, m[n \mapsto \{\statement{null}\}]) & \textrm{if } e(\statement{k})=\{n\} \land \neg \isSummary(n)\\
 (e, m[n \mapsto m(n) \cup \{\statement{null}\} : n \in e(\statement{k})]) & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{rmv})\\ 
+\right. & \\
 %%
-\csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)}\\
+\csemantics{S}{\statement{v = m.putIfAbsent(k, v)}, (e, m)} & \fixup (\mathtt{pIA})\\
 \;\;\;=  (\pi_1(\csemantics{S}{\statement{v = m.get(k)}, (e, m)}), m') : & \\
 \hspace{20pt} 
 m'=
@@ -208,41 +208,41 @@ m[n \mapsto e(\statement{v})] & \textrm{ if } e(\statement{k})=\{\statement{n}\}
 m[n \mapsto m(n) \cup e(\statement{v}) : n \in e(\statement{k})] & \textrm{ if } \statement{null} \in m(n) \land |m(n)| > 1\\
 m & \textrm{ otherwise}\\
 \end{array}
-\right. & (\mathtt{pIA})\\
+\right. & \\
 %%
-\csemantics{S}{\statement{assert(x==null)}, (e, m)}\\
+\csemantics{S}{\statement{assert(x==null)}, (e, m)} & \fixup (\mathtt{null})\\
 \;\;\;= \left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto \{\statement{null}\}], m) & \textrm{if } \statement{null} \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{null})\\
+\right. & \\
 %%
-\csemantics{S}{\statement{assert(x!=null)}, (e, m)} \\
+\csemantics{S}{\statement{assert(x!=null)}, (e, m)} & \fixup (\mathtt{!null})\\
 \;\;\;=\left\{
 \begin{array}{ll}
 (e[\statement{x} \mapsto e(\statement{x}) \setminus \{\statement{null}\}], m) & \textrm{if } \exists n \in \heapnode : n \neq \statement{null} \land n \in e(\statement{x})\\
 \bot & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{!null})\\
+\right. & \\
 %%
-\csemantics{S}{\statement{assert(m.containsK(k))}, (e, m)}\\
+\csemantics{S}{\statement{assert(m.containsK(k))}, (e, m)} & \fixup (\mathtt{cntK})\\
 \;\;\;= \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : m(n)=\{\statement{null}\}\\
 (e, m[n \mapsto m(n)\setminus\{\statement{null}\}]) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land  m(n) \neq \{\statement{null}\}\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{cntK})\\
+\right. & \\
 %%
-\csemantics{S}{\statement{assert(!m.containsK(k))}, (e, m)}\\
+\csemantics{S}{\statement{assert(!m.containsK(k))}, (e, m)} & \fixup (\mathtt{!cntK})\\
 \;\;\;= \left\{
 \begin{array}{ll}
 \bot & \textrm{if } \forall n \in e(\statement{k}) : \statement{null} \notin m(n)\\
 (e, m[n \mapsto \{\statement{null}\}) & \textrm{if } e(\statement{k}) = \{n\} \land \neg \isSummary(n) \land \statement{null} \in m(n)\\
 (e, m) & \textrm{otherwise}\\
 \end{array}
-\right. & (\mathtt{!cntK})\\
+\right. &\\
 \end{array}
 \]
 \caption{Formal definition of the abstract semantics.}
